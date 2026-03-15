@@ -1,23 +1,21 @@
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, Modal, ScrollView, useColorScheme, View as DefaultView } from 'react-native';
-import PagerView from 'react-native-pager-view';
+import { StyleSheet, useColorScheme } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { parseUGTabs, UGPart } from '@/core/ug-parser';
 import Colors from '@/constants/Colors';
-import { getChordShapes, getChordShape, ChordShape } from '@/constants/ChordShapes';
+import { getChordShape } from '@/constants/ChordShapes';
+import ChordDetailModal from './ChordDetailModal';
 
 interface UGSongViewProps {
   content: string;
+  fontSize?: number;
 }
 
-export default function UGSongView({ content }: UGSongViewProps) {
+export default function UGSongView({ content, fontSize = 14 }: UGSongViewProps) {
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
-  
-  const [selectedChord, setSelectedChord] = useState<string | null>(null);
-  const [currentShapeIndex, setCurrentShapeIndex] = useState(0);
 
-  const availableShapes = selectedChord ? getChordShapes(selectedChord) : [];
+  const [selectedChord, setSelectedChord] = useState<string | null>(null);
 
   const renderPart = (part: UGPart, index: number): React.ReactNode => {
     switch (part.type) {
@@ -27,11 +25,8 @@ export default function UGSongView({ content }: UGSongViewProps) {
         return (
           <Text 
             key={index} 
-            onPress={() => {
-              setSelectedChord(part.content);
-              setCurrentShapeIndex(0);
-            }}
-            style={[styles.chordText, { color }]}
+            onPress={() => setSelectedChord(part.content)}
+            style={[styles.chordText, { color, fontSize: fontSize + 1 }]}
           >
             {part.content}
           </Text>
@@ -39,7 +34,7 @@ export default function UGSongView({ content }: UGSongViewProps) {
       }
       case 'header':
         return (
-          <Text key={index} style={[styles.headerText, { color: theme.tint }]}>
+          <Text key={index} style={[styles.headerText, { color: theme.tint, fontSize }]}>
             {part.content}
           </Text>
         );
@@ -47,14 +42,14 @@ export default function UGSongView({ content }: UGSongViewProps) {
         // Recursively parse content inside [tab] tags to handle nested [ch] tags
         const nestedParts = parseUGTabs(part.content);
         return (
-          <Text key={index} style={[styles.tabText, { color: theme.subtext }]}>
+          <Text key={index} style={[styles.tabText, { color: theme.subtext, fontSize: fontSize - 1 }]}>
             {nestedParts.map((nestedPart, i) => renderPart(nestedPart, i))}
           </Text>
         );
       case 'text':
       default:
         return (
-          <Text key={index} style={[styles.regularText, { color: theme.text }]}>
+          <Text key={index} style={[styles.regularText, { color: theme.text, fontSize }]}>
             {part.content}
           </Text>
         );
@@ -65,155 +60,16 @@ export default function UGSongView({ content }: UGSongViewProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.contentWrapper}>
+      <Text style={[styles.contentWrapper, { fontSize, lineHeight: fontSize * 1.4 }]}>
         {parts.map((part, index) => renderPart(part, index))}
       </Text>
 
-      <Modal
-        visible={!!selectedChord}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setSelectedChord(null)}
-      >
-        <TouchableOpacity 
-          style={styles.modalOverlay} 
-          activeOpacity={1} 
-          onPress={() => setSelectedChord(null)}
-        >
-          <View style={[styles.modalContent, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            {selectedChord && (
-              <>
-                <Text style={[styles.modalTitle, { color: theme.text }]}>{selectedChord}</Text>
-                
-                {availableShapes.length > 0 ? (
-                  <>
-                    <PagerView 
-                      style={styles.pagerView} 
-                      initialPage={0}
-                      onPageSelected={(e) => setCurrentShapeIndex(e.nativeEvent.position)}
-                    >
-                      {availableShapes.map((shape, idx) => (
-                        <View key={idx} style={{ backgroundColor: 'transparent' }}>
-                          <ChordDiagram shape={shape} theme={theme} />
-                        </View>
-                      ))}
-                    </PagerView>
-
-                    {availableShapes.length > 1 && (
-                      <View style={styles.pagerIndicator}>
-                        {availableShapes.map((_, idx) => (
-                          <View 
-                            key={idx} 
-                            style={[
-                              styles.indicatorDot, 
-                              { 
-                                backgroundColor: idx === currentShapeIndex ? theme.tint : theme.border,
-                                width: idx === currentShapeIndex ? 12 : 8
-                              }
-                            ]} 
-                          />
-                        ))}
-                      </View>
-                    )}
-                  </>
-                ) : (
-                  <View style={styles.noShapeContainer}>
-                    <Text style={{ color: theme.text }}>No diagram available for {selectedChord}</Text>
-                  </View>
-                )}
-
-                <TouchableOpacity 
-                  onPress={() => setSelectedChord(null)}
-                  style={[styles.closeButton, { backgroundColor: theme.tint }]}
-                >
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-        </TouchableOpacity>
-      </Modal>
+      <ChordDetailModal 
+        chordName={selectedChord} 
+        onClose={() => setSelectedChord(null)} 
+        theme={theme} 
+      />
     </View>
-  );
-}
-
-function ChordDiagram({ shape, theme }: { shape: ChordShape, theme: any }) {
-  // Basic representation of a guitar neck
-  // 6 strings, 5 frets
-  const strings = [0, 1, 2, 3, 4, 5]; // E, A, D, G, B, e
-  const frets = [1, 2, 3, 4, 5];
-
-  return (
-    <DefaultView style={styles.diagramContainer}>
-      <DefaultView style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-        {/* Fret Numbers Column */}
-        <DefaultView style={styles.fretNumbersColumn}>
-          {frets.map(f => (
-            <Text key={f} style={[styles.fretNumber, { top: (f - 0.5) * 30 + 5, color: theme.subtext }]}>
-              {f}
-            </Text>
-          ))}
-        </DefaultView>
-
-        <DefaultView style={[styles.fretboard, { borderColor: theme.text }]}>
-          {/* Nut or first fret line */}
-          <DefaultView style={[styles.nut, { backgroundColor: theme.text }]} />
-          
-          {/* Frets */}
-          {frets.map(f => (
-            <DefaultView key={f} style={[styles.fret, { top: f * 30, backgroundColor: theme.text, opacity: 0.7 }]} />
-          ))}
-
-          {/* Barre Line */}
-          {shape.barre && (
-            <DefaultView style={[
-              styles.barreLine, 
-              { 
-                top: (shape.barre - 0.5) * 30 - 4, 
-                backgroundColor: theme.tint,
-                opacity: 0.8
-              }
-            ]} />
-          )}
-
-          {/* Strings and fingers */}
-          <DefaultView style={styles.stringsLayer}>
-            {strings.map(s => {
-              const fret = shape.frets[s];
-              const finger = shape.fingers ? shape.fingers[s] : null;
-              
-              return (
-                <DefaultView key={s} style={styles.stringContainer}>
-                  {/* String line */}
-                  <DefaultView style={[styles.stringLine, { backgroundColor: theme.text, opacity: 0.5 }]} />
-                  
-                  {/* Marker for muted or open */}
-                  {fret === -1 && <Text style={[styles.marker, { color: 'red' }]}>X</Text>}
-                  {fret === 0 && <Text style={[styles.marker, { color: theme.text }]}>O</Text>}
-                  
-                  {/* Finger position */}
-                  {fret > 0 && !(shape.barre === fret && finger === 1) && (
-                    <DefaultView style={[
-                      styles.finger, 
-                      { 
-                        top: (fret - 0.5) * 30 + 5, 
-                        backgroundColor: theme.tint 
-                      }
-                    ]}>
-                      {finger && <Text style={styles.fingerText}>{finger}</Text>}
-                    </DefaultView>
-                  )}                </DefaultView>
-              );
-            })}
-          </DefaultView>
-        </DefaultView>
-      </DefaultView>
-      
-      {/* Barre indicator (simplified) */}
-      {shape.barre && (
-        <Text style={[styles.barreText, { color: theme.subtext, marginTop: 15 }]}>Barre on fret {shape.barre}</Text>
-      )}
-    </DefaultView>
   );
 }
 
@@ -245,137 +101,5 @@ const styles = StyleSheet.create({
   regularText: {
     fontFamily: 'SpaceMono',
     fontSize: 14,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    padding: 20,
-    paddingTop: 30,
-    paddingBottom: 20,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-    minWidth: 280,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  pagerView: {
-    width: 240,
-    height: 220,
-  },
-  pagerIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 20,
-    marginTop: 10,
-  },
-  indicatorDot: {
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
-  },
-  closeButton: {
-    marginTop: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-  },
-  closeButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  noShapeContainer: {
-    height: 150,
-    justifyContent: 'center',
-  },
-  diagramContainer: {
-    alignItems: 'center',
-  },
-  fretNumbersColumn: {
-    width: 25,
-    height: 180,
-    marginRight: 5,
-    position: 'relative',
-  },
-  fretNumber: {
-    position: 'absolute',
-    right: 5,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  fretboard: {
-    width: 180,
-    height: 180,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderTopWidth: 1,
-    position: 'relative',
-  },
-  barreLine: {
-    position: 'absolute',
-    left: 10,
-    right: 10,
-    height: 18,
-    borderRadius: 9,
-    zIndex: 1,
-  },
-  nut: {
-    height: 5,
-    width: '100%',
-  },
-  fret: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    height: 2,
-  },
-  stringsLayer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    height: '100%',
-  },
-  stringContainer: {
-    width: 20,
-    height: '100%',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  stringLine: {
-    width: 0.8,
-    height: '100%',
-    position: 'absolute',
-  },
-  marker: {
-    position: 'absolute',
-    top: -20,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  finger: {
-    position: 'absolute',
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fingerText: {
-    color: 'white',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  barreText: {
-    marginTop: 10,
-    fontSize: 12,
-    fontStyle: 'italic',
   }
 });
