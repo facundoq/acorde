@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, Modal, ScrollView, useColorScheme } from 'react-native';
+import { StyleSheet, TouchableOpacity, Modal, ScrollView, useColorScheme, View as DefaultView } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { parseUGTabs, UGPart } from '@/core/ug-parser';
 import Colors from '@/constants/Colors';
@@ -110,26 +110,26 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
   const frets = [1, 2, 3, 4, 5];
 
   return (
-    <View style={styles.diagramContainer}>
-      <View style={[styles.fretboard, { borderColor: theme.text }]}>
+    <DefaultView style={styles.diagramContainer}>
+      <DefaultView style={[styles.fretboard, { borderColor: theme.text }]}>
         {/* Nut or first fret line */}
-        <View style={[styles.nut, { backgroundColor: theme.text }]} />
+        <DefaultView style={[styles.nut, { backgroundColor: theme.text }]} />
         
         {/* Frets */}
         {frets.map(f => (
-          <View key={f} style={[styles.fret, { top: f * 30, backgroundColor: theme.text, opacity: 0.7 }]} />
+          <DefaultView key={f} style={[styles.fret, { top: f * 30, backgroundColor: theme.text, opacity: 0.7 }]} />
         ))}
 
         {/* Strings and fingers */}
-        <View style={styles.stringsLayer}>
+        <DefaultView style={styles.stringsLayer}>
           {strings.map(s => {
             const fret = shape.frets[s];
             const finger = shape.fingers ? shape.fingers[s] : null;
             
             return (
-              <View key={s} style={styles.stringContainer}>
+              <DefaultView key={s} style={styles.stringContainer}>
                 {/* String line */}
-                <View style={[styles.stringLine, { backgroundColor: theme.text, opacity: 0.5 }]} />
+                <DefaultView style={[styles.stringLine, { backgroundColor: theme.text, opacity: 0.5 }]} />
                 
                 {/* Marker for muted or open */}
                 {fret === -1 && <Text style={[styles.marker, { color: 'red' }]}>X</Text>}
@@ -137,7 +137,7 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
                 
                 {/* Finger position */}
                 {fret > 0 && (
-                  <View style={[
+                  <DefaultView style={[
                     styles.finger, 
                     { 
                       top: (fret - 0.5) * 30 + 5, 
@@ -145,19 +145,19 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
                     }
                   ]}>
                     {finger && <Text style={styles.fingerText}>{finger}</Text>}
-                  </View>
+                  </DefaultView>
                 )}
-              </View>
+              </DefaultView>
             );
           })}
-        </View>
-      </View>
+        </DefaultView>
+      </DefaultView>
       
       {/* Barre indicator (simplified) */}
       {shape.barre && (
         <Text style={[styles.barreText, { color: theme.subtext }]}>Barre on fret {shape.barre}</Text>
       )}
-    </View>
+    </DefaultView>
   );
 }
 
