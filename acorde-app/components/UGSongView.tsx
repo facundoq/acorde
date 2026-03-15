@@ -117,7 +117,7 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
         
         {/* Frets */}
         {frets.map(f => (
-          <View key={f} style={[styles.fret, { top: f * 30, backgroundColor: theme.text, opacity: 0.5 }]} />
+          <View key={f} style={[styles.fret, { top: f * 30, backgroundColor: theme.text, opacity: 0.7 }]} />
         ))}
 
         {/* Strings and fingers */}
@@ -129,7 +129,7 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
             return (
               <View key={s} style={styles.stringContainer}>
                 {/* String line */}
-                <View style={[styles.stringLine, { backgroundColor: theme.text }]} />
+                <View style={[styles.stringLine, { backgroundColor: theme.text, opacity: 0.5 }]} />
                 
                 {/* Marker for muted or open */}
                 {fret === -1 && <Text style={[styles.marker, { color: 'red' }]}>X</Text>}
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    height: 1,
+    height: 2,
   },
   stringsLayer: {
     flexDirection: 'row',
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   stringLine: {
-    width: 1,
+    width: 0.8,
     height: '100%',
     position: 'absolute',
   },
