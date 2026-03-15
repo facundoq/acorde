@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, TouchableOpacity, Modal, ScrollView, useColorScheme, View as DefaultView } from 'react-native';
+import PagerView from 'react-native-pager-view';
 import { Text, View } from '@/components/Themed';
 import { parseUGTabs, UGPart } from '@/core/ug-parser';
 import Colors from '@/constants/Colors';
-import { getChordShape, ChordShape } from '@/constants/ChordShapes';
+import { getChordShapes, getChordShape, ChordShape } from '@/constants/ChordShapes';
 
 interface UGSongViewProps {
   content: string;
@@ -14,6 +15,9 @@ export default function UGSongView({ content }: UGSongViewProps) {
   const theme = Colors[colorScheme];
   
   const [selectedChord, setSelectedChord] = useState<string | null>(null);
+  const [currentShapeIndex, setCurrentShapeIndex] = useState(0);
+
+  const availableShapes = selectedChord ? getChordShapes(selectedChord) : [];
 
   const renderPart = (part: UGPart, index: number): React.ReactNode => {
     switch (part.type) {
@@ -23,7 +27,10 @@ export default function UGSongView({ content }: UGSongViewProps) {
         return (
           <Text 
             key={index} 
-            onPress={() => setSelectedChord(part.content)}
+            onPress={() => {
+              setSelectedChord(part.content);
+              setCurrentShapeIndex(0);
+            }}
             style={[styles.chordText, { color }]}
           >
             {part.content}
@@ -77,7 +84,44 @@ export default function UGSongView({ content }: UGSongViewProps) {
             {selectedChord && (
               <>
                 <Text style={[styles.modalTitle, { color: theme.text }]}>{selectedChord}</Text>
-                <ChordDiagram chordName={selectedChord} theme={theme} />
+                
+                {availableShapes.length > 0 ? (
+                  <>
+                    <PagerView 
+                      style={styles.pagerView} 
+                      initialPage={0}
+                      onPageSelected={(e) => setCurrentShapeIndex(e.nativeEvent.position)}
+                    >
+                      {availableShapes.map((shape, idx) => (
+                        <View key={idx} style={{ backgroundColor: 'transparent' }}>
+                          <ChordDiagram shape={shape} theme={theme} />
+                        </View>
+                      ))}
+                    </PagerView>
+
+                    {availableShapes.length > 1 && (
+                      <View style={styles.pagerIndicator}>
+                        {availableShapes.map((_, idx) => (
+                          <View 
+                            key={idx} 
+                            style={[
+                              styles.indicatorDot, 
+                              { 
+                                backgroundColor: idx === currentShapeIndex ? theme.tint : theme.border,
+                                width: idx === currentShapeIndex ? 12 : 8
+                              }
+                            ]} 
+                          />
+                        ))}
+                      </View>
+                    )}
+                  </>
+                ) : (
+                  <View style={styles.noShapeContainer}>
+                    <Text style={{ color: theme.text }}>No diagram available for {selectedChord}</Text>
+                  </View>
+                )}
+
                 <TouchableOpacity 
                   onPress={() => setSelectedChord(null)}
                   style={[styles.closeButton, { backgroundColor: theme.tint }]}
@@ -93,17 +137,7 @@ export default function UGSongView({ content }: UGSongViewProps) {
   );
 }
 
-function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
-  const shape = getChordShape(chordName);
-  
-  if (!shape) {
-    return (
-      <View style={styles.noShapeContainer}>
-        <Text style={{ color: theme.text }}>No diagram available for {chordName}</Text>
-      </View>
-    );
-  }
-
+function ChordDiagram({ shape, theme }: { shape: ChordShape, theme: any }) {
   // Basic representation of a guitar neck
   // 6 strings, 5 frets
   const strings = [0, 1, 2, 3, 4, 5]; // E, A, D, G, B, e
@@ -219,7 +253,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    padding: 30,
+    padding: 20,
+    paddingTop: 30,
+    paddingBottom: 20,
     borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
@@ -228,7 +264,23 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 10,
+  },
+  pagerView: {
+    width: 240,
+    height: 220,
+  },
+  pagerIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 20,
+    marginTop: 10,
+  },
+  indicatorDot: {
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
   },
   closeButton: {
     marginTop: 20,

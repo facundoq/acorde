@@ -8,6 +8,7 @@ export interface ChordShape {
 export const CHORD_SHAPES: Record<string, ChordShape[]> = {
   'C': [
     { name: 'C', frets: [-1, 3, 2, 0, 1, 0], fingers: [0, 3, 2, 0, 1, 0] },
+    { name: 'C', frets: [-1, 3, 5, 5, 5, 3], fingers: [0, 1, 2, 3, 4, 1], barre: 3 },
   ],
   'D': [
     { name: 'D', frets: [-1, -1, 0, 2, 3, 2], fingers: [0, 0, 0, 1, 3, 2] },
@@ -95,17 +96,22 @@ export const CHORD_SHAPES: Record<string, ChordShape[]> = {
   ],
 };
 
-export function getChordShape(name: string): ChordShape | null {
-  if (!name) return null;
+export function getChordShapes(name: string): ChordShape[] {
+  if (!name) return [];
   
   // Try exact match first
-  if (CHORD_SHAPES[name]) return CHORD_SHAPES[name][0];
+  if (CHORD_SHAPES[name]) return CHORD_SHAPES[name];
 
   // Try case-insensitive match
   const lowerName = name.toLowerCase();
   const foundKey = Object.keys(CHORD_SHAPES).find(k => k.toLowerCase() === lowerName);
   
-  if (foundKey) return CHORD_SHAPES[foundKey][0];
+  if (foundKey) return CHORD_SHAPES[foundKey];
   
-  return null;
+  return [];
+}
+
+export function getChordShape(name: string): ChordShape | null {
+  const shapes = getChordShapes(name);
+  return shapes.length > 0 ? shapes[0] : null;
 }
