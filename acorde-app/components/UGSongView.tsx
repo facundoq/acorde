@@ -111,51 +111,62 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
 
   return (
     <DefaultView style={styles.diagramContainer}>
-      <DefaultView style={[styles.fretboard, { borderColor: theme.text }]}>
-        {/* Nut or first fret line */}
-        <DefaultView style={[styles.nut, { backgroundColor: theme.text }]} />
-        
-        {/* Frets */}
-        {frets.map(f => (
-          <DefaultView key={f} style={[styles.fret, { top: f * 30, backgroundColor: theme.text, opacity: 0.7 }]} />
-        ))}
+      <DefaultView style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+        {/* Fret Numbers Column */}
+        <DefaultView style={styles.fretNumbersColumn}>
+          {frets.map(f => (
+            <Text key={f} style={[styles.fretNumber, { top: (f - 0.5) * 30 + 5, color: theme.subtext }]}>
+              {f}
+            </Text>
+          ))}
+        </DefaultView>
 
-        {/* Strings and fingers */}
-        <DefaultView style={styles.stringsLayer}>
-          {strings.map(s => {
-            const fret = shape.frets[s];
-            const finger = shape.fingers ? shape.fingers[s] : null;
-            
-            return (
-              <DefaultView key={s} style={styles.stringContainer}>
-                {/* String line */}
-                <DefaultView style={[styles.stringLine, { backgroundColor: theme.text, opacity: 0.5 }]} />
-                
-                {/* Marker for muted or open */}
-                {fret === -1 && <Text style={[styles.marker, { color: 'red' }]}>X</Text>}
-                {fret === 0 && <Text style={[styles.marker, { color: theme.text }]}>O</Text>}
-                
-                {/* Finger position */}
-                {fret > 0 && (
-                  <DefaultView style={[
-                    styles.finger, 
-                    { 
-                      top: (fret - 0.5) * 30 + 5, 
-                      backgroundColor: theme.tint 
-                    }
-                  ]}>
-                    {finger && <Text style={styles.fingerText}>{finger}</Text>}
-                  </DefaultView>
-                )}
-              </DefaultView>
-            );
-          })}
+        <DefaultView style={[styles.fretboard, { borderColor: theme.text }]}>
+          {/* Nut or first fret line */}
+          <DefaultView style={[styles.nut, { backgroundColor: theme.text }]} />
+          
+          {/* Frets */}
+          {frets.map(f => (
+            <DefaultView key={f} style={[styles.fret, { top: f * 30, backgroundColor: theme.text, opacity: 0.7 }]} />
+          ))}
+
+          {/* Strings and fingers */}
+          <DefaultView style={styles.stringsLayer}>
+            {strings.map(s => {
+              const fret = shape.frets[s];
+              const finger = shape.fingers ? shape.fingers[s] : null;
+              
+              return (
+                <DefaultView key={s} style={styles.stringContainer}>
+                  {/* String line */}
+                  <DefaultView style={[styles.stringLine, { backgroundColor: theme.text, opacity: 0.5 }]} />
+                  
+                  {/* Marker for muted or open */}
+                  {fret === -1 && <Text style={[styles.marker, { color: 'red' }]}>X</Text>}
+                  {fret === 0 && <Text style={[styles.marker, { color: theme.text }]}>O</Text>}
+                  
+                  {/* Finger position */}
+                  {fret > 0 && (
+                    <DefaultView style={[
+                      styles.finger, 
+                      { 
+                        top: (fret - 0.5) * 30 + 5, 
+                        backgroundColor: theme.tint 
+                      }
+                    ]}>
+                      {finger && <Text style={styles.fingerText}>{finger}</Text>}
+                    </DefaultView>
+                  )}
+                </DefaultView>
+              );
+            })}
+          </DefaultView>
         </DefaultView>
       </DefaultView>
       
       {/* Barre indicator (simplified) */}
       {shape.barre && (
-        <Text style={[styles.barreText, { color: theme.subtext }]}>Barre on fret {shape.barre}</Text>
+        <Text style={[styles.barreText, { color: theme.subtext, marginTop: 15 }]}>Barre on fret {shape.barre}</Text>
       )}
     </DefaultView>
   );
@@ -224,6 +235,18 @@ const styles = StyleSheet.create({
   },
   diagramContainer: {
     alignItems: 'center',
+  },
+  fretNumbersColumn: {
+    width: 25,
+    height: 160,
+    marginRight: 5,
+    position: 'relative',
+  },
+  fretNumber: {
+    position: 'absolute',
+    right: 5,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   fretboard: {
     width: 180,
