@@ -220,11 +220,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    width: 280,
-    padding: 20,
+    padding: 30,
     borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
+    minWidth: 280,
   },
   modalTitle: {
     fontSize: 24,
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   },
   fretNumbersColumn: {
     width: 25,
-    height: 160,
+    height: 180,
     marginRight: 5,
     position: 'relative',
   },
@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   },
   fretboard: {
     width: 180,
-    height: 160,
+    height: 180,
     borderLeftWidth: 1,
     borderRightWidth: 1,
     borderTopWidth: 1,
