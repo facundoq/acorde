@@ -117,7 +117,7 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
         
         {/* Frets */}
         {frets.map(f => (
-          <View key={f} style={[styles.fret, { top: f * 30, borderBottomColor: theme.border }]} />
+          <View key={f} style={[styles.fret, { top: f * 30, borderBottomColor: theme.text, opacity: 0.3 }]} />
         ))}
 
         {/* Strings and fingers */}
