@@ -228,7 +228,9 @@ const styles = StyleSheet.create({
   fretboard: {
     width: 180,
     height: 160,
-    borderWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderTopWidth: 1,
     position: 'relative',
   },
   nut: {
