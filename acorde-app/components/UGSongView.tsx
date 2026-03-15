@@ -158,7 +158,7 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
                   {fret === 0 && <Text style={[styles.marker, { color: theme.text }]}>O</Text>}
                   
                   {/* Finger position */}
-                  {fret > 0 && (
+                  {fret > 0 && !(shape.barre === fret && finger === 1) && (
                     <DefaultView style={[
                       styles.finger, 
                       { 
@@ -168,8 +168,7 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
                     ]}>
                       {finger && <Text style={styles.fingerText}>{finger}</Text>}
                     </DefaultView>
-                  )}
-                </DefaultView>
+                  )}                </DefaultView>
               );
             })}
           </DefaultView>
