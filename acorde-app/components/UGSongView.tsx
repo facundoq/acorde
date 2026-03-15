@@ -130,6 +130,18 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
             <DefaultView key={f} style={[styles.fret, { top: f * 30, backgroundColor: theme.text, opacity: 0.7 }]} />
           ))}
 
+          {/* Barre Line */}
+          {shape.barre && (
+            <DefaultView style={[
+              styles.barreLine, 
+              { 
+                top: (shape.barre - 0.5) * 30 - 4, 
+                backgroundColor: theme.tint,
+                opacity: 0.8
+              }
+            ]} />
+          )}
+
           {/* Strings and fingers */}
           <DefaultView style={styles.stringsLayer}>
             {strings.map(s => {
@@ -255,6 +267,14 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderTopWidth: 1,
     position: 'relative',
+  },
+  barreLine: {
+    position: 'absolute',
+    left: 10,
+    right: 10,
+    height: 18,
+    borderRadius: 9,
+    zIndex: 1,
   },
   nut: {
     height: 5,
