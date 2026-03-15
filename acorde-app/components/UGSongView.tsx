@@ -117,7 +117,7 @@ function ChordDiagram({ chordName, theme }: { chordName: string, theme: any }) {
         
         {/* Frets */}
         {frets.map(f => (
-          <View key={f} style={[styles.fret, { top: f * 30, borderBottomColor: theme.text, opacity: 0.3 }]} />
+          <View key={f} style={[styles.fret, { top: f * 30, backgroundColor: theme.text, opacity: 0.5 }]} />
         ))}
 
         {/* Strings and fingers */}
@@ -240,7 +240,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1,
-    borderBottomWidth: 1,
   },
   stringsLayer: {
     flexDirection: 'row',
