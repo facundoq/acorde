@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, useColorScheme, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { StyleSheet, ScrollView, TouchableOpacity, useColorScheme, ActivityIndicator, Platform } from 'react-native';
 import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from '@/components/Themed';
 import { getSongById, SavedSong } from '@/services/database';
+import { getFontSize, saveFontSize } from '@/services/settings';
 import Colors from '@/constants/Colors';
 import UGSongView from '@/components/UGSongView';
 import ChordDetailModal from '@/components/ChordDetailModal';
@@ -14,24 +16,87 @@ export default function SongDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedChord, setSelectedChord] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState(14);
+  const [scrollSpeed, setScrollSpeed] = useState<'none' | 'low' | 'mid' | 'high'>('none');
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollInterval = useRef<any>(null);
+  const currentY = useRef(0);
+  
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme];
   const router = useRouter();
 
+  // Load font size and handle scroll reset
   useEffect(() => {
-    const loadSong = async () => {
+    const loadData = async () => {
       try {
-        const data = await getSongById(Number(id));
-        setSong(data);
+        const [songData, savedFontSize] = await Promise.all([
+          getSongById(Number(id)),
+          getFontSize()
+        ]);
+        setSong(songData);
+        setFontSize(savedFontSize);
       } catch (error) {
-        console.error('Failed to load song:', error);
+        console.error('Failed to load song or settings:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadSong();
+    loadData();
+    currentY.current = 0; // Reset scroll position tracker
   }, [id]);
+
+  const changeFontSize = async (newSize: number) => {
+    const clampedSize = Math.max(8, Math.min(30, newSize));
+    setFontSize(clampedSize);
+    await saveFontSize(clampedSize);
+  };
+
+  // Auto-scroll logic
+  useEffect(() => {
+    if (scrollInterval.current) {
+      clearInterval(scrollInterval.current);
+      scrollInterval.current = null;
+    }
+
+    if (scrollSpeed !== 'none') {
+      const intervalMs = scrollSpeed === 'low' ? 80 : scrollSpeed === 'mid' ? 40 : 20;
+      
+      scrollInterval.current = setInterval(() => {
+        currentY.current += 1;
+        scrollRef.current?.scrollTo({ y: currentY.current, animated: false });
+      }, intervalMs);
+    }
+
+    return () => {
+      if (scrollInterval.current) clearInterval(scrollInterval.current);
+    };
+  }, [scrollSpeed]);
+
+  const handleManualScroll = (event: any) => {
+    // Update tracking position even during auto-scroll to handle user manual "nudges"
+    currentY.current = event.nativeEvent.contentOffset.y;
+  };
+
+  const toggleScrollSpeed = () => {
+    const speeds: ('none' | 'low' | 'mid' | 'high')[] = ['none', 'low', 'mid', 'high'];
+    const currentIndex = speeds.indexOf(scrollSpeed);
+    const nextIndex = (currentIndex + 1) % speeds.length;
+    setScrollSpeed(speeds[nextIndex]);
+  };
+
+  const getScrollIcon = () => {
+    switch (scrollSpeed) {
+      case 'low': return "chevron-down-outline";
+      case 'mid': return "chevron-down";
+      case 'high': return "play-forward-outline";
+      default: return "arrow-down-circle-outline";
+    }
+  };
+
+  const getScrollColor = () => {
+    return scrollSpeed === 'none' ? theme.text : theme.tint;
+  };
 
   if (loading) {
     return (
@@ -93,30 +158,46 @@ export default function SongDetailScreen() {
           headerBackTitle: 'Tabs',
           headerStyle: { backgroundColor: theme.background },
           headerTintColor: theme.tint,
+          headerRight: () => (
+            <View style={styles.headerControls}>
+              <TouchableOpacity 
+                style={[styles.headerButton, { borderColor: getScrollColor() }]} 
+                onPress={toggleScrollSpeed}
+              >
+                <Ionicons 
+                  name={getScrollIcon() as any} 
+                  size={20} 
+                  color={getScrollColor()} 
+                />
+              </TouchableOpacity>
+
+              <View style={[styles.separator, { backgroundColor: theme.border, height: 20, marginHorizontal: 8 }]} />
+
+              <TouchableOpacity 
+                style={[styles.headerButton, { borderColor: theme.border }]} 
+                onPress={() => changeFontSize(fontSize - 2)}
+              >
+                <Ionicons name="remove" size={18} color={theme.text} />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.headerButton, { borderColor: theme.border, marginLeft: 8 }]} 
+                onPress={() => changeFontSize(fontSize + 2)}
+              >
+                <Ionicons name="add" size={18} color={theme.text} />
+              </TouchableOpacity>
+            </View>
+          )
         }} 
       />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView 
+        ref={scrollRef}
+        contentContainerStyle={styles.scrollContent}
+        onScroll={handleManualScroll}
+        scrollEventThrottle={16}
+      >
         <View style={styles.header}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'transparent' }}>
-            <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-              <Text style={[styles.title, { color: theme.text }]}>{song.title}</Text>
-              <Text style={[styles.artist, { color: theme.subtext }]}>{song.artist}</Text>
-            </View>
-            <View style={styles.fontControls}>
-              <TouchableOpacity 
-                style={[styles.fontButton, { borderColor: theme.border }]} 
-                onPress={() => setFontSize(Math.max(8, fontSize - 2))}
-              >
-                <Text style={{ color: theme.text, fontSize: 18 }}>-</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.fontButton, { borderColor: theme.border, marginLeft: 10 }]} 
-                onPress={() => setFontSize(Math.min(30, fontSize + 2))}
-              >
-                <Text style={{ color: theme.text, fontSize: 18 }}>+</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <Text style={[styles.title, { color: theme.text }]}>{song.title}</Text>
+          <Text style={[styles.artist, { color: theme.subtext }]}>{song.artist}</Text>
           <View style={[styles.sourceContainer, { backgroundColor: theme.card }]}>
             <Text style={[styles.sourceText, { color: theme.subtext }]}>Source: {song.source}</Text>
           </View>
@@ -161,19 +242,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginTop: 4,
   },
-  fontControls: {
+  headerControls: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'transparent',
+    paddingRight: 10,
   },
-  fontButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  headerButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
+  },
+  separator: {
+    width: 1,
   },
   sourceContainer: {
     marginTop: 10,

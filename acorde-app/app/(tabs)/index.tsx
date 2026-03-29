@@ -38,6 +38,9 @@ export default function TabsScreen() {
   const [searchingOnline, setSearchingOnline] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [onlineError, setOnlineError] = useState<string | null>(null);
+  const [savingModalVisible, setSavingModalVisible] = useState(false);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [sourceStatus, setSourceStatus] = useState<Record<string, 'idle' | 'searching' | 'done' | 'error'>>({});
   
   const router = useRouter();
 
@@ -99,31 +102,30 @@ export default function TabsScreen() {
     setOnlineError(null);
     setStatus(`Searching online for "${query}"...`);
     
-    let allResults: SongSearchResult[] = [];
-    let lastError = null;
-    
+    // Initialize statuses
+    const initialStatus: Record<string, 'searching'> = {};
+    activeSources.forEach(s => initialStatus[s.name] = 'searching');
+    setSourceStatus(initialStatus);
+
     try {
-      console.log(`Starting online search for: ${query}`);
-      for (const source of activeSources) {
+      const searchPromises = activeSources.map(async (source) => {
         try {
-          console.log(`Searching source: ${source.name}`);
           const results = await source.search(query);
-          console.log(`Results from ${source.name}: ${results.length}`);
-          allResults = [...allResults, ...results];
+          setSourceStatus(prev => ({ ...prev, [source.name]: 'done' }));
+          return results;
         } catch (err: any) {
           console.error(`Search error for ${source.name}:`, err);
-          lastError = err.message;
+          setSourceStatus(prev => ({ ...prev, [source.name]: 'error' }));
+          return [];
         }
-      }
+      });
+
+      const allResultsArrays = await Promise.all(searchPromises);
+      const allResults = allResultsArrays.flat();
 
       setOnlineResults(allResults);
       if (allResults.length === 0) {
-        if (lastError) {
-          setOnlineError(`No online results found (${lastError})`);
-          setStatus(null);
-        } else {
-          setStatus(`No online results found for "${query}".`);
-        }
+        setStatus(`No online results found for "${query}".`);
       } else {
         setStatus(null);
       }
@@ -136,12 +138,67 @@ export default function TabsScreen() {
     }
   };
 
+  const renderSourceProgress = () => {
+    if (!searchingOnline && Object.keys(sourceStatus).length === 0) return null;
+    
+    return (
+      <View style={styles.progressContainer}>
+        {activeSources.map(source => {
+          const state = sourceStatus[source.name] || 'idle';
+          let icon: any = 'ellipsis-horizontal';
+          let color = theme.subtext;
+
+          if (state === 'searching') {
+            icon = 'search-outline';
+            color = theme.tint;
+          } else if (state === 'done') {
+            icon = 'checkmark-circle';
+            color = '#4CAF50';
+          } else if (state === 'error') {
+            icon = 'close-circle';
+            color = '#f44336';
+          }
+
+          return (
+            <View key={source.name} style={styles.progressItem}>
+              <Ionicons name={icon} size={14} color={color} />
+              <Text style={[styles.progressText, { color }]}>{source.name}</Text>
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
+
+  const handleCancelSave = () => {
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+    }
+    setSavingModalVisible(false);
+    setStatus(null);
+  };
+
   const handleSaveOnline = async (item: SongSearchResult) => {
+    const controller = new AbortController();
+    setAbortController(controller);
+    setSavingModalVisible(true);
+    setStatus(`Downloading from ${item.source}...`);
+    setOnlineError(null);
+
     try {
-      setStatus(`Downloading from ${item.source}...`);
-      setOnlineError(null);
       const source = allSources.find(s => s.name === item.source) || allSources[0];
-      const songContent = await source.getSong(item.url);
+      
+      // We'll wrap the promise to make it abortable
+      const songContent = await Promise.race([
+        source.getSong(item.url),
+        new Promise<never>((_, reject) => {
+          controller.signal.addEventListener('abort', () => reject(new Error('Cancelled')));
+        })
+      ]);
+
+      if (controller.signal.aborted) return;
+
       const songId = await saveSong({
         source_id: item.id,
         title: songContent.title,
@@ -153,28 +210,47 @@ export default function TabsScreen() {
         instrument: item.instrument || songContent.instrument,
         rating: item.rating || songContent.rating,
       });
+
+      if (controller.signal.aborted) return;
+
       loadSongs();
       setOnlineResults([]);
-      setStatus(null);
+      setSavingModalVisible(false);
+      setAbortController(null);
+      
       // Redirect to the newly saved song
       router.push({ pathname: '/song/[id]', params: { id: songId } });
     } catch (error: any) {
-      console.error('Save error:', error);
-      setOnlineError(`Failed to save song (${error.message})`);
+      if (error.message === 'Cancelled') {
+        console.log('Save cancelled by user');
+      } else {
+        console.error('Save error:', error);
+        setOnlineError(`Failed to save song (${error.message})`);
+        setSavingModalVisible(false);
+      }
     } finally {
-      setStatus(null);
+      if (!controller.signal.aborted) {
+        setStatus(null);
+        setAbortController(null);
+      }
     }
   };
 
-  const handleDelete = (id: number, title: string) => {
-    Alert.alert(
-      'Delete Song',
-      `Are you sure you want to delete "${title}" from your Tabs?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: async () => { await deleteSong(id); loadSongs(); } },
-      ]
-    );
+  const confirmDelete = (id: number, title: string) => {
+    if (Platform.OS === 'web') {
+      if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
+        deleteSong(id).then(() => loadSongs());
+      }
+    } else {
+      Alert.alert(
+        'Delete Song',
+        `Are you sure you want to delete "${title}" from your Tabs?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: async () => { await deleteSong(id); loadSongs(); } },
+        ]
+      );
+    }
   };
 
   const getInstrumentIcon = (instrument?: string) => {
@@ -283,7 +359,7 @@ export default function TabsScreen() {
             <TouchableOpacity 
               style={[styles.songItem, { borderBottomColor: theme.border }]} 
               onPress={() => router.push({ pathname: '/song/[id]', params: { id: item.id } })}
-              onLongPress={() => handleDelete(item.id, item.title)}
+              onLongPress={() => Platform.OS !== 'web' && confirmDelete(item.id, item.title)}
             >
               <View style={styles.songInfo}>
                 <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>
@@ -297,9 +373,23 @@ export default function TabsScreen() {
                   )}
                 </View>
               </View>
-              <View style={{ alignItems: 'flex-end', backgroundColor: 'transparent' }}>
-                {renderStars(item.rating)}
-                <Text style={[styles.sourceTag, { backgroundColor: theme.card, color: theme.subtext, marginTop: 4 }]}>{item.source}</Text>
+              <View style={{ alignItems: 'flex-end', backgroundColor: 'transparent', flexDirection: 'row' }}>
+                <View style={{ alignItems: 'flex-end', backgroundColor: 'transparent', marginRight: Platform.OS === 'web' ? 15 : 0 }}>
+                  {renderStars(item.rating)}
+                  <Text style={[styles.sourceTag, { backgroundColor: theme.card, color: theme.subtext, marginTop: 4 }]}>{item.source}</Text>
+                </View>
+                
+                {Platform.OS === 'web' && (
+                  <TouchableOpacity 
+                    style={styles.deleteButton} 
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      confirmDelete(item.id, item.title);
+                    }}
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#ff4444" />
+                  </TouchableOpacity>
+                )}
               </View>
             </TouchableOpacity>
           )}
@@ -312,6 +402,7 @@ export default function TabsScreen() {
                   <Text style={[styles.statusText, { color: theme.tint }]}>{status}</Text>
                 </View>
               )}
+              {renderSourceProgress()}
               {onlineError && <Text style={[styles.statusText, { color: '#f44336', marginTop: 20, fontWeight: 'bold', textAlign: 'center' }]}>{onlineError}</Text>}
               {renderOnlineResults()}
             </View>
@@ -361,6 +452,24 @@ export default function TabsScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Saving Modal */}
+      <Modal visible={savingModalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={[styles.configCard, { backgroundColor: theme.card, alignItems: 'center', padding: 30 }]}>
+            <ActivityIndicator size="large" color={theme.tint} style={{ marginBottom: 20 }} />
+            <Text style={[styles.sectionTitle, { color: theme.text, textAlign: 'center', marginBottom: 10 }]}>Saving Tab</Text>
+            <Text style={[styles.statusText, { color: theme.subtext, textAlign: 'center', marginBottom: 25 }]}>{status}</Text>
+            
+            <TouchableOpacity 
+              style={[styles.doneButton, { width: '100%', backgroundColor: '#ff4444' }]} 
+              onPress={handleCancelSave}
+            >
+              <Text style={styles.saveButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -384,6 +493,26 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: 'transparent',
   },
+  progressContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 15,
+    paddingHorizontal: 10,
+    backgroundColor: 'transparent',
+  },
+  progressItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 8,
+    marginVertical: 4,
+    backgroundColor: 'transparent',
+  },
+  progressText: {
+    fontSize: 12,
+    marginLeft: 4,
+    textTransform: 'capitalize',
+  },
   songItem: { flexDirection: 'row', paddingVertical: 15, borderBottomWidth: 1, alignItems: 'center', backgroundColor: 'transparent' },
   songInfo: { flex: 1, backgroundColor: 'transparent' },
   title: { fontSize: 16, fontWeight: 'bold' },
@@ -392,6 +521,7 @@ const styles = StyleSheet.create({
   starsContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent' },
   ratingText: { fontSize: 12, fontWeight: 'bold', color: '#FFB300' },
   sourceTag: { fontSize: 10, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, overflow: 'hidden' },
+  deleteButton: { padding: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: 'transparent' },
   emptyText: { textAlign: 'center', marginTop: 50, paddingHorizontal: 20, backgroundColor: 'transparent' },
   // Online section styles
   onlineSection: { marginTop: 20, backgroundColor: 'transparent' },

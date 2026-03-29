@@ -1,40 +1,10 @@
 import * as cheerio from 'cheerio';
 import { Source } from './Source';
 import { SongSearchResult, SongContent } from '../types';
-import { crossFetch } from '../fetcher';
-import { Platform } from 'react-native';
+import { fetchHtml } from '../fetcher';
 
 export class CifraclubSource implements Source {
   name = 'cifraclub';
-
-  private async fetchHtml(url: string): Promise<string> {
-    const isWeb = Platform.OS === 'web';
-    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
-    
-    if (isWeb) {
-      const proxies = [
-        (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-        (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-      ];
-
-      for (const getProxyUrl of proxies) {
-        try {
-          const proxyUrl = getProxyUrl(url);
-          const response = await crossFetch(proxyUrl, { headers: { 'User-Agent': userAgent } });
-          if (response.ok) return await response.text();
-        } catch (e) {}
-      }
-      throw new Error(`Web fetch failed for ${url}`);
-    }
-
-    const response = await crossFetch(url, {
-      method: 'GET',
-      headers: { 'User-Agent': userAgent }
-    });
-
-    if (!response.ok) throw new Error(`Native fetch failed: ${response.status}`);
-    return await response.text();
-  }
 
   async search(query: string): Promise<SongSearchResult[]> {
     const results: SongSearchResult[] = [];
@@ -43,9 +13,11 @@ export class CifraclubSource implements Source {
       // 1. Try suggestions API
       const suggestUrl = `https://www.cifraclub.com.br/api/search/suggestions/?q=${encodeURIComponent(query)}`;
       try {
-        const suggestHtml = await this.fetchHtml(suggestUrl);
+        console.log(`[Cifraclub] Trying suggestions API...`);
+        const suggestHtml = await fetchHtml(suggestUrl);
         const data = JSON.parse(suggestHtml);
         if (data && data.songs) {
+          console.log(`[Cifraclub] Found ${data.songs.length} suggestions.`);
           data.songs.forEach((song: any) => {
             results.push({
               id: song.url,
@@ -56,12 +28,15 @@ export class CifraclubSource implements Source {
             });
           });
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn(`[Cifraclub] Suggestions API failed, falling back to scrape.`);
+      }
 
       // 2. Fallback to scraping
       if (results.length === 0) {
+        console.log(`[Cifraclub] Scraping search page...`);
         const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(query)}`;
-        const html = await this.fetchHtml(searchUrl);
+        const html = await fetchHtml(searchUrl);
         
         const songPattern = /("name"|"url")\s*:\s*"([^"]+)"\s*,\s*("name"|"url")\s*:\s*"([^"]+)"/g;
         const matches = Array.from(html.matchAll(songPattern));
@@ -111,7 +86,7 @@ export class CifraclubSource implements Source {
 
   async getSong(url: string): Promise<SongContent> {
     const targetUrl = url.startsWith('http') ? url : `https://www.cifraclub.com.br${url}`;
-    const html = await this.fetchHtml(targetUrl);
+    const html = await fetchHtml(targetUrl);
     const $ = cheerio.load(html);
 
     const title = $('h1.t1').text().trim() || $('h1').first().text().trim() || 'Unknown Title';

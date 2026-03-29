@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, useColorScheme } from 'react-native';
+import { StyleSheet, useColorScheme, View as DefaultView } from 'react-native';
 import { Text, View } from '@/components/Themed';
-import { parseUGTabs, UGPart } from '@/core/ug-parser';
+import { parseUGTabs, UGPart, parseAlignedSegments, AlignedLine } from '@/core/ug-parser';
 import Colors from '@/constants/Colors';
 import { getChordShape } from '@/constants/ChordShapes';
 import ChordDetailModal from './ChordDetailModal';
@@ -16,6 +16,56 @@ export default function UGSongView({ content, fontSize = 14 }: UGSongViewProps) 
   const theme = Colors[colorScheme];
 
   const [selectedChord, setSelectedChord] = useState<string | null>(null);
+
+  const renderAlignedLine = (line: AlignedLine, lineIndex: number) => {
+    // 1. Paired line: Chords specifically aligned over lyrics
+    if (line.type === 'paired') {
+      return (
+        <View key={lineIndex} style={styles.alignedLine}>
+          {line.segments.map((segment, segIndex) => {
+            const shape = segment.chord ? getChordShape(segment.chord) : null;
+            const color = segment.chord ? (shape ? theme.tint : '#FFD700') : 'transparent';
+            
+            return (
+              <View key={segIndex} style={styles.segment}>
+                <Text 
+                  onPress={segment.chord ? () => setSelectedChord(segment.chord) : undefined}
+                  style={[styles.chordText, { color, fontSize: fontSize + 1, minHeight: fontSize + 5 }]}
+                >
+                  {segment.chord || ' '}
+                </Text>
+                <Text style={[styles.regularText, { color: theme.text, fontSize, minHeight: fontSize + 2 }]}>
+                  {segment.text || (segment.chord ? ' ' : '')}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+      );
+    }
+
+    // 2. Single line: Chords only, or plain text
+    return (
+      <Text key={lineIndex} style={[styles.regularText, { color: theme.text, fontSize, marginBottom: 5 }]}>
+        {line.segments.map((segment, segIndex) => {
+          if (segment.chord) {
+            const shape = getChordShape(segment.chord);
+            const color = shape ? theme.tint : '#FFD700';
+            return (
+              <Text 
+                key={segIndex}
+                onPress={() => setSelectedChord(segment.chord!)}
+                style={[styles.chordText, { color, fontSize: fontSize + 1 }]}
+              >
+                {segment.chord}
+              </Text>
+            );
+          }
+          return <Text key={segIndex}>{segment.text}</Text>;
+        })}
+      </Text>
+    );
+  };
 
   const renderPart = (part: UGPart, index: number): React.ReactNode => {
     switch (part.type) {
@@ -39,12 +89,11 @@ export default function UGSongView({ content, fontSize = 14 }: UGSongViewProps) 
           </Text>
         );
       case 'tab':
-        // Recursively parse content inside [tab] tags to handle nested [ch] tags
-        const nestedParts = parseUGTabs(part.content);
+        const alignedLines = parseAlignedSegments(part.content);
         return (
-          <Text key={index} style={[styles.tabText, { color: theme.subtext, fontSize: fontSize - 1 }]}>
-            {nestedParts.map((nestedPart, i) => renderPart(nestedPart, i))}
-          </Text>
+          <View key={index} style={styles.tabContainer}>
+            {alignedLines.map((line, i) => renderAlignedLine(line, i))}
+          </View>
         );
       case 'text':
       default:
@@ -60,9 +109,9 @@ export default function UGSongView({ content, fontSize = 14 }: UGSongViewProps) 
 
   return (
     <View style={styles.container}>
-      <Text style={[styles.contentWrapper, { fontSize, lineHeight: fontSize * 1.4 }]}>
+      <View style={{ backgroundColor: 'transparent' }}>
         {parts.map((part, index) => renderPart(part, index))}
-      </Text>
+      </View>
 
       <ChordDetailModal 
         chordName={selectedChord} 
@@ -77,29 +126,32 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',
   },
-  contentWrapper: {
-    fontFamily: 'SpaceMono',
-    fontSize: 14,
-    lineHeight: 20,
-  },
   chordText: {
     fontFamily: 'SpaceMono',
     fontWeight: 'bold',
-    fontSize: 15,
   },
   headerText: {
     fontFamily: 'SpaceMono',
     fontWeight: 'bold',
-    fontSize: 14,
     marginTop: 10,
     marginBottom: 5,
   },
-  tabText: {
-    fontFamily: 'SpaceMono',
-    fontSize: 13,
+  tabContainer: {
+    backgroundColor: 'transparent',
+    marginVertical: 5,
+  },
+  alignedLine: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    backgroundColor: 'transparent',
+    marginBottom: 5,
+  },
+  segment: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    backgroundColor: 'transparent',
   },
   regularText: {
     fontFamily: 'SpaceMono',
-    fontSize: 14,
   }
 });

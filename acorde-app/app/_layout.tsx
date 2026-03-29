@@ -7,6 +7,7 @@ import { ActivityIndicator, StyleSheet, useColorScheme } from 'react-native';
 import 'react-native-reanimated';
 
 import { initDatabase } from '@/services/database';
+import { initSettings } from '@/services/settings';
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 
@@ -49,8 +50,8 @@ export default function RootLayout() {
     const bootstrap = async () => {
       try {
         console.log('Starting bootstrap...');
-        await initDatabase();
-        console.log('Database initialized.');
+        await Promise.all([initDatabase(), initSettings()]);
+        console.log('Database and settings initialized.');
       } catch (err) {
         console.error('Failed to init database:', err);
       } finally {

@@ -1,46 +1,16 @@
 import * as cheerio from 'cheerio';
 import { Source } from './Source';
 import { SongSearchResult, SongContent } from '../types';
-import { crossFetch } from '../fetcher';
-import { Platform } from 'react-native';
+import { fetchHtml } from '../fetcher';
 
 export class CifrasSource implements Source {
   name = 'cifras';
-
-  private async fetchHtml(url: string): Promise<string> {
-    const isWeb = Platform.OS === 'web';
-    const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
-    
-    if (isWeb) {
-      const proxies = [
-        (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-        (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-      ];
-
-      for (const getProxyUrl of proxies) {
-        try {
-          const proxyUrl = getProxyUrl(url);
-          const response = await crossFetch(proxyUrl, { headers: { 'User-Agent': userAgent } });
-          if (response.ok) return await response.text();
-        } catch (e) {}
-      }
-      throw new Error(`Web fetch failed for ${url}`);
-    }
-
-    const response = await crossFetch(url, {
-      method: 'GET',
-      headers: { 'User-Agent': userAgent }
-    });
-
-    if (!response.ok) throw new Error(`Native fetch failed: ${response.status}`);
-    return await response.text();
-  }
 
   async search(query: string): Promise<SongSearchResult[]> {
     const results: SongSearchResult[] = [];
     try {
       const searchUrl = `https://www.cifras.com.br/search?q=${encodeURIComponent(query)}`;
-      const html = await this.fetchHtml(searchUrl);
+      const html = await fetchHtml(searchUrl);
       const $ = cheerio.load(html);
 
       $('.search-result .item').each((i, el) => {
@@ -85,7 +55,7 @@ export class CifrasSource implements Source {
   }
 
   async getSong(url: string): Promise<SongContent> {
-    const html = await this.fetchHtml(url);
+    const html = await fetchHtml(url);
     const $ = cheerio.load(html);
 
     const title = $('h1').text().trim() || 'Unknown Title';

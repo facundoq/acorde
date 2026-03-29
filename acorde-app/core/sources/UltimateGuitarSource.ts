@@ -1,66 +1,17 @@
 import * as cheerio from 'cheerio';
 import { Source } from './Source';
 import { SongSearchResult, SongContent } from '../types';
-import { crossFetch } from '../fetcher';
-import { Platform } from 'react-native';
+import { fetchHtml } from '../fetcher';
 
 export class UltimateGuitarSource implements Source {
   name = 'ultimateguitar';
-private async fetchHtml(url: string): Promise<string> {
-  const isWeb = Platform.OS === 'web';
-  const isNode = typeof process !== 'undefined' && process.versions && process.versions.node;
-  const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
 
-  const MAX_RETRIES = 2;
-
-  const tryFetch = async (targetUrl: string, useNative: boolean = false): Promise<string | null> => {
-    for (let i = 0; i <= MAX_RETRIES; i++) {
-      try {
-        const response = useNative 
-          ? await crossFetch(targetUrl, { method: 'GET', headers: { 'User-Agent': userAgent } })
-          : await fetch(targetUrl, { headers: { 'User-Agent': userAgent } });
-
-        if (response.ok) return await response.text();
-        if (response.status === 403 || response.status === 429) continue; // Try next retry/proxy on rate limit or block
-      } catch (e) {}
-      // Small delay between retries
-      if (i < MAX_RETRIES) await new Promise(r => setTimeout(r, 500 * (i + 1)));
-    }
-    return null;
-  };
-
-  // 1. In Node (like Jest), ALWAYS try direct first
-  if (isNode) {
-    const result = await tryFetch(url);
-    if (result) return result;
-  }
-
-  // 2. If direct failed OR we are in a real browser, use proxies
-  if (isWeb) {
-    const proxies = [
-      (u: string) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
-      (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    ];
-
-    for (const getProxyUrl of proxies) {
-      const result = await tryFetch(getProxyUrl(url));
-      if (result) return result;
-    }
-  }
-
-  // 3. Native app path
-  if (!isWeb) {
-    const result = await tryFetch(url, true);
-    if (result) return result;
-  }
-
-  throw new Error(`Fetch failed for ${url} after retries`);
-}  async search(query: string): Promise<SongSearchResult[]> {
+  async search(query: string): Promise<SongSearchResult[]> {
     const results: SongSearchResult[] = [];
     try {
       // Use '+' instead of '%20' for spaces as requested
       const searchUrl = `https://www.ultimate-guitar.com/search.php?search_type=title&order=&value=${encodeURIComponent(query).replace(/%20/g, '+')}`;
-      const html = await this.fetchHtml(searchUrl);
+      const html = await fetchHtml(searchUrl);
       
       const $ = cheerio.load(html);
       const jsonStr = $('.js-store').attr('data-content');
@@ -112,7 +63,7 @@ private async fetchHtml(url: string): Promise<string> {
   }
 
   async getSong(url: string): Promise<SongContent> {
-    const html = await this.fetchHtml(url);
+    const html = await fetchHtml(url);
     const $ = cheerio.load(html);
     
     const jsonStr = $('.js-store').attr('data-content');

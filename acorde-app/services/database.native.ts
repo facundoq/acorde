@@ -1,5 +1,4 @@
 import * as SQLite from 'expo-sqlite';
-import { Platform } from 'react-native';
 
 export interface SavedSong {
   id: number;
@@ -15,16 +14,9 @@ export interface SavedSong {
   rating?: number;
 }
 
-const LOCAL_STORAGE_KEY = 'acorde_tabs';
-
 let db: SQLite.SQLiteDatabase | null = null;
 
 export const initDatabase = async () => {
-  if (Platform.OS === 'web') {
-    await seedLocalStorage();
-    return null;
-  }
-
   if (db) return db;
   db = await SQLite.openDatabaseAsync('acorde_tabs.db');
   
@@ -63,16 +55,6 @@ const DEFAULT_SONG: Omit<SavedSong, 'id' | 'created_at'> = {
   rating: 4.8
 };
 
-const seedLocalStorage = async () => {
-  if (typeof window !== 'undefined') {
-    const existing = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!existing || JSON.parse(existing).length === 0) {
-      const songs = [{ ...DEFAULT_SONG, id: Date.now(), created_at: new Date().toISOString() }];
-      window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(songs));
-    }
-  }
-};
-
 const seedDatabase = async (database: SQLite.SQLiteDatabase) => {
   const count = await database.getFirstAsync<{ 'COUNT(*)': number }>('SELECT COUNT(*) FROM songs');
   if (count && count['COUNT(*)'] === 0) {
@@ -95,19 +77,6 @@ const seedDatabase = async (database: SQLite.SQLiteDatabase) => {
 };
 
 export const saveSong = async (song: Omit<SavedSong, 'id' | 'created_at'>) => {
-  if (Platform.OS === 'web') {
-    const existing = await getSongs();
-    const newSong: SavedSong = {
-      ...song,
-      id: Date.now(),
-      created_at: new Date().toISOString()
-    };
-    const filtered = existing.filter(s => !(s.source === song.source && s.source_id === song.source_id));
-    const updated = [newSong, ...filtered];
-    window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-    return newSong.id;
-  }
-
   const database = await initDatabase();
   const result = await database!.runAsync(
     `INSERT OR REPLACE INTO songs (source_id, title, artist, lyrics, chords, source, url, instrument, rating) 
@@ -118,32 +87,16 @@ export const saveSong = async (song: Omit<SavedSong, 'id' | 'created_at'>) => {
 };
 
 export const getSongs = async (): Promise<SavedSong[]> => {
-  if (Platform.OS === 'web') {
-    const data = window.localStorage.getItem(LOCAL_STORAGE_KEY);
-    return data ? JSON.parse(data) : [];
-  }
-
   const database = await initDatabase();
   return await database!.getAllAsync<SavedSong>('SELECT * FROM songs ORDER BY created_at DESC');
 };
 
 export const getSongById = async (id: number): Promise<SavedSong | null> => {
-  if (Platform.OS === 'web') {
-    const songs = await getSongs();
-    return songs.find(s => s.id === id) || null;
-  }
-
   const database = await initDatabase();
   return await database!.getFirstAsync<SavedSong>('SELECT * FROM songs WHERE id = ?', [id]);
 };
 
 export const searchLocalSongs = async (query: string): Promise<SavedSong[]> => {
-  if (Platform.OS === 'web') {
-    const songs = await getSongs();
-    const q = query.toLowerCase();
-    return songs.filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q));
-  }
-
   const database = await initDatabase();
   return await database!.getAllAsync<SavedSong>(
     'SELECT * FROM songs WHERE title LIKE ? OR artist LIKE ? ORDER BY created_at DESC',
@@ -152,13 +105,6 @@ export const searchLocalSongs = async (query: string): Promise<SavedSong[]> => {
 };
 
 export const deleteSong = async (id: number) => {
-  if (Platform.OS === 'web') {
-    const songs = await getSongs();
-    const updated = songs.filter(s => s.id !== id);
-    window.localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-    return;
-  }
-
   const database = await initDatabase();
   await database!.runAsync('DELETE FROM songs WHERE id = ?', [id]);
 };
