@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, useColorScheme, Platform, ActivityIndicat
 import { Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
+import { AudioModule, useAudioRecorder, RecordingOptionsPresets } from 'expo-audio';
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 
@@ -130,7 +130,7 @@ export default function TunerScreen() {
     currentTuningRef.current = currentTuning;
   }, [currentTuning]);
 
-  const recording = useRef<Audio.Recording | null>(null);
+  const recorder = useAudioRecorder(RecordingOptionsPresets.LOW_QUALITY);
 
   const startListening = async () => {
     if (Platform.OS === 'web') {
@@ -183,27 +183,25 @@ export default function TunerScreen() {
 
   const startListeningNative = async () => {
     try {
-      const { status } = await Audio.requestPermissionsAsync();
+      const { status } = await AudioModule.requestPermissionsAsync();
       if (status !== 'granted') {
         setError('Microphone permission not granted');
         return;
       }
 
-      await Audio.setAudioModeAsync({
+      await AudioModule.setAudioModeAsync({
         allowsRecordingIOS: true,
         playsInSilentModeIOS: true,
       });
 
-      const { recording: newRecording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.LOW_QUALITY
-      );
-      recording.current = newRecording;
+      await recorder.prepareAsync();
+      await recorder.recordAsync();
       setIsListening(true);
       setError(null);
       
       // Real-time pitch detection on Native usually requires a specialized 
       // native module like react-native-pitch-detector or processing raw buffers.
-      // With expo-av, we can simulate the UI state.
+      // With expo-audio, we can simulate the UI state.
       setError("Native real-time detection requires specialized native modules. Web version is recommended for full accuracy.");
     } catch (err) {
       console.error('Failed to start recording', err);
@@ -213,9 +211,8 @@ export default function TunerScreen() {
 
   const stopListeningNative = async () => {
     try {
-      if (recording.current) {
-        await recording.current.stopAndUnloadAsync();
-        recording.current = null;
+      if (recorder.isRecording) {
+        await recorder.stopAsync();
       }
       setIsListening(false);
       setPitch(null);

@@ -28,6 +28,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
+      "baseUrl": "/acorde",
       "favicon": "./assets/images/favicon.png",
       "description": "Acorde - Your chords and lyrics vault.",
       "display": "standalone",

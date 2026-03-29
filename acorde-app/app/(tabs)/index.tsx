@@ -41,8 +41,15 @@ export default function TabsScreen() {
   const [savingModalVisible, setSavingModalVisible] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [sourceStatus, setSourceStatus] = useState<Record<string, 'idle' | 'searching' | 'done' | 'error'>>({});
+  const [debugMode, setDebugMode] = useState(false);
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
   
   const router = useRouter();
+
+  const addDebugLog = (msg: string) => {
+    console.log(`[DEBUG] ${msg}`);
+    setDebugLogs(prev => [new Date().toLocaleTimeString() + ': ' + msg, ...prev.slice(0, 50)]);
+  };
 
   const allSources: Source[] = useMemo(() => [
     new UltimateGuitarSource(),
@@ -101,6 +108,7 @@ export default function TabsScreen() {
     setOnlineResults([]);
     setOnlineError(null);
     setStatus(`Searching online for "${query}"...`);
+    addDebugLog(`Starting search for "${query}" on ${activeSources.length} sources...`);
     
     // Initialize statuses
     const initialStatus: Record<string, 'searching'> = {};
@@ -110,10 +118,13 @@ export default function TabsScreen() {
     try {
       const searchPromises = activeSources.map(async (source) => {
         try {
+          addDebugLog(`Searching ${source.name}...`);
           const results = await source.search(query);
+          addDebugLog(`Search done for ${source.name}: ${results.length} results found.`);
           setSourceStatus(prev => ({ ...prev, [source.name]: 'done' }));
           return results;
         } catch (err: any) {
+          addDebugLog(`Search error for ${source.name}: ${err.message}`);
           console.error(`Search error for ${source.name}:`, err);
           setSourceStatus(prev => ({ ...prev, [source.name]: 'error' }));
           return [];
@@ -404,6 +415,19 @@ export default function TabsScreen() {
               )}
               {renderSourceProgress()}
               {onlineError && <Text style={[styles.statusText, { color: '#f44336', marginTop: 20, fontWeight: 'bold', textAlign: 'center' }]}>{onlineError}</Text>}
+              {debugMode && debugLogs.length > 0 && (
+                <View style={[styles.debugContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 5, backgroundColor: 'transparent' }}>
+                    <Text style={{ color: '#f44336', fontWeight: 'bold', fontSize: 10 }}>DEBUG LOGS</Text>
+                    <TouchableOpacity onPress={() => setDebugLogs([])}>
+                      <Text style={{ color: theme.tint, fontSize: 10 }}>Clear</Text>
+                    </TouchableOpacity>
+                  </View>
+                  {debugLogs.map((log, i) => (
+                    <Text key={i} style={{ color: theme.text, fontSize: 10, fontFamily: 'SpaceMono' }}>{log}</Text>
+                  ))}
+                </View>
+              )}
               {renderOnlineResults()}
             </View>
           }
@@ -426,7 +450,21 @@ export default function TabsScreen() {
               </View>
             ))}
 
-            <View style={[styles.separator, { backgroundColor: theme.border, marginVertical: 20 }]} />
+            <View style={[styles.separator, { backgroundColor: theme.border, marginVertical: 10 }]} />
+
+            <View style={[styles.configRow, { backgroundColor: 'transparent' }]}>
+              <View>
+                <Text style={{ color: theme.text, fontWeight: 'bold' }}>Debug Mode</Text>
+                <Text style={{ color: theme.subtext, fontSize: 10 }}>Show errors and logs in UI</Text>
+              </View>
+              <Switch
+                value={debugMode}
+                onValueChange={setDebugMode}
+                trackColor={{ false: '#767577', true: '#f44336' }}
+              />
+            </View>
+
+            <View style={[styles.separator, { backgroundColor: theme.border, marginVertical: 10 }]} />
             
             <Text style={[styles.modalTitle, { color: theme.text, fontSize: 16, marginBottom: 10 }]}>Native Android App</Text>
             <Text style={{ color: theme.subtext, fontSize: 12, marginBottom: 15 }}>
@@ -530,6 +568,7 @@ const styles = StyleSheet.create({
   resultItem: { flexDirection: 'row', paddingVertical: 15, borderBottomWidth: 1, alignItems: 'center', backgroundColor: 'transparent' },
   resultInfo: { flex: 1, backgroundColor: 'transparent' },
   resultSource: { fontSize: 10, marginTop: 2, textTransform: 'uppercase', fontWeight: 'bold', backgroundColor: 'transparent' },
+  debugContainer: { margin: 10, padding: 10, borderWidth: 1, borderRadius: 8 },
   saveButton: { paddingVertical: 8, paddingHorizontal: 15, borderRadius: 5 },
   doneButton: { paddingVertical: 12, paddingHorizontal: 20, borderRadius: 8, alignItems: 'center' },
   saveButtonText: { color: '#fff', fontWeight: 'bold' },

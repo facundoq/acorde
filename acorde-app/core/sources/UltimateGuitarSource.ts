@@ -22,7 +22,10 @@ export class UltimateGuitarSource implements Source {
 
           searchResults.forEach((res: any) => {
             // Filter out 'Pro' or 'Official' tabs as they are usually paywalled and harder to scrape
-            if (res.tab_url && res.type !== 'Official' && res.type !== 'Chords Pro') {
+            const type = (res.type_name || res.type || '').toLowerCase();
+            const isPro = res.is_pro || type.includes('pro') || type.includes('official') || type.includes('power');
+            
+            if (res.tab_url && !isPro) {
               results.push({
                 id: res.tab_url,
                 title: res.song_name,
@@ -45,6 +48,13 @@ export class UltimateGuitarSource implements Source {
         for (const match of matches) {
           const [_, title, artist, tabUrl, typeName, rating] = match;
           const cleanUrl = tabUrl.replace(/\\/g, '');
+          const lowerType = (typeName || '').toLowerCase();
+          
+          // Exclude if type mentions pro or official
+          if (lowerType.includes('pro') || lowerType.includes('official') || lowerType.includes('power')) {
+            continue;
+          }
+
           results.push({
             id: cleanUrl,
             title,

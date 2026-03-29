@@ -1,0 +1,81 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main # Change this to your main branch name if it's different
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            acorde-core/package-lock.json
+            acorde-app/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install and build acorde-core
+        run: |
+          cd acorde-core
+          npm ci
+          npm run build
+
+      - name: Install acorde-app dependencies
+        run: |
+          cd acorde-app
+          npm ci
+
+      - name: Generate Android project (Prebuild)
+        run: |
+          cd acorde-app
+          npx expo prebuild --platform android --no-install
+
+      - name: Build Android APK
+        run: |
+          cd acorde-app/android
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Copy APK to public folder
+        run: |
+          # Robust way to find the generated APK (could be split or single)
+          # We prefer the release APK
+          APK_PATH=$(find acorde-app/android/app/build/outputs/apk/release -name "*-release.apk" | head -n 1)
+          if [ -n "$APK_PATH" ]; then
+            cp "$APK_PATH" acorde-app/public/acorde.apk
+            echo "✅ APK found at $APK_PATH and copied to acorde-app/public/acorde.apk"
+          else
+            echo "❌ Error: Could not find any generated APK"
+            exit 1
+          fi
+
+      - name: Build Web App
+        run: |
+          cd acorde-app
+          npm run build:web
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: acorde-app/dist
+          branch: gh-pages
+          clean: true
