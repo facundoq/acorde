@@ -11,8 +11,8 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="manifest" href={`${process.env.EXPO_BASE_URL ?? ''}/manifest.json`} />
+        <link rel="apple-touch-icon" href={`${process.env.EXPO_BASE_URL ?? ''}/icon-192.png`} />
         <meta name="theme-color" content="#000000" />
 
         {/* 
@@ -23,7 +23,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
 
         {/* Using raw CSS styles as an escape-hatch to ensure the background color never flickers in dark-mode. */}
         <style dangerouslySetInnerHTML={{ __html: responsiveBackground }} />
-        
+
         <script dangerouslySetInnerHTML={{ __html: swRegistration }} />
         {/* Add any additional <head> elements that you want globally available on web... */}
       </head>
@@ -35,7 +35,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
 const swRegistration = `
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(reg => {
+    navigator.serviceWorker.register((process.env.EXPO_BASE_URL ?? '') + '/sw.js').then(reg => {
       console.log('SW registered:', reg);
     }).catch(err => {
       console.log('SW registration failed:', err);
