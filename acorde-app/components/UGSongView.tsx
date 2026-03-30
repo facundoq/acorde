@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, useColorScheme, View as DefaultView } from 'react-native';
+import { StyleSheet, useColorScheme, View as DefaultView, Pressable } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { parseUGTabs, UGPart, parseAlignedSegments, AlignedLine } from '@/core/ug-parser';
 import Colors from '@/constants/Colors';
 import { getChordShape } from '@/constants/ChordShapes';
+import { Typography } from '@/constants/Typography';
 import ChordDetailModal from './ChordDetailModal';
 
 interface UGSongViewProps {
@@ -28,12 +29,23 @@ export default function UGSongView({ content, fontSize = 14 }: UGSongViewProps) 
             
             return (
               <View key={segIndex} style={styles.segment}>
-                <Text 
-                  onPress={segment.chord ? () => setSelectedChord(segment.chord) : undefined}
-                  style={[styles.chordText, { color, fontSize: fontSize + 1, minHeight: fontSize + 5 }]}
-                >
-                  {segment.chord || ' '}
-                </Text>
+                {segment.chord ? (
+                  <Pressable 
+                    onPress={() => setSelectedChord(segment.chord!)}
+                    style={({ hovered, pressed }) => [
+                      styles.chordPressable,
+                      (hovered || pressed) && { backgroundColor: theme.tabIconDefault + '44', borderRadius: 2 }
+                    ]}
+                  >
+                    <Text style={[styles.chordText, { color, fontSize: fontSize + 1, minHeight: fontSize + 5 }]}>
+                      {segment.chord}
+                    </Text>
+                  </Pressable>
+                ) : (
+                  <Text style={[styles.chordText, { color: 'transparent', fontSize: fontSize + 1, minHeight: fontSize + 5 }]}>
+                    {' '}
+                  </Text>
+                )}
                 <Text style={[styles.regularText, { color: theme.text, fontSize, minHeight: fontSize + 2 }]}>
                   {segment.text || (segment.chord ? ' ' : '')}
                 </Text>
@@ -46,19 +58,24 @@ export default function UGSongView({ content, fontSize = 14 }: UGSongViewProps) 
 
     // 2. Single line: Chords only, or plain text
     return (
-      <Text key={lineIndex} style={[styles.regularText, { color: theme.text, fontSize, marginBottom: 5 }]}>
+      <Text key={lineIndex} style={[styles.regularText, { color: theme.text, fontSize }]}>
         {line.segments.map((segment, segIndex) => {
           if (segment.chord) {
             const shape = getChordShape(segment.chord);
             const color = shape ? theme.tint : '#FFD700';
             return (
-              <Text 
+              <Pressable 
                 key={segIndex}
                 onPress={() => setSelectedChord(segment.chord!)}
-                style={[styles.chordText, { color, fontSize: fontSize + 1 }]}
+                style={({ hovered, pressed }) => [
+                  styles.inlineChordPressable,
+                  (hovered || pressed) && { backgroundColor: theme.tabIconDefault + '44', borderRadius: 2 }
+                ]}
               >
-                {segment.chord}
-              </Text>
+                <Text style={[styles.chordText, { color, fontSize: fontSize + 1 }]}>
+                  {segment.chord}
+                </Text>
+              </Pressable>
             );
           }
           return <Text key={segIndex}>{segment.text}</Text>;
@@ -73,13 +90,18 @@ export default function UGSongView({ content, fontSize = 14 }: UGSongViewProps) 
         const shape = getChordShape(part.content);
         const color = shape ? theme.tint : '#FFD700'; // Yellowish for unknown
         return (
-          <Text 
-            key={index} 
+          <Pressable 
+            key={index}
             onPress={() => setSelectedChord(part.content)}
-            style={[styles.chordText, { color, fontSize: fontSize + 1 }]}
+            style={({ hovered, pressed }) => [
+              styles.inlineChordPressable,
+              (hovered || pressed) && { backgroundColor: theme.tabIconDefault + '44', borderRadius: 2 }
+            ]}
           >
-            {part.content}
-          </Text>
+            <Text style={[styles.chordText, { color, fontSize: fontSize + 1 }]}>
+              {part.content}
+            </Text>
+          </Pressable>
         );
       }
       case 'header':
@@ -127,11 +149,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   chordText: {
-    fontFamily: 'SpaceMono',
+    ...Typography.mono as any,
     fontWeight: 'bold',
   },
+  chordPressable: {
+    backgroundColor: 'transparent',
+  },
+  inlineChordPressable: {
+    backgroundColor: 'transparent',
+    display: 'inline-flex',
+  },
   headerText: {
-    fontFamily: 'SpaceMono',
+    ...Typography.mono as any,
     fontWeight: 'bold',
     marginTop: 10,
     marginBottom: 5,
@@ -144,7 +173,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     backgroundColor: 'transparent',
-    marginBottom: 5,
   },
   segment: {
     flexDirection: 'column',
@@ -152,6 +180,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   regularText: {
-    fontFamily: 'SpaceMono',
+    ...Typography.mono as any,
   }
 });

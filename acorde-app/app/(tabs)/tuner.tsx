@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { AudioModule, useAudioRecorder, RecordingOptionsPresets } from 'expo-audio';
 import { Text, View } from '@/components/Themed';
+import { Typography } from '@/constants/Typography';
 import Colors from '@/constants/Colors';
 
 // Tunings Database
@@ -507,7 +508,7 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: 'SpaceMono',
+    ...Typography.mono as any,
   },
   headerTuningButton: {
     paddingHorizontal: 12,
@@ -538,7 +539,7 @@ const styles = StyleSheet.create({
   noteText: {
     fontSize: 84,
     fontWeight: 'bold',
-    fontFamily: 'SpaceMono',
+    ...Typography.mono as any,
   },
   stringName: {
     fontSize: 18,

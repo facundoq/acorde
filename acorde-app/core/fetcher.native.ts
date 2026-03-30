@@ -1,4 +1,5 @@
 import { fetch as nativeFetch } from 'react-native-fetch-api';
+import { logger } from './logger';
 
 export const crossFetch = async (url: string, options: any = {}) => {
   return await nativeFetch(url, options);
@@ -10,19 +11,24 @@ export async function fetchHtml(url: string): Promise<string> {
 
   for (let i = 0; i <= MAX_RETRIES; i++) {
     try {
-      console.log(`[Fetcher] Native fetch attempt ${i+1} for: ${url}`);
+      logger.log(`[Fetcher] Native fetch attempt ${i+1} for: ${url}`);
       const response = await crossFetch(url, { 
         headers: { 'User-Agent': userAgent } 
       });
 
-      if (response.ok) return await response.text();
+      if (response.ok) {
+        const result = await response.text();
+        logger.log(`[Fetcher] Native fetch success! HTML length: ${result.length}`);
+        logger.log(`[Fetcher] HTML snippet: ${result.substring(0, 500)}...`);
+        return result;
+      }
       
-      console.warn(`[Fetcher] Native fetch attempt ${i+1} returned status ${response.status}: ${response.statusText}`);
+      logger.warn(`[Fetcher] Native fetch attempt ${i+1} returned status ${response.status}: ${response.statusText}`);
       if (i === MAX_RETRIES) {
         throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
       }
     } catch (e: any) {
-      console.warn(`[Fetcher] Native fetch attempt ${i+1} failed:`, e);
+      logger.warn(`[Fetcher] Native fetch attempt ${i+1} failed:`, e);
       if (i === MAX_RETRIES) throw e;
     }
     if (i < MAX_RETRIES) await new Promise(r => setTimeout(r, 500));

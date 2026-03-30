@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { Source } from './Source';
 import { SongSearchResult, SongContent } from '../types';
 import { fetchHtml } from '../fetcher';
+import { logger } from '../logger';
 
 export class UltimateGuitarSource implements Source {
   name = 'ultimateguitar';
@@ -21,17 +22,28 @@ export class UltimateGuitarSource implements Source {
           const searchResults = data.store?.page?.data?.results || [];
 
           searchResults.forEach((res: any) => {
-            // Filter out 'Pro' or 'Official' tabs as they are usually paywalled and harder to scrape
             const type = (res.type_name || res.type || '').toLowerCase();
-            const isPro = res.is_pro || type.includes('pro') || type.includes('official') || type.includes('power');
+            const url = res.tab_url || '';
             
-            if (res.tab_url && !isPro) {
+            // Strictly exclude 'Official', 'Pro', 'Guitar Pro', 'Video', and 'Power' (Power Tab)
+            const isExcludedType = 
+              res.is_pro || 
+              type.includes('pro') || 
+              type.includes('official') || 
+              type.includes('power') ||
+              type.includes('guitar pro') ||
+              type.includes('video');
+
+            // Publicly available chords/tabs must follow this URL pattern
+            const isPublicPattern = url.includes('ultimate-guitar.com/tab/');
+            
+            if (url && !isExcludedType && isPublicPattern) {
               results.push({
-                id: res.tab_url,
+                id: url,
                 title: res.song_name,
                 artist: res.artist_name,
                 source: this.name,
-                url: res.tab_url,
+                url: url,
                 instrument: res.type_name || res.type,
                 rating: res.rating ? parseFloat(res.rating) : undefined,
               });
@@ -50,24 +62,31 @@ export class UltimateGuitarSource implements Source {
           const cleanUrl = tabUrl.replace(/\\/g, '');
           const lowerType = (typeName || '').toLowerCase();
           
-          // Exclude if type mentions pro or official
-          if (lowerType.includes('pro') || lowerType.includes('official') || lowerType.includes('power')) {
-            continue;
-          }
+          // Apply same strict filtering
+          const isExcludedType = 
+            lowerType.includes('pro') || 
+            lowerType.includes('official') || 
+            lowerType.includes('power') ||
+            lowerType.includes('guitar pro') ||
+            lowerType.includes('video');
 
-          results.push({
-            id: cleanUrl,
-            title,
-            artist,
-            source: this.name,
-            url: cleanUrl,
-            instrument: typeName,
-            rating: rating ? parseFloat(rating) : undefined,
-          });
+          const isPublicPattern = cleanUrl.includes('ultimate-guitar.com/tab/');
+          
+          if (!isExcludedType && isPublicPattern) {
+            results.push({
+              id: cleanUrl,
+              title,
+              artist,
+              source: this.name,
+              url: cleanUrl,
+              instrument: typeName,
+              rating: rating ? parseFloat(rating) : undefined,
+            });
+          }
         }
       }
-    } catch (e) {
-      console.error('UltimateGuitar search error:', e);
+    } catch (e: any) {
+      logger.error('UltimateGuitar search error:', e.message || e);
     }
     return results.slice(0, 20);
   }
@@ -97,8 +116,8 @@ export class UltimateGuitarSource implements Source {
             rating: tabData.rating ? parseFloat(tabData.rating) : undefined,
           };
         }
-      } catch (e) {
-        console.error('UG detail JSON parse error:', e);
+      } catch (e: any) {
+        logger.error('UG detail JSON parse error:', e.message || e);
       }
     }
 
@@ -118,7 +137,7 @@ export class UltimateGuitarSource implements Source {
       };
     }
 
-    console.warn(`UG parsing failed for ${url}. HTML length: ${html.length}`);
+    logger.warn(`UG parsing failed for ${url}. HTML length: ${html.length}`);
     return {
       title: 'Unknown Title',
       artist: 'Unknown Artist',

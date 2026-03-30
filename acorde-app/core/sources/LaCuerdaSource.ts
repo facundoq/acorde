@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { Source } from './Source';
 import { SongSearchResult, SongContent } from '../types';
 import { fetchHtml } from '../fetcher';
+import { logger } from '../logger';
 
 export class LaCuerdaSource implements Source {
   name = 'lacuerda';
@@ -13,16 +14,19 @@ export class LaCuerdaSource implements Source {
       const html = await fetchHtml(searchUrl);
       const $ = cheerio.load(html);
 
-      $('a').each((i, el) => {
+      // Target specific containers for song results
+      // #b_main is the main results list
+      // #rList is the side list (populares/historial)
+      $('#b_main a, #rList a').each((i, el) => {
         const href = $(el).attr('href');
-        const text = $(el).text().trim();
+        const text = $(el).find('em').remove().end().text().trim(); // Remove 'acordes'/'tablatura' text inside <em>
         
-        // LaCuerda search results usually link to /tabs/ or artist subdirectories
-        if (href && (href.includes('/tabs/') || href.includes('lacuerda.net/')) && (href.endsWith('.shtml') || href.endsWith('.php'))) {
-          const cleanUrl = href.startsWith('//') ? `https:${href}` : (href.startsWith('/') ? `https://acordes.lacuerda.net${href}` : href);
+        if (href && !href.includes('javascript:') && !href.includes('/Extras/')) {
+          const cleanUrl = href.startsWith('//') ? `https:${href}` : 
+                          (href.startsWith('http') ? href : `https://acordes.lacuerda.net/${href.startsWith('/') ? href.substring(1) : href}`);
           
-          if (text && text.length > 2 && !text.includes('Instrucciones')) {
-            // Try to separate Artist - Title if available in text
+          if (text && text.length > 1) {
+            // Try to separate Artist - Title if available in text (sometimes happens in search results)
             let artist = 'LaCuerda';
             let title = text;
             
@@ -42,8 +46,31 @@ export class LaCuerdaSource implements Source {
           }
         }
       });
-    } catch (e) {
-      console.error('LaCuerda search error:', e);
+
+      // Fallback if the specific containers didn't work (might be a different page layout)
+      if (results.length === 0) {
+        $('a').each((i, el) => {
+          const href = $(el).attr('href');
+          const text = $(el).text().trim();
+          
+          if (href && (href.includes('/tabs/') || (href.split('/').length === 1 && !href.includes('.') && href.length > 3)) && 
+              !href.includes('javascript:') && !href.includes('/Extras/') && !['Aviso Legal', 'Privacidad', 'Contacto'].includes(text)) {
+            
+            const cleanUrl = href.startsWith('//') ? `https:${href}` : 
+                            (href.startsWith('http') ? href : `https://acordes.lacuerda.net/${href.startsWith('/') ? href.substring(1) : href}`);
+            
+            results.push({
+              id: cleanUrl,
+              title: text,
+              artist: 'LaCuerda',
+              source: this.name,
+              url: cleanUrl,
+            });
+          }
+        });
+      }
+    } catch (e: any) {
+      logger.error('LaCuerda search error:', e.message || e);
     }
     return results.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i).slice(0, 20);
   }

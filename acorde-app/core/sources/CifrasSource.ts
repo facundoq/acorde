@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { Source } from './Source';
 import { SongSearchResult, SongContent } from '../types';
 import { fetchHtml } from '../fetcher';
+import { logger } from '../logger';
 
 export class CifrasSource implements Source {
   name = 'cifras';
@@ -48,8 +49,8 @@ export class CifrasSource implements Source {
           }
         }
       }
-    } catch (e) {
-      console.error('Cifras search error:', e);
+    } catch (e: any) {
+      logger.error('Cifras search error:', e.message || e);
     }
     return results.filter((v, i, a) => v.id && v.title && a.findIndex(t => t.id === v.id) === i).slice(0, 15);
   }

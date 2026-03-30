@@ -228,6 +228,25 @@ export const CHORD_SHAPES: Record<string, ChordShape[]> = {
   'A7': [
     { name: 'A7', frets: [-1, 0, 2, 0, 2, 0], fingers: [0, 0, 1, 0, 2, 0] },
   ],
+  'A/C#': [
+    { name: 'A/C#', frets: [-1, 4, 2, 2, 2, -1], fingers: [0, 4, 1, 1, 1, 0], barre: 2 },
+    { name: 'A/C#', frets: [-1, 4, 2, 2, 5, -1], fingers: [0, 2, 1, 1, 4, 0], barre: 2 },
+  ],
+  'Bm/A': [
+    { name: 'Bm/A', frets: [-1, 0, 4, 4, 3, 2], fingers: [0, 0, 3, 4, 2, 1], barre: 2 },
+  ],
+  'E7sus4': [
+    { name: 'E7sus4', frets: [0, 2, 0, 2, 0, 0], fingers: [0, 2, 0, 3, 0, 0] },
+  ],
+  'Dm7': [
+    { name: 'Dm7', frets: [-1, -1, 0, 2, 1, 1], fingers: [0, 0, 0, 2, 1, 1], barre: 1 },
+  ],
+  'Bbmaj7': [
+    { name: 'Bbmaj7', frets: [-1, 1, 3, 2, 3, 1], fingers: [0, 1, 3, 2, 4, 1], barre: 1 },
+  ],
+  'Fm': [
+    { name: 'Fm', frets: [1, 3, 3, 1, 1, 1], fingers: [1, 3, 4, 1, 1, 1], barre: 1 },
+  ],
 };
 
 export function getChordShapes(name: string): ChordShape[] {

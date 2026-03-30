@@ -2,6 +2,7 @@ import * as cheerio from 'cheerio';
 import { Source } from './Source';
 import { SongSearchResult, SongContent } from '../types';
 import { fetchHtml } from '../fetcher';
+import { logger } from '../logger';
 
 export class CifraclubSource implements Source {
   name = 'cifraclub';
@@ -13,11 +14,11 @@ export class CifraclubSource implements Source {
       // 1. Try suggestions API
       const suggestUrl = `https://www.cifraclub.com.br/api/search/suggestions/?q=${encodeURIComponent(query)}`;
       try {
-        console.log(`[Cifraclub] Trying suggestions API...`);
+        logger.log(`[Cifraclub] Trying suggestions API...`);
         const suggestHtml = await fetchHtml(suggestUrl);
         const data = JSON.parse(suggestHtml);
         if (data && data.songs) {
-          console.log(`[Cifraclub] Found ${data.songs.length} suggestions.`);
+          logger.log(`[Cifraclub] Found ${data.songs.length} suggestions.`);
           data.songs.forEach((song: any) => {
             results.push({
               id: song.url,
@@ -29,12 +30,12 @@ export class CifraclubSource implements Source {
           });
         }
       } catch (e) {
-        console.warn(`[Cifraclub] Suggestions API failed, falling back to scrape.`);
+        logger.warn(`[Cifraclub] Suggestions API failed, falling back to scrape.`);
       }
 
       // 2. Fallback to scraping
       if (results.length === 0) {
-        console.log(`[Cifraclub] Scraping search page...`);
+        logger.log(`[Cifraclub] Scraping search page...`);
         const searchUrl = `https://www.cifraclub.com.br/?q=${encodeURIComponent(query)}`;
         const html = await fetchHtml(searchUrl);
         
@@ -78,7 +79,7 @@ export class CifraclubSource implements Source {
         }
       }
     } catch (error) {
-      console.error('CifraclubSource search error:', error);
+      logger.error('CifraclubSource search error:', error);
     }
 
     return results.filter((v, i, a) => v.id && v.title && v.artist && a.findIndex(t => t.id === v.id) === i).slice(0, 20);

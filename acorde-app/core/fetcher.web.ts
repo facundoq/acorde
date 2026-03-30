@@ -1,3 +1,5 @@
+import { logger } from './logger';
+
 export const crossFetch = async (url: string, options: any = {}) => {
   return await fetch(url, options);
 };
@@ -32,8 +34,14 @@ export async function fetchHtml(url: string): Promise<string> {
   ];
 
   for (const proxy of proxies) {
-    const result = await tryFetch(proxy.url(url), proxy.headers);
-    if (result) return result;
+    const proxyUrl = proxy.url(url);
+    logger.log(`[Fetcher] Trying proxy: ${proxyUrl}`);
+    const result = await tryFetch(proxyUrl, proxy.headers);
+    if (result) {
+      logger.log(`[Fetcher] Result found! HTML length: ${result.length}`);
+      logger.log(`[Fetcher] HTML snippet: ${result.substring(0, 500)}...`);
+      return result;
+    }
     await new Promise(r => setTimeout(r, 200));
   }
 

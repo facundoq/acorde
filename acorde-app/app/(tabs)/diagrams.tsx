@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Text, View } from '@/components/Themed';
+import { Typography } from '@/constants/Typography';
 import Colors from '@/constants/Colors';
 import { CHORD_SHAPES } from '@/constants/ChordShapes';
 import ChordDetailModal from '@/components/ChordDetailModal';
@@ -98,7 +99,7 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 22,
     fontWeight: 'bold',
-    fontFamily: 'SpaceMono',
+    ...Typography.mono as any,
   },
   content: {
     flex: 1,
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
   chordName: {
     fontSize: 18,
     fontWeight: 'bold',
-    fontFamily: 'SpaceMono',
+    ...Typography.mono as any,
   },
   variantCount: {
     fontSize: 14,

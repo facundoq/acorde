@@ -1,4 +1,4 @@
-import { isUGFormat, parseUGTabs } from '../ug-parser';
+import { isUGFormat, parseUGTabs, autoTagChords } from '../ug-parser';
 
 describe('UG Parser', () => {
   describe('isUGFormat', () => {
@@ -17,14 +17,43 @@ describe('UG Parser', () => {
       expect(isUGFormat(content)).toBe(true);
     });
 
+    it('should detect UG format with chord-only lines', () => {
+      const content = 'C G Am F\nSome lyrics';
+      expect(isUGFormat(content)).toBe(true);
+    });
+
     it('should return false for plain text', () => {
-      const content = 'Just some regular lyrics with chords G Am C';
+      const content = 'Just some regular lyrics without structure';
       expect(isUGFormat(content)).toBe(false);
     });
 
     it('should handle empty or null content', () => {
       expect(isUGFormat('')).toBe(false);
       expect(isUGFormat(null as any)).toBe(false);
+    });
+  });
+
+  describe('autoTagChords', () => {
+    it('should wrap chords in [ch] tags for chord-only lines', () => {
+      const content = 'C G Am F';
+      expect(autoTagChords(content)).toBe('[ch]C[/ch] [ch]G[/ch] [ch]Am[/ch] [ch]F[/ch]');
+    });
+
+    it('should wrap chords in [ch] tags for chords above lyrics', () => {
+      const content = '  C        G\nLyrics here';
+      const tagged = autoTagChords(content);
+      expect(tagged).toContain('[ch]C[/ch]');
+      expect(tagged).toContain('[ch]G[/ch]');
+    });
+
+    it('should not wrap headers', () => {
+      const content = '[Intro]';
+      expect(autoTagChords(content)).toBe('[Intro]');
+    });
+
+    it('should handle complex chords like Bb/D', () => {
+      const content = 'Bb/D C7sus4';
+      expect(autoTagChords(content)).toBe('[ch]Bb/D[/ch] [ch]C7sus4[/ch]');
     });
   });
 
@@ -46,9 +75,6 @@ describe('UG Parser', () => {
       const content = 'Intro:\n[tab]  [ch]G[/ch]  [ch]Am7[/ch]  [/tab]';
       const parts = parseUGTabs(content);
       
-      // Note: the current regex doesn't handle nested tags inside [tab] perfectly as nested parts,
-      // it captures the whole content between [tab] and [/tab].
-      // Let's verify what the current implementation does.
       expect(parts).toContainEqual({ type: 'tab', content: '  [ch]G[/ch]  [ch]Am7[/ch]  ' });
     });
 

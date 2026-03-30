@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal, useColorScheme, Switch, Platform, ScrollView, Linking } from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, TextInput, Alert, ActivityIndicator, Modal, useColorScheme, Switch, Platform, ScrollView, Linking, BackHandler } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -11,6 +11,8 @@ import { UltimateGuitarSource } from '../../core/sources/UltimateGuitarSource';
 import { CifrasSource } from '../../core/sources/CifrasSource';
 import { SongSearchResult } from '../../core/types';
 import { Source } from '../../core/sources/Source';
+import { logger } from '../../core/logger';
+import { Typography } from '@/constants/Typography';
 import Colors from '@/constants/Colors';
 
 const SOURCES_CONFIG_KEY = 'acorde_sources_config';
@@ -40,16 +42,52 @@ export default function TabsScreen() {
   const [onlineError, setOnlineError] = useState<string | null>(null);
   const [savingModalVisible, setSavingModalVisible] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
-  const [sourceStatus, setSourceStatus] = useState<Record<string, 'idle' | 'searching' | 'done' | 'error'>>({});
+  const [sourceStatus, setSourceStatus] = useState<Record<string, { state: 'idle' | 'searching' | 'done' | 'error', count: number }>>({});
   const [debugMode, setDebugMode] = useState(false);
   const [debugLogs, setDebugLogs] = useState<string[]>([]);
   
+  // Search history for back button
+  const [searchHistory, setSearchHistory] = useState<{ query: string, results: SongSearchResult[] }[]>([]);
+  
   const router = useRouter();
 
-  const addDebugLog = (msg: string) => {
-    console.log(`[DEBUG] ${msg}`);
+  // Handle hardware back button
+  useEffect(() => {
+    const onBackPress = () => {
+      // If there are online results showing
+      if (onlineResults.length > 0 || searchingOnline) {
+        if (searchHistory.length > 0) {
+          // Go back to previous search in history
+          const previous = searchHistory[searchHistory.length - 1];
+          setQuery(previous.query);
+          setOnlineResults(previous.results);
+          setSearchHistory(prev => prev.slice(0, -1));
+        } else {
+          // No more history, just clear
+          setOnlineResults([]);
+          setQuery('');
+        }
+        return true; // Prevent default behavior (app exit/nav back)
+      }
+      return false;
+    };
+
+    BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+  }, [onlineResults, searchingOnline, searchHistory]);
+
+  const addDebugLog = useCallback((msg: string) => {
+    // Note: This is now partially handled by the global logger's subscription below
     setDebugLogs(prev => [new Date().toLocaleTimeString() + ': ' + msg, ...prev.slice(0, 50)]);
-  };
+  }, []);
+
+  // Subscribe to core logger
+  useEffect(() => {
+    const unsubscribe = logger.subscribe((msg) => {
+      addDebugLog(msg);
+    });
+    return unsubscribe;
+  }, [addDebugLog]);
 
   const allSources: Source[] = useMemo(() => [
     new UltimateGuitarSource(),
@@ -104,29 +142,34 @@ export default function TabsScreen() {
       return;
     }
 
+    // Save current state to history if we have results
+    if (onlineResults.length > 0) {
+      setSearchHistory(prev => [...prev, { query: query, results: onlineResults }]);
+    }
+
     setSearchingOnline(true);
     setOnlineResults([]);
     setOnlineError(null);
     setStatus(`Searching online for "${query}"...`);
-    addDebugLog(`Starting search for "${query}" on ${activeSources.length} sources...`);
+    logger.log(`Starting search for "${query}" on ${activeSources.length} sources...`);
     
     // Initialize statuses
-    const initialStatus: Record<string, 'searching'> = {};
-    activeSources.forEach(s => initialStatus[s.name] = 'searching');
+    const initialStatus: Record<string, { state: 'searching', count: number }> = {};
+    activeSources.forEach(s => initialStatus[s.name] = { state: 'searching', count: 0 });
     setSourceStatus(initialStatus);
 
     try {
       const searchPromises = activeSources.map(async (source) => {
         try {
-          addDebugLog(`Searching ${source.name}...`);
+          logger.log(`Searching ${source.name}...`);
           const results = await source.search(query);
-          addDebugLog(`Search done for ${source.name}: ${results.length} results found.`);
-          setSourceStatus(prev => ({ ...prev, [source.name]: 'done' }));
+          logger.log(`Search done for ${source.name}: ${results.length} results found.`);
+          setSourceStatus(prev => ({ ...prev, [source.name]: { state: 'done', count: results.length } }));
           return results;
         } catch (err: any) {
-          addDebugLog(`Search error for ${source.name}: ${err.message}`);
+          logger.log(`Search error for ${source.name}: ${err.message}`);
           console.error(`Search error for ${source.name}:`, err);
-          setSourceStatus(prev => ({ ...prev, [source.name]: 'error' }));
+          setSourceStatus(prev => ({ ...prev, [source.name]: { state: 'error', count: 0 } }));
           return [];
         }
       });
@@ -146,6 +189,11 @@ export default function TabsScreen() {
       setStatus(null);
     } finally {
       setSearchingOnline(false);
+      // Clear status if we found results, otherwise keep the "No results found" message
+      setOnlineResults(prev => {
+        if (prev.length > 0) setStatus(null);
+        return prev;
+      });
     }
   };
 
@@ -155,17 +203,17 @@ export default function TabsScreen() {
     return (
       <View style={styles.progressContainer}>
         {activeSources.map(source => {
-          const state = sourceStatus[source.name] || 'idle';
+          const status = sourceStatus[source.name] || { state: 'idle', count: 0 };
           let icon: any = 'ellipsis-horizontal';
           let color = theme.subtext;
 
-          if (state === 'searching') {
+          if (status.state === 'searching') {
             icon = 'search-outline';
             color = theme.tint;
-          } else if (state === 'done') {
+          } else if (status.state === 'done') {
             icon = 'checkmark-circle';
-            color = '#4CAF50';
-          } else if (state === 'error') {
+            color = status.count > 0 ? '#4CAF50' : '#FFC107'; // Green if found, Yellow if none
+          } else if (status.state === 'error') {
             icon = 'close-circle';
             color = '#f44336';
           }
@@ -296,7 +344,11 @@ export default function TabsScreen() {
       <View style={styles.onlineSection}>
         <View style={[styles.sectionHeader, { borderBottomColor: theme.border }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Online Results</Text>
-          <TouchableOpacity onPress={() => setOnlineResults([])}>
+          <TouchableOpacity onPress={() => {
+            setOnlineResults([]);
+            setSearchHistory([]);
+            setQuery('');
+          }}>
             <Text style={{ color: theme.tint, fontWeight: 'bold' }}>Clear</Text>
           </TouchableOpacity>
         </View>
@@ -409,7 +461,7 @@ export default function TabsScreen() {
             <View style={{ backgroundColor: 'transparent', paddingBottom: 40 }}>
               {status && (
                 <View style={styles.statusContainer}>
-                  <ActivityIndicator size="small" color={theme.tint} style={{ marginRight: 10 }} />
+                  {searchingOnline && <ActivityIndicator size="small" color={theme.tint} style={{ marginRight: 10 }} />}
                   <Text style={[styles.statusText, { color: theme.tint }]}>{status}</Text>
                 </View>
               )}
@@ -424,7 +476,7 @@ export default function TabsScreen() {
                     </TouchableOpacity>
                   </View>
                   {debugLogs.map((log, i) => (
-                    <Text key={i} style={{ color: theme.text, fontSize: 10, fontFamily: 'SpaceMono' }}>{log}</Text>
+                    <Text key={i} style={{ color: theme.text, fontSize: 10, ...Typography.mono as any }}>{log}</Text>
                   ))}
                 </View>
               )}
@@ -516,7 +568,7 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { flex: 1, padding: 15, backgroundColor: 'transparent' },
   titleBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 15 },
-  appName: { fontSize: 22, fontWeight: 'bold', fontFamily: 'SpaceMono' },
+  appName: { fontSize: 22, fontWeight: 'bold', ...Typography.mono as any },
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   badgeText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
   searchHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10, backgroundColor: 'transparent' },

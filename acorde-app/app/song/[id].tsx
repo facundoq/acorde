@@ -6,6 +6,7 @@ import { Text, View } from '@/components/Themed';
 import { getSongById, SavedSong } from '@/services/database';
 import { getFontSize, saveFontSize } from '@/services/settings';
 import Colors from '@/constants/Colors';
+import { Typography } from '@/constants/Typography';
 import UGSongView from '@/components/UGSongView';
 import ChordDetailModal from '@/components/ChordDetailModal';
 import { isUGFormat } from '@/core/ug-parser';
@@ -85,17 +86,17 @@ export default function SongDetailScreen() {
     setScrollSpeed(speeds[nextIndex]);
   };
 
-  const getScrollIcon = () => {
+  const getScrollLabel = () => {
     switch (scrollSpeed) {
-      case 'low': return "chevron-down-outline";
-      case 'mid': return "chevron-down";
-      case 'high': return "play-forward-outline";
-      default: return "arrow-down-circle-outline";
+      case 'low': return "1x";
+      case 'mid': return "2x";
+      case 'high': return "3x";
+      default: return null;
     }
   };
 
   const getScrollColor = () => {
-    return scrollSpeed === 'none' ? theme.text : theme.tint;
+    return theme.tint;
   };
 
   if (loading) {
@@ -135,14 +136,14 @@ export default function SongDetailScreen() {
               return (
                 <Text 
                   key={wordIdx} 
-                  style={{ color: theme.tint, fontWeight: 'bold', fontFamily: 'SpaceMono', fontSize }}
+                  style={{ color: theme.tint, fontWeight: 'bold', ...Typography.mono as any, fontSize }}
                   onPress={() => setSelectedChord(trimmed)}
                 >
                   {word}
                 </Text>
               );
             }
-            return <Text key={wordIdx} style={{ fontFamily: 'SpaceMono', fontSize }}>{word}</Text>;
+            return <Text key={wordIdx} style={{ ...Typography.mono as any, fontSize }}>{word}</Text>;
           })}
           {'\n'}
         </Text>
@@ -164,11 +165,17 @@ export default function SongDetailScreen() {
                 style={[styles.headerButton, { borderColor: getScrollColor() }]} 
                 onPress={toggleScrollSpeed}
               >
-                <Ionicons 
-                  name={getScrollIcon() as any} 
-                  size={20} 
-                  color={getScrollColor()} 
-                />
+                {scrollSpeed === 'none' ? (
+                  <Ionicons name="play" size={16} color={getScrollColor()} style={{ marginLeft: 2 }} />
+                ) : (
+                  <Text style={{ 
+                    color: getScrollColor(), 
+                    fontSize: 12, 
+                    fontWeight: 'bold' 
+                  }}>
+                    {getScrollLabel()}
+                  </Text>
+                )}
               </TouchableOpacity>
 
               <View style={[styles.separator, { backgroundColor: theme.border, height: 20, marginHorizontal: 8 }]} />
@@ -277,7 +284,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   lyricsChords: {
-    fontFamily: 'SpaceMono', 
+    ...Typography.mono as any, 
     fontSize: 14,
     lineHeight: 20,
   },

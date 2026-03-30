@@ -9,6 +9,7 @@ import 'react-native-reanimated';
 import { initDatabase } from '@/services/database';
 import { initSettings } from '@/services/settings';
 import { Text, View } from '@/components/Themed';
+import { Typography } from '@/constants/Typography';
 import Colors from '@/constants/Colors';
 
 export {
@@ -26,7 +27,7 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const systemColorScheme = useColorScheme();
   const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    RecursiveMono: require('../assets/fonts/Recursive.ttf'),
   });
   const [dbLoaded, setDbLoaded] = useState(false);
   const [loadingTask, setLoadingTask] = useState('Starting up...');
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 32,
     fontWeight: 'bold',
-    fontFamily: 'SpaceMono',
+    ...Typography.mono as any,
     marginBottom: 20,
   },
   subText: {
