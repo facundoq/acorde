@@ -6,6 +6,7 @@ export interface SongSearchResult {
   url: string;
   instrument?: string; // e.g., 'Chords', 'Tab', 'Bass'
   rating?: number; // 0 to 5
+  type?: 'song' | 'artist';
 }
 
 export interface SongContent {

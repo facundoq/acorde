@@ -104,7 +104,7 @@ export class CifraclubSource implements Source {
               results.push({
                 id: href,
                 title: title || parts[1].replace(/-/g, ' '),
-                artist: parts[0].replace(/-/g, ' '),
+                artist: parts[0],
                 source: this.name,
                 url: `https://www.cifraclub.com.br${href}`,
               });

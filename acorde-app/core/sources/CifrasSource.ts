@@ -33,18 +33,18 @@ export class CifrasSource implements Source {
 
       if (results.length === 0) {
         const songPattern = /("name"|"url")\s*:\s*"([^"]+)"\s*,\s*("name"|"url")\s*:\s*"([^"]+)"/g;
-        const matches = Array.from(html.matchAll(songPattern));
-        for (const match of matches) {
+        let match;
+        while ((match = songPattern.exec(html)) !== null) {
           const [_, p1, v1, p2, v2] = match;
-          const name = p1.includes('name') ? v1 : v2;
-          const songUrl = p1.includes('url') ? v1 : v2;
-          if (songUrl.includes('/') && songUrl.length > 5 && !songUrl.includes('search')) {
+          const name = String(p1 || '').includes('name') ? v1 : v2;
+          const songUrl = String(p1 || '').includes('url') ? v1 : v2;
+          if (String(songUrl || '').includes('/') && String(songUrl || '').length > 5 && !String(songUrl || '').includes('search')) {
             results.push({
-              id: songUrl,
-              title: name,
-              artist: songUrl.split('/').filter(p => p)[0] || 'Unknown Artist',
+              id: String(songUrl || ''),
+              title: String(name || 'Unknown'),
+              artist: String(songUrl || '').split('/').filter(p => p)[0] || 'Unknown Artist',
               source: this.name,
-              url: songUrl.startsWith('http') ? songUrl : `https://www.cifras.com.br${songUrl.startsWith('/') ? '' : '/'}${songUrl}`,
+              url: String(songUrl || '').startsWith('http') ? String(songUrl || '') : `https://www.cifras.com.br${String(songUrl || '').startsWith('/') ? '' : '/'}${songUrl}`,
             });
           }
         }

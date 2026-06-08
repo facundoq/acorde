@@ -33,7 +33,7 @@ describe('CifraclubSource', () => {
       expect(results.length).toBeGreaterThan(0);
       expect(results[0].title).toBe('Tempo Perdido - Legião Urbana');
       expect(results[0].artist).toBe('legiao-urbana');
-      expect(results[0].url).toBe('https://www.cifraclub.com/legiao-urbana/tempo-perdido/');
+      expect(results[0].url).toBe('https://www.cifraclub.com.br/legiao-urbana/tempo-perdido/');
     });
   });
 

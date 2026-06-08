@@ -1,38 +1,33 @@
-import { fetch as nativeFetch } from 'react-native-fetch-api';
+import { fetch as polyfillFetch } from 'react-native-fetch-api';
 import { logger } from './logger';
+import { DeviceEventEmitter } from 'react-native';
 
 export const crossFetch = async (url: string, options: any = {}) => {
-  return await nativeFetch(url, options);
+  const fetchFn = polyfillFetch || global.fetch || fetch;
+  if (!fetchFn) throw new Error('No fetch implementation found');
+  return await fetchFn(url, options);
 };
 
 export async function fetchHtml(url: string): Promise<string> {
-  const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
-  const MAX_RETRIES = 2;
+  const id = Math.random().toString(36).substring(2, 15);
+  
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      subscription.remove();
+      reject(new Error(`Timeout fetching HTML for ${url} via WebView`));
+    }, 30000); // 30s timeout
 
-  for (let i = 0; i <= MAX_RETRIES; i++) {
-    try {
-      logger.log(`[Fetcher] Native fetch attempt ${i+1} for: ${url}`);
-      const response = await crossFetch(url, { 
-        headers: { 'User-Agent': userAgent } 
-      });
-
-      if (response.ok) {
-        const result = await response.text();
-        logger.log(`[Fetcher] Native fetch success! HTML length: ${result.length}`);
-        logger.log(`[Fetcher] HTML snippet: ${result.substring(0, 500)}...`);
-        return result;
+    const subscription = DeviceEventEmitter.addListener(`FETCH_HTML_RESPONSE_${id}`, (response) => {
+      clearTimeout(timeout);
+      subscription.remove();
+      if (response.error) {
+        reject(response.error);
+      } else {
+        resolve(response.html);
       }
-      
-      logger.warn(`[Fetcher] Native fetch attempt ${i+1} returned status ${response.status}: ${response.statusText}`);
-      if (i === MAX_RETRIES) {
-        throw new Error(`HTTP Error ${response.status}: ${response.statusText}`);
-      }
-    } catch (e: any) {
-      logger.warn(`[Fetcher] Native fetch attempt ${i+1} failed:`, e);
-      if (i === MAX_RETRIES) throw e;
-    }
-    if (i < MAX_RETRIES) await new Promise(r => setTimeout(r, 500));
-  }
+    });
 
-  throw new Error(`Failed to fetch content directly for ${url}.`);
+    logger.log(`[Fetcher] Requesting WebView fetch for ${url} (id: ${id})`);
+    DeviceEventEmitter.emit('FETCH_HTML_REQUEST', { id, url });
+  });
 }

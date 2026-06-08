@@ -135,8 +135,14 @@ export default function TabsScreen() {
     }, [loadSongs])
   );
 
-  const handleOnlineSearch = async () => {
-    if (!query.trim()) return;
+  const handleOnlineSearch = async (overrideQuery?: string | any) => {
+    // If overrideQuery is an event object (from onSubmitEditing), ignore it and use 'query' state
+    const actualOverride = typeof overrideQuery === 'string' ? overrideQuery : undefined;
+    const searchQuery = actualOverride || query;
+    
+    if (!searchQuery || typeof searchQuery !== 'string' || !searchQuery.trim()) return;
+    const trimmedQuery = searchQuery.trim();
+
     if (activeSources.length === 0) {
       alert('Please enable at least one search source in settings (gear icon).');
       return;
@@ -147,11 +153,13 @@ export default function TabsScreen() {
       setSearchHistory(prev => [...prev, { query: query, results: onlineResults }]);
     }
 
+    if (actualOverride) setQuery(actualOverride);
+
     setSearchingOnline(true);
     setOnlineResults([]);
     setOnlineError(null);
-    setStatus(`Searching online for "${query}"...`);
-    logger.log(`Starting search for "${query}" on ${activeSources.length} sources...`);
+    setStatus(`Searching online for "${trimmedQuery}"...`);
+    logger.log(`Starting search for "${trimmedQuery}" on ${activeSources.length} sources...`);
     
     // Initialize statuses
     const initialStatus: Record<string, { state: 'searching', count: number }> = {};
@@ -162,7 +170,7 @@ export default function TabsScreen() {
       const searchPromises = activeSources.map(async (source) => {
         try {
           logger.log(`Searching ${source.name}...`);
-          const results = await source.search(query);
+          const results = await source.search(trimmedQuery);
           logger.log(`Search done for ${source.name}: ${results.length} results found.`);
           setSourceStatus(prev => ({ ...prev, [source.name]: { state: 'done', count: results.length } }));
           return results;
@@ -175,11 +183,13 @@ export default function TabsScreen() {
       });
 
       const allResultsArrays = await Promise.all(searchPromises);
-      const allResults = allResultsArrays.flat();
+      // Ensure each element is actually an array before concat
+      const safeResultsArrays = allResultsArrays.map(arr => Array.isArray(arr) ? arr : []);
+      const allResults = ([] as SongSearchResult[]).concat(...safeResultsArrays);
 
       setOnlineResults(allResults);
       if (allResults.length === 0) {
-        setStatus(`No online results found for "${query}".`);
+        setStatus(`No online results found for "${trimmedQuery}".`);
       } else {
         setStatus(null);
       }
@@ -369,8 +379,11 @@ export default function TabsScreen() {
             </View>
             <View style={{ alignItems: 'flex-end', backgroundColor: 'transparent' }}>
               {renderStars(item.rating)}
-              <TouchableOpacity style={[styles.saveButton, { backgroundColor: '#4CAF50', marginTop: 5 }]} onPress={() => handleSaveOnline(item)}>
-                <Text style={styles.saveButtonText}>Add</Text>
+              <TouchableOpacity 
+                style={[styles.saveButton, { backgroundColor: item.type === 'artist' ? theme.tint : '#4CAF50', marginTop: 5 }]} 
+                onPress={() => item.type === 'artist' ? handleOnlineSearch(item.url) : handleSaveOnline(item)}
+              >
+                <Text style={styles.saveButtonText}>{item.type === 'artist' ? 'View' : 'Add'}</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -17,15 +17,16 @@ export class CifraclubSource implements Source {
         logger.log(`[Cifraclub] Trying suggestions API...`);
         const suggestHtml = await fetchHtml(suggestUrl);
         const data = JSON.parse(suggestHtml);
-        if (data && data.songs) {
+        if (data && Array.isArray(data.songs)) {
           logger.log(`[Cifraclub] Found ${data.songs.length} suggestions.`);
           data.songs.forEach((song: any) => {
+            if (!song) return;
             results.push({
-              id: song.url,
-              title: song.name,
-              artist: song.artist.name,
+              id: song.url || '',
+              title: song.name || 'Unknown',
+              artist: song.artist?.name || 'Unknown Artist',
               source: this.name,
-              url: `https://www.cifraclub.com.br${song.url}`,
+              url: `https://www.cifraclub.com.br${song.url || ''}`,
             });
           });
         }
@@ -40,20 +41,19 @@ export class CifraclubSource implements Source {
         const html = await fetchHtml(searchUrl);
         
         const songPattern = /("name"|"url")\s*:\s*"([^"]+)"\s*,\s*("name"|"url")\s*:\s*"([^"]+)"/g;
-        const matches = Array.from(html.matchAll(songPattern));
-        
-        for (const match of matches) {
+        let match;
+        while ((match = songPattern.exec(html)) !== null) {
           const [_, p1, v1, p2, v2] = match;
-          const name = p1.includes('name') ? v1 : v2;
-          const songUrl = p1.includes('url') ? v1 : v2;
+          const name = String(p1 || '').includes('name') ? v1 : v2;
+          const songUrl = String(p1 || '').includes('url') ? v1 : v2;
           
-          if (songUrl.split('/').filter(p => p).length >= 2) {
+          if (String(songUrl || '').split('/').filter(p => p).length >= 2) {
             results.push({
-              id: songUrl,
-              title: name,
-              artist: songUrl.split('/').filter(p => p)[0] || 'Unknown Artist',
+              id: String(songUrl || ''),
+              title: String(name || 'Unknown'),
+              artist: String(songUrl || '').split('/').filter(p => p)[0] || 'Unknown Artist',
               source: this.name,
-              url: `https://www.cifraclub.com.br${songUrl.startsWith('/') ? '' : '/'}${songUrl}`,
+              url: `https://www.cifraclub.com.br${String(songUrl || '').startsWith('/') ? '' : '/'}${songUrl}`,
             });
           }
         }
@@ -69,7 +69,7 @@ export class CifraclubSource implements Source {
                 results.push({
                   id: href,
                   title: text || parts[1].replace(/-/g, ' '),
-                  artist: parts[0].replace(/-/g, ' '),
+                  artist: parts[0],
                   source: this.name,
                   url: `https://www.cifraclub.com.br${href}`,
                 });

@@ -11,6 +11,21 @@ export const CHORD_SHAPES: Record<string, ChordShape[]> = {
     { name: 'C', frets: [-1, 3, 5, 5, 5, 3], fingers: [0, 1, 3, 3, 3, 1], barre: 3 },
     { name: 'C', frets: [-1, 8, 10, 10, 9, 8], fingers: [0, 1, 3, 4, 2, 1], barre: 8 },
   ],
+  'Csus2': [
+    { name: 'Csus2', frets: [-1, 3, 5, 5, 3, 3], fingers: [0, 1, 3, 4, 1, 1], barre: 3 },
+  ],
+  'Csus4': [
+    { name: 'Csus4', frets: [-1, 3, 5, 5, 6, 3], fingers: [0, 1, 3, 4, 4, 1], barre: 3 },
+  ],
+  'C5': [
+    { name: 'C5', frets: [-1, 3, 5, 5, -1, -1], fingers: [0, 1, 3, 4, 0, 0] },
+  ],
+  'C9': [
+    { name: 'C9', frets: [-1, 3, 2, 3, 3, 3], fingers: [0, 2, 1, 3, 3, 3], barre: 3 },
+  ],
+  'Cm9': [
+    { name: 'Cm9', frets: [-1, 3, 1, 3, 3, -1], fingers: [0, 3, 1, 4, 4, 0], barre: 3 },
+  ],
   'C/G': [
     { name: 'C/G', frets: [3, 3, 2, 0, 1, 0], fingers: [3, 4, 2, 0, 1, 0] },
   ],
@@ -28,6 +43,21 @@ export const CHORD_SHAPES: Record<string, ChordShape[]> = {
     { name: 'C#', frets: [-1, 4, 6, 6, 6, 4], fingers: [0, 1, 3, 3, 3, 1], barre: 4 },
     { name: 'C#', frets: [-1, -1, 3, 1, 2, 1], fingers: [0, 0, 3, 1, 2, 1], barre: 1 },
   ],
+  'C#sus2': [
+    { name: 'C#sus2', frets: [-1, 4, 6, 6, 4, 4], fingers: [0, 1, 3, 4, 1, 1], barre: 4 },
+  ],
+  'C#sus4': [
+    { name: 'C#sus4', frets: [-1, 4, 6, 6, 7, 4], fingers: [0, 1, 3, 4, 4, 1], barre: 4 },
+  ],
+  'C#5': [
+    { name: 'C#5', frets: [-1, 4, 6, 6, -1, -1], fingers: [0, 1, 3, 4, 0, 0] },
+  ],
+  'C#9': [
+    { name: 'C#9', frets: [-1, 4, 3, 4, 4, 4], fingers: [0, 2, 1, 3, 3, 3], barre: 4 },
+  ],
+  'C#m9': [
+    { name: 'C#m9', frets: [-1, 4, 2, 4, 4, -1], fingers: [0, 3, 1, 4, 4, 0], barre: 4 },
+  ],
   'C#/G#': [
     { name: 'C#/G#', frets: [4, 4, 6, 6, 6, 4], fingers: [1, 1, 2, 3, 4, 1], barre: 4 },
   ],
@@ -38,6 +68,16 @@ export const CHORD_SHAPES: Record<string, ChordShape[]> = {
     { name: 'D', frets: [-1, -1, 0, 2, 3, 2], fingers: [0, 0, 0, 1, 3, 2] },
     { name: 'D', frets: [-1, 5, 7, 7, 7, 5], fingers: [0, 1, 3, 3, 3, 1], barre: 5 },
     { name: 'D', frets: [-1, 10, 12, 12, 11, 10], fingers: [0, 1, 3, 4, 2, 1], barre: 10 },
+  ],
+  'D5': [
+    { name: 'D5', frets: [-1, -1, 0, 2, 3, -1], fingers: [0, 0, 0, 1, 2, 0] },
+    { name: 'D5', frets: [-1, 5, 7, 7, -1, -1], fingers: [0, 1, 3, 4, 0, 0] },
+  ],
+  'D9': [
+    { name: 'D9', frets: [-1, 5, 4, 5, 5, 5], fingers: [0, 2, 1, 3, 3, 3], barre: 5 },
+  ],
+  'Dm9': [
+    { name: 'Dm9', frets: [-1, 5, 3, 5, 5, -1], fingers: [0, 3, 1, 4, 4, 0], barre: 5 },
   ],
   'D/F#': [
     { name: 'D/F#', frets: [2, 0, 0, 2, 3, 2], fingers: [1, 0, 0, 2, 4, 3] },
@@ -51,6 +91,21 @@ export const CHORD_SHAPES: Record<string, ChordShape[]> = {
   ],
   'D#': [
     { name: 'D#', frets: [-1, 6, 8, 8, 8, 6], fingers: [0, 1, 3, 3, 3, 1], barre: 6 },
+  ],
+  'D#sus2': [
+    { name: 'D#sus2', frets: [-1, 6, 8, 8, 6, 6], fingers: [0, 1, 3, 4, 1, 1], barre: 6 },
+  ],
+  'D#sus4': [
+    { name: 'D#sus4', frets: [-1, 6, 8, 8, 9, 6], fingers: [0, 1, 3, 4, 4, 1], barre: 6 },
+  ],
+  'D#5': [
+    { name: 'D#5', frets: [-1, 6, 8, 8, -1, -1], fingers: [0, 1, 3, 4, 0, 0] },
+  ],
+  'D#9': [
+    { name: 'D#9', frets: [-1, 6, 5, 6, 6, 6], fingers: [0, 2, 1, 3, 3, 3], barre: 6 },
+  ],
+  'D#m9': [
+    { name: 'D#m9', frets: [-1, 6, 4, 6, 6, -1], fingers: [0, 3, 1, 4, 4, 0], barre: 6 },
   ],
   'D#/A#': [
     { name: 'D#/A#', frets: [-1, 1, 1, 3, 4, 3], fingers: [0, 1, 1, 2, 4, 3], barre: 1 },
@@ -67,12 +122,38 @@ export const CHORD_SHAPES: Record<string, ChordShape[]> = {
     { name: 'E', frets: [-1, 7, 9, 9, 9, 7], fingers: [0, 1, 3, 3, 3, 1], barre: 7 },
     { name: 'E', frets: [0, 7, 6, 4, 5, 4], fingers: [0, 4, 3, 1, 2, 1], barre: 4 },
   ],
+  'Esus2': [
+    { name: 'Esus2', frets: [0, 2, 4, 4, 0, 0], fingers: [0, 1, 3, 4, 0, 0] },
+  ],
+  'E5': [
+    { name: 'E5', frets: [0, 2, 2, -1, -1, -1], fingers: [0, 1, 2, 0, 0, 0] },
+    { name: 'E5', frets: [-1, 7, 9, 9, -1, -1], fingers: [0, 1, 3, 4, 0, 0] },
+  ],
+  'E9': [
+    { name: 'E9', frets: [0, 2, 0, 1, 0, 2], fingers: [0, 2, 0, 1, 0, 3] },
+  ],
+  'Em9': [
+    { name: 'Em9', frets: [0, 2, 0, 0, 0, 2], fingers: [0, 1, 0, 0, 0, 2] },
+  ],
   'Esus4': [
     { name: 'Esus4', frets: [0, 2, 2, 2, 0, 0], fingers: [0, 2, 3, 4, 0, 0] },
   ],
   'F': [
     { name: 'F', frets: [1, 3, 3, 2, 1, 1], fingers: [1, 3, 4, 2, 1, 1], barre: 1 },
     { name: 'F', frets: [-1, 8, 10, 10, 10, 8], fingers: [0, 1, 3, 3, 3, 1], barre: 8 },
+  ],
+  'Fsus2': [
+    { name: 'Fsus2', frets: [1, 3, 3, 0, -1, -1], fingers: [1, 3, 4, 0, 0, 0] },
+    { name: 'Fsus2', frets: [-1, 8, 10, 10, 8, 8], fingers: [0, 1, 3, 4, 1, 1], barre: 8 },
+  ],
+  'F5': [
+    { name: 'F5', frets: [1, 3, 3, -1, -1, -1], fingers: [1, 3, 4, 0, 0, 0] },
+  ],
+  'F9': [
+    { name: 'F9', frets: [1, 0, 1, 0, 1, -1], fingers: [1, 0, 2, 0, 3, 0] },
+  ],
+  'Fm9': [
+    { name: 'Fm9', frets: [1, 3, 1, 1, 1, 3], fingers: [1, 3, 1, 1, 1, 4], barre: 1 },
   ],
   'F/A': [
     { name: 'F/A', frets: [-1, 0, 3, 2, 1, 1], fingers: [0, 0, 3, 2, 1, 1], barre: 1 },
@@ -88,6 +169,21 @@ export const CHORD_SHAPES: Record<string, ChordShape[]> = {
   'F#': [
     { name: 'F#', frets: [2, 4, 4, 3, 2, 2], fingers: [1, 3, 4, 2, 1, 1], barre: 2 },
   ],
+  'F#sus2': [
+    { name: 'F#sus2', frets: [2, 4, 4, 2, 2, 4], fingers: [1, 3, 4, 1, 1, 2], barre: 2 },
+  ],
+  'F#sus4': [
+    { name: 'F#sus4', frets: [2, 4, 4, 4, 2, 2], fingers: [1, 3, 4, 4, 1, 1], barre: 2 },
+  ],
+  'F#5': [
+    { name: 'F#5', frets: [2, 4, 4, -1, -1, -1], fingers: [1, 3, 4, 0, 0, 0] },
+  ],
+  'F#9': [
+    { name: 'F#9', frets: [-1, 9, 8, 9, 9, 9], fingers: [0, 2, 1, 3, 3, 3], barre: 9 },
+  ],
+  'F#m9': [
+    { name: 'F#m9', frets: [2, 4, 2, 2, 2, 4], fingers: [1, 3, 1, 1, 1, 4], barre: 2 },
+  ],
   'Gb': [
     { name: 'Gb', frets: [2, 4, 4, 3, 2, 2], fingers: [1, 3, 4, 2, 1, 1], barre: 2 },
   ],
@@ -96,8 +192,22 @@ export const CHORD_SHAPES: Record<string, ChordShape[]> = {
     { name: 'G', frets: [3, 5, 5, 4, 3, 3], fingers: [1, 3, 4, 2, 1, 1], barre: 3 },
     { name: 'G', frets: [-1, 10, 12, 12, 12, 10], fingers: [0, 1, 3, 3, 3, 1], barre: 10 },
   ],
+  'Gsus2': [
+    { name: 'Gsus2', frets: [3, 0, 0, 2, 3, 3], fingers: [2, 0, 0, 1, 3, 4] },
+  ],
+  'G5': [
+    { name: 'G5', frets: [3, 5, 5, -1, -1, -1], fingers: [1, 3, 4, 0, 0, 0] },
+  ],
+  'G9': [
+    { name: 'G9', frets: [3, 2, 3, 2, 0, -1], fingers: [2, 1, 3, 1, 0, 0] },
+  ],
+  'Gm9': [
+    { name: 'Gm9', frets: [3, 5, 3, 3, 3, 5], fingers: [1, 3, 1, 1, 1, 4], barre: 3 },
+  ],
   'G/B': [
     { name: 'G/B', frets: [-1, 2, 0, 0, 3, 3], fingers: [0, 1, 0, 0, 3, 4] },
+    { name: 'G/B', frets: [7, 5, 5, 4, 3, 3], fingers: [4, 2, 3, 1, 1, 1], barre: 3 },
+  ],
     { name: 'G/B', frets: [7, 5, 5, 4, 3, 3], fingers: [4, 2, 3, 1, 1, 1], barre: 3 },
   ],
   'Gsus4': [

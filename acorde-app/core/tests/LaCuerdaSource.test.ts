@@ -2,7 +2,7 @@ import { LaCuerdaSource } from '../sources/LaCuerdaSource';
 
 global.fetch = jest.fn();
 
-describe('LaCuerdaSource - Fito Paez Case', () => {
+describe('LaCuerdaSource - Advanced Cases', () => {
   let source: LaCuerdaSource;
 
   beforeEach(() => {
@@ -10,66 +10,74 @@ describe('LaCuerdaSource - Fito Paez Case', () => {
     jest.clearAllMocks();
   });
 
-  const fitoPaezHtml = `<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<HTML lang='es'>
-    <BODY>
-        <div id='mCols'>
-            <div id='mLeft'>
-                <div id='rList' class='rList'>
-                    <ul>
-                        <li onclick='w.location="11_y_6"'>
-                            <a href='11_y_6'>11 y 6</a>
-                        </li>
-                        <li onclick='w.location="mariposa_tecknicolor"'>
-                            <a href='mariposa_tecknicolor'>Mariposa Tecknicolor</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class='mBody'>
-                <div id=a_cont>
-                    <ul id=b_main class=b_main onclick="bOpen(event)">
-                        <li id='r000' lcd='RRTRKRRTR-967421835'>
-                            <a href="11_y_6">
-                                11 y 6 <em>acordes</em>
-                            </A>
-                        </li>
-                        <li id='r172' lcd='RRRTTRTBK-621354789'>
-                            <a href="mariposa_tecknicolor">
-                                Mariposa Tecknicolor <em>acordes</em>
-                            </A>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div id='mBot'>
-            <b>&copy;</b>
-            LaCuerda<font color=#a0a0a0>.net</font>
-             &middot <a href=//lacuerda.net/Extras/legal.php>aviso legal</a>
-            &middot;<a href=//lacuerda.net/Extras/privpol.php>privacidad</a>
-            &middot;<a href=//lacuerda.net/Extras/contacto.php>contacto</a>
-        </div>
-    </BODY>
-</HTML>`;
+  const artistOnlyHtml = `
+    <ul id=i_main class=s_blist>
+      <li><a class=sb href="/dante_spinetta/">Dante Spinetta</a><span>1 canciones</span></li>
+      <li><a class=sb href="/luis_a_spinetta/">Luis Alberto Spinetta</a><span>247 canciones</span></li>
+    </ul>
+  `;
 
-  test('should parse songs correctly and ignore footer links', async () => {
+  const songTableHtml = `
+    <table id=s_main>
+      <tr><td><a href="/spinetta_jade/">Spinetta Jade</a></td><td><ul class=b_main id=b_main0>
+        <li id='r000'><a href="javascript:">Alma de diamante</a></li>
+      </ul></td></tr>
+    </table>
+    <script>
+      var hds=['spinetta_jade','luis_a_spinetta'];
+      var fns=['alma_de_diamante','alma_de_diamante'];
+      var NMAX=0;
+    </script>
+  `;
+
+  test('should parse artist-only results correctly', async () => {
     (global.fetch as jest.Mock).mockResolvedValue({
       ok: true,
-      text: () => Promise.resolve(fitoPaezHtml),
+      text: () => Promise.resolve(artistOnlyHtml),
     });
     
-    const results = await source.search('Fito Paez');
+    const results = await source.search('spinetta');
+    expect(results.length).toBe(2);
+    expect(results[0].type).toBe('artist');
+    expect(results[0].title).toBe('Dante Spinetta');
+    expect(results[0].url).toBe('https://acordes.lacuerda.net/dante_spinetta/');
+  });
+
+  test('should parse song table with JS links correctly', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve(songTableHtml),
+    });
     
-    const titles = results.map(r => r.title.toLowerCase());
-    
-    // Check for expected songs
-    expect(titles).toContain('11 y 6');
-    expect(titles).toContain('mariposa tecknicolor');
-    
-    // Check that it DOES NOT contain footer links
-    expect(titles).not.toContain('aviso legal');
-    expect(titles).not.toContain('privacidad');
-    expect(titles).not.toContain('contacto');
+    const results = await source.search('alma de diamante');
+    expect(results.length).toBe(1);
+    expect(results[0].type).toBe('song');
+    expect(results[0].title).toBe('Alma de diamante');
+    expect(results[0].artist).toBe('Spinetta Jade');
+    expect(results[0].url).toBe('https://acordes.lacuerda.net/spinetta_jade/alma_de_diamante');
+  });
+
+  test('should parse artist page correctly when URL is searched', async () => {
+    const artistPageHtml = `
+      <html>
+        <body>
+          <h1>Fito Paez</h1>
+          <ul id=b_main>
+            <li><a href="11_y_6">11 y 6</a></li>
+            <li><a href="mariposa_tecknicolor">Mariposa Tecknicolor</a></li>
+          </ul>
+        </body>
+      </html>
+    `;
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve(artistPageHtml),
+    });
+
+    const results = await source.search('https://acordes.lacuerda.net/fito_paez/');
+    expect(results.length).toBe(2);
+    expect(results[0].title).toBe('11 y 6');
+    expect(results[0].artist).toBe('Fito Paez');
+    expect(results[0].url).toBe('https://acordes.lacuerda.net/fito_paez/11_y_6');
   });
 });

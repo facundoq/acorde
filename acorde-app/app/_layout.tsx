@@ -11,6 +11,7 @@ import { initSettings } from '@/services/settings';
 import { Text, View } from '@/components/Themed';
 import { Typography } from '@/constants/Typography';
 import Colors from '@/constants/Colors';
+import { HiddenWebViewFetcher } from '@/components/HiddenWebViewFetcher';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -92,6 +93,7 @@ function RootLayoutNav() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
+      <HiddenWebViewFetcher />
     </ThemeProvider>
   );
 }
