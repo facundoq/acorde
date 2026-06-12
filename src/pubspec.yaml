@@ -43,6 +43,7 @@ dependencies:
   sqflite_common_ffi: ^2.4.1
   flutter_linux_webview: ^0.1.0
   webview_flutter: ^3.0.4
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   integration_test:

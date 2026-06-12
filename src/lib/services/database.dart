@@ -103,31 +103,8 @@ class DatabaseService {
             UNIQUE(source, source_id)
           )
         ''');
-        await _seedDatabase(db);
       },
     );
-  }
-
-  static Future<void> _seedDatabase(Database db) async {
-    final List<Map<String, dynamic>> count = await db.rawQuery(
-      'SELECT COUNT(*) as count FROM songs',
-    );
-    if (count.isNotEmpty && count.first['count'] == 0) {
-      await db.insert('songs', {
-        'source_id': '/the-beatles/yellow-submarine-chords-1047118',
-        'title': 'Yellow Submarine',
-        'artist': 'The Beatles',
-        'lyrics':
-            'In the town where I was born\nLived a man who sailed to sea\nAnd he told us of his life\nIn the land of submarines...',
-        'chords':
-            'G D C G\nEm Am C D\nG D C G\nEm Am C D\n\nG D\nWe all live in a yellow submarine\nD G\nYellow submarine, yellow submarine',
-        'source': 'ultimateguitar',
-        'url':
-            'https://www.ultimate-guitar.com/tab/the-beatles/yellow-submarine-chords-1047118',
-        'instrument': 'Chords',
-        'rating': 4.8,
-      });
-    }
   }
 
   static Future<int> saveSong(SavedSong song) async {
@@ -154,6 +131,22 @@ class DatabaseService {
       'songs',
       where: 'id = ?',
       whereArgs: [id],
+    );
+    if (maps.isNotEmpty) {
+      return SavedSong.fromMap(maps.first);
+    }
+    return null;
+  }
+
+  static Future<SavedSong?> getSongBySourceAndId(
+    String source,
+    String sourceId,
+  ) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'songs',
+      where: 'source = ? AND source_id = ?',
+      whereArgs: [source, sourceId],
     );
     if (maps.isNotEmpty) {
       return SavedSong.fromMap(maps.first);

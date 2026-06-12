@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'search_screen.dart';
 import 'diagrams_screen.dart';
 import 'tuner_screen.dart';
+import 'collection_screen.dart';
 
 class HomeTabs extends StatefulWidget {
   const HomeTabs({super.key});
@@ -11,13 +12,44 @@ class HomeTabs extends StatefulWidget {
 }
 
 class _HomeTabsState extends State<HomeTabs> {
-  int _currentIndex = 0;
+  int _currentIndex = 0; // Collection is now at index 0 as default tab
 
-  final List<Widget> _screens = [
-    const SearchScreen(),
-    const DiagramsScreen(),
-    const TunerScreen(),
-  ];
+  final GlobalKey<SearchScreenState> _searchKey =
+      GlobalKey<SearchScreenState>();
+  final GlobalKey<CollectionScreenState> _collectionKey =
+      GlobalKey<CollectionScreenState>();
+
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      CollectionScreen(key: _collectionKey, onSearchOnline: _onSearchOnline),
+      SearchScreen(key: _searchKey),
+      const DiagramsScreen(),
+      const TunerScreen(),
+    ];
+  }
+
+  void _onSearchOnline(String query) {
+    setState(() {
+      _currentIndex = 1; // Search index is now 1
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _searchKey.currentState?.triggerOnlineSearch(query);
+    });
+  }
+
+  void _onDestinationSelected(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    if (index == 0) {
+      // Collection is at index 0
+      _collectionKey.currentState?.loadSongs();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,16 +57,17 @@ class _HomeTabsState extends State<HomeTabs> {
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onDestinationSelected: _onDestinationSelected,
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.music_note_outlined),
-            selectedIcon: Icon(Icons.music_note),
-            label: 'My Tabs',
+            icon: Icon(Icons.library_music_outlined),
+            selectedIcon: Icon(Icons.library_music),
+            label: 'Collection',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.search_outlined),
+            selectedIcon: Icon(Icons.search),
+            label: 'Search',
           ),
           NavigationDestination(
             icon: Icon(Icons.grid_on_outlined),

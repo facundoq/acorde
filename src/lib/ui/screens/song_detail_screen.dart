@@ -1,8 +1,15 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/logger.dart';
 import '../../core/ug_parser.dart';
+import '../../core/models.dart';
+import '../../core/sources/source.dart';
+import '../../core/sources/ultimate_guitar_source.dart';
+import '../../core/sources/cifraclub_source.dart';
+import '../../core/sources/la_cuerda_source.dart';
+import '../../core/sources/cifras_source.dart';
 import '../../services/database.dart';
 import '../../services/settings.dart';
 import '../components/ug_song_view.dart';
@@ -11,9 +18,19 @@ import '../components/chord_detail_modal.dart';
 enum ScrollSpeed { none, low, mid, high }
 
 class SongDetailScreen extends StatefulWidget {
-  final int songId;
+  final int? songId;
+  final SongSearchResult? searchResult;
+  final List<Source>? sources;
 
-  const SongDetailScreen({super.key, required this.songId});
+  const SongDetailScreen({
+    super.key,
+    this.songId,
+    this.searchResult,
+    this.sources,
+  }) : assert(
+         songId != null || searchResult != null,
+         'Either songId or searchResult must be provided',
+       );
 
   @override
   State<SongDetailScreen> createState() => _SongDetailScreenState();
@@ -50,22 +67,169 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     super.dispose();
   }
 
+  Future<void> _openBrowser(String urlString) async {
+    final uri = Uri.parse(urlString);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not launch $urlString')));
+      }
+    }
+  }
+
   Future<void> _loadSongAndSettings() async {
     try {
-      final songData = await DatabaseService.getSongById(widget.songId);
       final savedFontSize = await SettingsService.getFontSize();
       if (!mounted) return;
       setState(() {
-        _song = songData;
         _fontSize = savedFontSize;
-        _loading = false;
       });
+
+      if (widget.songId != null) {
+        final songData = await DatabaseService.getSongById(widget.songId!);
+        if (!mounted) return;
+        setState(() {
+          _song = songData;
+          _loading = false;
+        });
+      } else if (widget.searchResult != null) {
+        final existingSong = await DatabaseService.getSongBySourceAndId(
+          widget.searchResult!.source,
+          widget.searchResult!.id,
+        );
+        if (existingSong != null) {
+          if (!mounted) return;
+          setState(() {
+            _song = existingSong;
+            _loading = false;
+          });
+          return;
+        }
+
+        final allSources =
+            widget.sources ??
+            [
+              UltimateGuitarSource(),
+              CifraclubSource(),
+              LaCuerdaSource(),
+              CifrasSource(),
+            ];
+        final source = allSources.firstWhere(
+          (s) => s.name == widget.searchResult!.source,
+          orElse: () => allSources[0],
+        );
+        final songContent = await source.getSong(widget.searchResult!.url);
+
+        if (!mounted) return;
+
+        final tempSong = SavedSong(
+          id: null,
+          sourceId: widget.searchResult!.id,
+          title: songContent.title,
+          artist: songContent.artist,
+          lyrics: songContent.lyrics,
+          chords: songContent.chords ?? '',
+          source: songContent.source,
+          url: songContent.url,
+          createdAt: DateTime.now().toIso8601String(),
+          instrument: widget.searchResult!.instrument ?? songContent.instrument,
+          rating: widget.searchResult!.rating ?? songContent.rating,
+        );
+
+        setState(() {
+          _song = tempSong;
+          _loading = false;
+        });
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _loading = false;
       });
       logger.error('Failed to load song or settings: $e');
+    }
+  }
+
+  Future<void> _toggleSaveCollection() async {
+    final song = _song;
+    if (song == null) return;
+
+    setState(() {
+      _loading = true;
+    });
+
+    try {
+      if (song.id == null) {
+        final savedSong = SavedSong(
+          sourceId: song.sourceId,
+          title: song.title,
+          artist: song.artist,
+          lyrics: song.lyrics,
+          chords: song.chords,
+          source: song.source,
+          url: song.url,
+          createdAt: DateTime.now().toIso8601String(),
+          instrument: song.instrument,
+          rating: song.rating,
+        );
+        final newId = await DatabaseService.saveSong(savedSong);
+        final updatedSong = SavedSong(
+          id: newId,
+          sourceId: savedSong.sourceId,
+          title: savedSong.title,
+          artist: savedSong.artist,
+          lyrics: savedSong.lyrics,
+          chords: savedSong.chords,
+          source: savedSong.source,
+          url: savedSong.url,
+          createdAt: savedSong.createdAt,
+          instrument: savedSong.instrument,
+          rating: savedSong.rating,
+        );
+        if (!mounted) return;
+        setState(() {
+          _song = updatedSong;
+          _loading = false;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Saved to collection')));
+      } else {
+        await DatabaseService.deleteSong(song.id!);
+        final updatedSong = SavedSong(
+          id: null,
+          sourceId: song.sourceId,
+          title: song.title,
+          artist: song.artist,
+          lyrics: song.lyrics,
+          chords: song.chords,
+          source: song.source,
+          url: song.url,
+          createdAt: song.createdAt,
+          instrument: song.instrument,
+          rating: song.rating,
+        );
+        if (!mounted) return;
+        setState(() {
+          _song = updatedSong;
+          _loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Removed from collection')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+      });
+      logger.error('Failed to toggle save collection: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
@@ -264,6 +428,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           // Auto scroll button
           OutlinedButton(
             onPressed: _toggleScrollSpeed,
+            onLongPress: _stopAutoScroll,
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: colorScheme.primary),
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -281,23 +446,33 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     ),
                   ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 12),
+          // Separator
+          Container(
+            width: 1,
+            height: 18,
+            color: colorScheme.onSurface.withOpacity(0.3),
+          ),
+          const SizedBox(width: 12),
+          // Font size icon
+          Icon(Icons.format_size, size: 18, color: colorScheme.onSurface),
           // Font size decrement button
           IconButton(
-            icon: const Icon(Icons.remove_circle_outline),
+            icon: const Icon(Icons.remove, size: 20),
             onPressed: () => _changeFontSize(_fontSize - 2),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
+            visualDensity: VisualDensity.compact,
           ),
-          const SizedBox(width: 8),
           // Font size increment button
           IconButton(
-            icon: const Icon(Icons.add_circle_outline),
+            icon: const Icon(Icons.add, size: 20),
             onPressed: () => _changeFontSize(_fontSize + 2),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
+            visualDensity: VisualDensity.compact,
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
         ],
         elevation: 1,
       ),
@@ -328,23 +503,59 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    'SOURCE: ${_song!.source.toUpperCase()}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurfaceVariant,
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => _openBrowser(_song!.url),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          'SOURCE: ${_song!.source.toUpperCase()}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: _toggleSaveCollection,
+                      icon: Icon(
+                        _song!.id != null
+                            ? Icons.remove_circle_outline
+                            : Icons.add_circle_outline,
+                        size: 16,
+                      ),
+                      label: Text(
+                        _song!.id != null
+                            ? 'Remove from collection'
+                            : 'Save to collection',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _song!.id != null
+                            ? colorScheme.errorContainer
+                            : colorScheme.primaryContainer,
+                        foregroundColor: _song!.id != null
+                            ? colorScheme.onErrorContainer
+                            : colorScheme.onPrimaryContainer,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -370,6 +581,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     : _renderStandardContent(content, colorScheme),
               ),
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),

@@ -7,7 +7,6 @@ import '../../core/sources/cifraclub_source.dart';
 import '../../core/sources/la_cuerda_source.dart';
 import '../../core/sources/cifras_source.dart';
 import '../../core/logger.dart';
-import '../../services/database.dart';
 import '../../services/settings.dart';
 import 'song_detail_screen.dart';
 
@@ -26,14 +25,12 @@ class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key, this.sources});
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  State<SearchScreen> createState() => SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<SavedSong> _songs = [];
   String _query = '';
-  int _totalCount = 0;
 
   // Configuration states
   Map<String, bool> _selectedSources = {
@@ -51,8 +48,6 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _searchingOnline = false;
   String? _status;
   String? _onlineError;
-  bool _savingModalVisible = false;
-  bool _isSaveCancelled = false;
 
   final Map<String, Map<String, dynamic>> _sourceStatus = {};
   final List<SearchHistoryItem> _searchHistory = [];
@@ -62,14 +57,15 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    _allSources = widget.sources ?? [
-      UltimateGuitarSource(),
-      CifraclubSource(),
-      LaCuerdaSource(),
-      CifrasSource(),
-    ];
+    _allSources =
+        widget.sources ??
+        [
+          UltimateGuitarSource(),
+          CifraclubSource(),
+          LaCuerdaSource(),
+          CifrasSource(),
+        ];
     _loadSettings();
-    _loadSongs();
     _searchController.addListener(_onSearchTextChanged);
 
     // Subscribe to logger
@@ -108,37 +104,19 @@ class _SearchScreenState extends State<SearchScreen> {
     await SettingsService.saveSourcesConfig(_selectedSources);
   }
 
-  Future<void> _loadSongs() async {
-    final all = await DatabaseService.getSongs();
-    if (!mounted) return;
-    setState(() {
-      _totalCount = all.length;
-      if (_query.isEmpty) {
-        _songs = all;
-      }
-    });
-  }
-
   void _onSearchTextChanged() {
     final text = _searchController.text.trim();
     if (text == _query) return;
     setState(() {
       _query = text;
     });
-
-    if (text.isEmpty) {
-      _loadSongs();
-    } else {
-      _searchLocal(text);
-    }
   }
 
-  Future<void> _searchLocal(String query) async {
-    final results = await DatabaseService.searchLocalSongs(query);
-    if (!mounted) return;
-    setState(() {
-      _songs = results;
-    });
+  void triggerOnlineSearch(String query) {
+    if (query.trim().isEmpty) return;
+    _searchController.text = query;
+    _query = query;
+    _handleOnlineSearch(overrideQuery: query);
   }
 
   List<Source> get _activeSources {
@@ -246,106 +224,6 @@ class _SearchScreenState extends State<SearchScreen> {
           _searchingOnline = false;
         });
       }
-    }
-  }
-
-  Future<void> _handleSaveOnline(SongSearchResult item) async {
-    setState(() {
-      _savingModalVisible = true;
-      _isSaveCancelled = false;
-      _status = 'Downloading from ${item.source}...';
-      _onlineError = null;
-    });
-
-    try {
-      final source = _allSources.firstWhere(
-        (s) => s.name == item.source,
-        orElse: () => _allSources[0],
-      );
-      final songContent = await source.getSong(item.url);
-
-      if (_isSaveCancelled || !mounted) return;
-
-      final savedSong = SavedSong(
-        sourceId: item.id,
-        title: songContent.title,
-        artist: songContent.artist,
-        lyrics: songContent.lyrics,
-        chords: songContent.chords ?? '',
-        source: songContent.source,
-        url: songContent.url,
-        createdAt: DateTime.now().toIso8601String(),
-        instrument: item.instrument ?? songContent.instrument,
-        rating: item.rating ?? songContent.rating,
-      );
-
-      final songId = await DatabaseService.saveSong(savedSong);
-
-      if (_isSaveCancelled || !mounted) return;
-
-      setState(() {
-        _savingModalVisible = false;
-        _onlineResults = [];
-        _searchController.clear();
-      });
-
-      _loadSongs();
-
-      if (!mounted) return;
-      // Navigate to detail screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SongDetailScreen(songId: songId),
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _onlineError = 'Failed to save song ($e)';
-        _savingModalVisible = false;
-        _status = null;
-      });
-    }
-  }
-
-  void _handleCancelSave() {
-    setState(() {
-      _isSaveCancelled = true;
-      _savingModalVisible = false;
-      _status = null;
-    });
-  }
-
-  Future<void> _confirmDelete(SavedSong song) async {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: colorScheme.surface,
-        title: const Text('Delete Song'),
-        content: Text(
-          'Are you sure you want to delete "${song.title}" from your Tabs?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm == true && song.id != null) {
-      await DatabaseService.deleteSong(song.id!);
-      _loadSongs();
     }
   }
 
@@ -567,6 +445,21 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               elevation: 0,
               child: ListTile(
+                onTap: () {
+                  if (isArtist) {
+                    _handleOnlineSearch(overrideQuery: item.url);
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SongDetailScreen(
+                          searchResult: item,
+                          sources: _allSources,
+                        ),
+                      ),
+                    );
+                  }
+                },
                 title: Text(
                   item.title,
                   style: TextStyle(
@@ -629,13 +522,19 @@ class _SearchScreenState extends State<SearchScreen> {
                         if (isArtist) {
                           _handleOnlineSearch(overrideQuery: item.url);
                         } else {
-                          _handleSaveOnline(item);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SongDetailScreen(
+                                searchResult: item,
+                                sources: _allSources,
+                              ),
+                            ),
+                          );
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isArtist
-                            ? colorScheme.primary
-                            : Colors.green,
+                        backgroundColor: colorScheme.primary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -647,9 +546,9 @@ class _SearchScreenState extends State<SearchScreen> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
-                      child: Text(
-                        isArtist ? 'View' : 'Add',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      child: const Text(
+                        'View',
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
@@ -691,32 +590,16 @@ class _SearchScreenState extends State<SearchScreen> {
         appBar: AppBar(
           backgroundColor: Colors.black,
           title: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
+              Image.asset('assets/images/icon.png', width: 24, height: 24),
+              const SizedBox(width: 8),
               const Text(
                 'Acorde',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'SpaceMono',
-                ),
-              ),
-              const SizedBox(width: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  '$_totalCount Tabs',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
                 ),
               ),
             ],
@@ -743,8 +626,10 @@ class _SearchScreenState extends State<SearchScreen> {
                         child: TextField(
                           controller: _searchController,
                           style: TextStyle(color: colorScheme.onSurface),
+                          textInputAction: TextInputAction.search,
+                          onSubmitted: (val) => _handleOnlineSearch(),
                           decoration: InputDecoration(
-                            hintText: 'Search your Tabs...',
+                            hintText: 'Search chords & tabs online...',
                             hintStyle: TextStyle(
                               color: colorScheme.onSurfaceVariant.withOpacity(
                                 0.7,
@@ -754,6 +639,14 @@ class _SearchScreenState extends State<SearchScreen> {
                               Icons.search,
                               color: colorScheme.onSurfaceVariant,
                             ),
+                            suffixIcon: _query.isNotEmpty
+                                ? IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                    },
+                                  )
+                                : null,
                             filled: true,
                             fillColor: colorScheme.surfaceContainerHighest
                                 .withOpacity(0.3),
@@ -780,7 +673,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             backgroundColor: colorScheme.primary,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
+                              horizontal: 16,
                               vertical: 12,
                             ),
                             shape: RoundedRectangleBorder(
@@ -797,7 +690,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                   ),
                                 )
                               : const Text(
-                                  'Add Online',
+                                  'Search',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 12,
@@ -814,146 +707,44 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: ListView(
                       physics: const AlwaysScrollableScrollPhysics(),
                       children: [
-                        // Local songs list (only visible if we are NOT viewing online results)
-                        if (_onlineResults.isEmpty) ...[
-                          if (_songs.isEmpty)
-                            Padding(
+                        // Empty Onboarding State
+                        if (_onlineResults.isEmpty && _status == null)
+                          Center(
+                            child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                vertical: 50.0,
+                                vertical: 80.0,
                               ),
-                              child: Text(
-                                _query.isNotEmpty
-                                    ? 'No matching local songs.'
-                                    : 'Your Tabs list is empty.',
-                                style: TextStyle(
-                                  color: colorScheme.onSurfaceVariant,
-                                ),
-                                textAlign: TextAlign.center,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.public,
+                                    size: 80,
+                                    color: colorScheme.onSurfaceVariant
+                                        .withOpacity(0.3),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Search Chords & Tabs Online',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: colorScheme.onSurface,
+                                      fontFamily: 'SpaceMono',
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Find songs from Ultimate Guitar, Cifra Club, and more',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            )
-                          else
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: _songs.length,
-                              itemBuilder: (context, index) {
-                                final song = _songs[index];
-
-                                return Card(
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 4.0,
-                                  ),
-                                  color: colorScheme.surfaceContainerLow,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    side: BorderSide(
-                                      color: colorScheme.outlineVariant
-                                          .withOpacity(0.5),
-                                    ),
-                                  ),
-                                  elevation: 0,
-                                  child: ListTile(
-                                    onTap: () {
-                                      if (song.id != null) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                SongDetailScreen(
-                                                  songId: song.id!,
-                                                ),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    onLongPress: () => _confirmDelete(song),
-                                    title: Text(
-                                      song.title,
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: colorScheme.onSurface,
-                                      ),
-                                    ),
-                                    subtitle: Row(
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            song.artist,
-                                            style: TextStyle(
-                                              color:
-                                                  colorScheme.onSurfaceVariant,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        if (song.instrument != null) ...[
-                                          const SizedBox(width: 8),
-                                          Icon(
-                                            _getInstrumentIcon(song.instrument),
-                                            size: 14,
-                                            color: colorScheme.primary,
-                                          ),
-                                          const SizedBox(width: 2),
-                                          Text(
-                                            song.instrument!,
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: colorScheme.primary,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                    trailing: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.end,
-                                          children: [
-                                            _buildStars(song.rating),
-                                            const SizedBox(height: 4),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 6,
-                                                    vertical: 2,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: colorScheme
-                                                    .surfaceContainerHighest,
-                                                borderRadius:
-                                                    BorderRadius.circular(4),
-                                              ),
-                                              child: Text(
-                                                song.source,
-                                                style: TextStyle(
-                                                  fontSize: 10,
-                                                  color: colorScheme
-                                                      .onSurfaceVariant,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(width: 8),
-                                        IconButton(
-                                          icon: const Icon(
-                                            Icons.delete_outline,
-                                            color: Colors.red,
-                                          ),
-                                          onPressed: () => _confirmDelete(song),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
                             ),
-                        ],
+                          ),
 
                         // Search Progress / Loading
                         if (_status != null)
@@ -1069,60 +860,6 @@ class _SearchScreenState extends State<SearchScreen> {
                 ],
               ),
             ),
-
-            // Saving / Downloading Overlay Dialog
-            if (_savingModalVisible)
-              Container(
-                color: Colors.black54,
-                alignment: Alignment.center,
-                child: Card(
-                  margin: const EdgeInsets.all(30),
-                  color: colorScheme.surface,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(30.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircularProgressIndicator(color: colorScheme.primary),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Saving Tab',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          _status ?? 'Downloading...',
-                          style: TextStyle(
-                            color: colorScheme.onSurfaceVariant,
-                            fontStyle: FontStyle.italic,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 25),
-                        ElevatedButton(
-                          onPressed: _handleCancelSave,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(double.infinity, 44),
-                          ),
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
           ],
         ),
       ),

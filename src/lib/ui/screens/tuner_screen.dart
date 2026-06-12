@@ -389,13 +389,20 @@ class _TunerScreenState extends State<TunerScreen> {
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: const Text(
-          'Guitar Tuner',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'SpaceMono',
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset('assets/images/icon.png', width: 24, height: 24),
+            const SizedBox(width: 8),
+            const Text(
+              'Acorde',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'SpaceMono',
+              ),
+            ),
+          ],
         ),
         elevation: 1,
       ),

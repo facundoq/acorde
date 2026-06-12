@@ -73,11 +73,10 @@ void main() {
   });
 
   group('SearchScreen with mock UltimateGuitar source', () {
-    testWidgets('renders the search field and app bar on startup',
-        (WidgetTester tester) async {
-      final screen = SearchScreen(
-        sources: [MockUGSource(searchResults: [])],
-      );
+    testWidgets('renders the search field and app bar on startup', (
+      WidgetTester tester,
+    ) async {
+      final screen = SearchScreen(sources: [MockUGSource(searchResults: [])]);
       await tester.pumpWidget(buildTestApp(screen));
       await tester.pumpAndSettle();
 
@@ -85,95 +84,100 @@ void main() {
       expect(find.text('Acorde'), findsOneWidget);
     });
 
-    testWidgets(
-        '"Add Online" button appears only when query length > 2',
-        (WidgetTester tester) async {
-      final screen = SearchScreen(
-        sources: [MockUGSource(searchResults: [])],
-      );
+    testWidgets('"Search" button appears only when query length > 2', (
+      WidgetTester tester,
+    ) async {
+      final screen = SearchScreen(sources: [MockUGSource(searchResults: [])]);
       await tester.pumpWidget(buildTestApp(screen));
       await tester.pumpAndSettle();
 
       // Button should NOT appear for a short query
       await tester.enterText(find.byType(TextField), 'ab');
       await tester.pumpAndSettle();
-      expect(find.text('Add Online'), findsNothing);
+      expect(find.text('Search'), findsNothing);
 
       // Button SHOULD appear for a query longer than 2 chars
       await tester.enterText(find.byType(TextField), 'yellow');
       await tester.pumpAndSettle();
-      expect(find.text('Add Online'), findsOneWidget);
+      expect(
+        find.text('Search'),
+        findsWidgets,
+      ); // TextField prefix icon might contain Search, or the button
     });
 
     testWidgets(
-        'search results from mock source appear in the list after tapping Add Online',
-        (WidgetTester tester) async {
-      final mockResults = [
-        SongSearchResult(
-          id: 'https://www.ultimate-guitar.com/tab/the-beatles/yellow-submarine-chords-1',
-          title: 'Yellow Submarine',
-          artist: 'The Beatles',
-          source: 'ultimateguitar',
-          url: 'https://www.ultimate-guitar.com/tab/the-beatles/yellow-submarine-chords-1',
-          instrument: 'Chords',
-          rating: 4.8,
-        ),
-        SongSearchResult(
-          id: 'https://www.ultimate-guitar.com/tab/coldplay/yellow-chords-2',
-          title: 'Yellow',
-          artist: 'Coldplay',
-          source: 'ultimateguitar',
-          url: 'https://www.ultimate-guitar.com/tab/coldplay/yellow-chords-2',
-          instrument: 'Chords',
-          rating: 4.6,
-        ),
-      ];
+      'search results from mock source appear in the list after tapping Search',
+      (WidgetTester tester) async {
+        final mockResults = [
+          SongSearchResult(
+            id: 'https://www.ultimate-guitar.com/tab/the-beatles/yellow-submarine-chords-1',
+            title: 'Yellow Submarine',
+            artist: 'The Beatles',
+            source: 'ultimateguitar',
+            url:
+                'https://www.ultimate-guitar.com/tab/the-beatles/yellow-submarine-chords-1',
+            instrument: 'Chords',
+            rating: 4.8,
+          ),
+          SongSearchResult(
+            id: 'https://www.ultimate-guitar.com/tab/coldplay/yellow-chords-2',
+            title: 'Yellow',
+            artist: 'Coldplay',
+            source: 'ultimateguitar',
+            url: 'https://www.ultimate-guitar.com/tab/coldplay/yellow-chords-2',
+            instrument: 'Chords',
+            rating: 4.6,
+          ),
+        ];
 
-      final screen = SearchScreen(
-        sources: [MockUGSource(searchResults: mockResults)],
-      );
-      await tester.pumpWidget(buildTestApp(screen));
-      await tester.pumpAndSettle();
+        final screen = SearchScreen(
+          sources: [MockUGSource(searchResults: mockResults)],
+        );
+        await tester.pumpWidget(buildTestApp(screen));
+        await tester.pumpAndSettle();
 
-      // Type a query longer than 2 chars to reveal the "Add Online" button
-      await tester.enterText(find.byType(TextField), 'yellow');
-      await tester.pumpAndSettle();
+        // Type a query longer than 2 chars to reveal the "Search" button
+        await tester.enterText(find.byType(TextField), 'yellow');
+        await tester.pumpAndSettle();
 
-      // Tap "Add Online" button
-      expect(find.text('Add Online'), findsOneWidget);
-      await tester.tap(find.text('Add Online'));
+        // Tap "Search" button (the elevated button, not the search icon in TextField)
+        final searchButton = find.widgetWithText(ElevatedButton, 'Search');
+        expect(searchButton, findsOneWidget);
+        await tester.tap(searchButton);
 
-      // Allow the async search (50 ms mock delay + setState) to complete
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.pumpAndSettle();
+        // Allow the async search (50 ms mock delay + setState) to complete
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.pumpAndSettle();
 
-      // The section header "Online Results" must be visible
-      expect(find.text('Online Results'), findsOneWidget);
+        // The section header "Online Results" must be visible
+        expect(find.text('Online Results'), findsOneWidget);
 
-      // Both result titles must appear in the rendered widget tree
-      expect(find.text('Yellow Submarine'), findsOneWidget);
-      expect(find.text('Yellow'), findsWidgets); // also in text field
-      expect(find.text('The Beatles'), findsOneWidget);
-      expect(find.text('Coldplay'), findsOneWidget);
-    });
+        // Both result titles must appear in the rendered widget tree
+        expect(find.text('Yellow Submarine'), findsOneWidget);
+        expect(find.text('Yellow'), findsWidgets); // also in text field
+        expect(find.text('The Beatles'), findsOneWidget);
+        expect(find.text('Coldplay'), findsOneWidget);
+      },
+    );
 
-    testWidgets('shows "No online results" status when source returns empty list',
-        (WidgetTester tester) async {
-      final screen = SearchScreen(
-        sources: [MockUGSource(searchResults: [])],
-      );
-      await tester.pumpWidget(buildTestApp(screen));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'shows "No online results" status when source returns empty list',
+      (WidgetTester tester) async {
+        final screen = SearchScreen(sources: [MockUGSource(searchResults: [])]);
+        await tester.pumpWidget(buildTestApp(screen));
+        await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField), 'xyznotexist999');
-      await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), 'xyznotexist999');
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Add Online'));
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.pumpAndSettle();
+        final searchButton = find.widgetWithText(ElevatedButton, 'Search');
+        await tester.tap(searchButton);
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.pumpAndSettle();
 
-      // Should show the no-results status message
-      expect(find.textContaining('No online results'), findsOneWidget);
-    });
+        // Should show the no-results status message
+        expect(find.textContaining('No online results'), findsOneWidget);
+      },
+    );
   });
 }

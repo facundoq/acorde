@@ -19,15 +19,11 @@ import 'package:acorde/core/models.dart';
 // Helpers
 // ---------------------------------------------------------------------------
 
-String buildSearchHtml({
-  required List<Map<String, dynamic>> results,
-}) {
+String buildSearchHtml({required List<Map<String, dynamic>> results}) {
   final data = {
     'store': {
       'page': {
-        'data': {
-          'results': results,
-        },
+        'data': {'results': results},
       },
     },
   };
@@ -64,9 +60,7 @@ String buildSongHtml({
         'data': {
           'tab': tabData,
           'tab_view': {
-            'wiki_tab': {
-              'content': content,
-            },
+            'wiki_tab': {'content': content},
           },
         },
       },
@@ -123,9 +117,7 @@ void main() {
     late String Function(String url) nextHtml;
 
     setUp(() {
-      source = UltimateGuitarSource(
-        fetchHtmlFn: (url) async => nextHtml(url),
-      );
+      source = UltimateGuitarSource(fetchHtmlFn: (url) async => nextHtml(url));
     });
 
     // -----------------------------------------------------------------------
@@ -133,26 +125,28 @@ void main() {
     // -----------------------------------------------------------------------
     group('search()', () {
       test('parses multiple results from js-store JSON', () async {
-        nextHtml = (_) => buildSearchHtml(results: [
-              {
-                'song_name': 'Yellow Submarine',
-                'artist_name': 'The Beatles',
-                'tab_url':
-                    'https://www.ultimate-guitar.com/tab/the-beatles/yellow-submarine-chords-46953',
-                'type_name': 'Chords',
-                'rating': '4.8',
-                'is_pro': false,
-              },
-              {
-                'song_name': 'Yellow',
-                'artist_name': 'Coldplay',
-                'tab_url':
-                    'https://www.ultimate-guitar.com/tab/coldplay/yellow-chords-12345',
-                'type_name': 'Chords',
-                'rating': '4.6',
-                'is_pro': false,
-              },
-            ]);
+        nextHtml = (_) => buildSearchHtml(
+          results: [
+            {
+              'song_name': 'Yellow Submarine',
+              'artist_name': 'The Beatles',
+              'tab_url':
+                  'https://www.ultimate-guitar.com/tab/the-beatles/yellow-submarine-chords-46953',
+              'type_name': 'Chords',
+              'rating': '4.8',
+              'is_pro': false,
+            },
+            {
+              'song_name': 'Yellow',
+              'artist_name': 'Coldplay',
+              'tab_url':
+                  'https://www.ultimate-guitar.com/tab/coldplay/yellow-chords-12345',
+              'type_name': 'Chords',
+              'rating': '4.6',
+              'is_pro': false,
+            },
+          ],
+        );
 
         final results = await source.search('yellow');
 
@@ -165,38 +159,66 @@ void main() {
       });
 
       test('filters out PRO / Official tabs', () async {
-        nextHtml = (_) => buildSearchHtml(results: [
-              {
-                'song_name': 'Bohemian Rhapsody',
-                'artist_name': 'Queen',
-                'tab_url':
-                    'https://www.ultimate-guitar.com/tab/queen/bohemian-rhapsody-chords-1234',
-                'type_name': 'Chords',
-                'is_pro': false,
-              },
-              {
-                'song_name': 'Bohemian Rhapsody Pro',
-                'artist_name': 'Queen',
-                'tab_url':
-                    'https://www.ultimate-guitar.com/tab/queen/bohemian-rhapsody-pro-5678',
-                'type_name': 'Official',
-                'is_pro': true,
-              },
-              {
-                'song_name': 'Bohemian Rhapsody Guitar Pro',
-                'artist_name': 'Queen',
-                'tab_url':
-                    'https://www.ultimate-guitar.com/tab/queen/bohemian-rhapsody-gp-9999',
-                'type_name': 'Guitar Pro',
-                'is_pro': false,
-              },
-            ]);
+        nextHtml = (_) => buildSearchHtml(
+          results: [
+            {
+              'song_name': 'Bohemian Rhapsody',
+              'artist_name': 'Queen',
+              'tab_url':
+                  'https://www.ultimate-guitar.com/tab/queen/bohemian-rhapsody-chords-1234',
+              'type_name': 'Chords',
+              'is_pro': false,
+            },
+            {
+              'song_name': 'Bohemian Rhapsody Pro',
+              'artist_name': 'Queen',
+              'tab_url':
+                  'https://www.ultimate-guitar.com/tab/queen/bohemian-rhapsody-pro-5678',
+              'type_name': 'Official',
+              'is_pro': true,
+            },
+            {
+              'song_name': 'Bohemian Rhapsody Guitar Pro',
+              'artist_name': 'Queen',
+              'tab_url':
+                  'https://www.ultimate-guitar.com/tab/queen/bohemian-rhapsody-gp-9999',
+              'type_name': 'Guitar Pro',
+              'is_pro': false,
+            },
+            {
+              'song_name': 'Bohemian Rhapsody Official Web',
+              'artist_name': 'Queen',
+              'tab_url':
+                  'https://www.ultimate-guitar.com/tab/queen/bohemian-rhapsody-official-1111',
+              'type_name': 'Chords',
+              'is_official': true,
+            },
+            {
+              'song_name': 'Bohemian Rhapsody Marketing Pro',
+              'artist_name': 'Queen',
+              'tab_url':
+                  'https://www.ultimate-guitar.com/tab/queen/bohemian-rhapsody-chords-2222',
+              'type_name': 'Chords',
+              'marketing_type': 'pro',
+            },
+            {
+              'song_name': 'Professional Widow',
+              'artist_name': 'Tori Amos',
+              'tab_url':
+                  'https://www.ultimate-guitar.com/tab/tori-amos/professional-widow-chords-12345',
+              'type_name': 'Chords',
+              'is_pro': false,
+            },
+          ],
+        );
 
         final results = await source.search('bohemian');
 
-        expect(results.length, equals(1));
+        expect(results.length, equals(2));
         expect(results[0].title, equals('Bohemian Rhapsody'));
         expect(results[0].instrument, equals('Chords'));
+        expect(results[1].title, equals('Professional Widow'));
+        expect(results[1].artist, equals('Tori Amos'));
       });
 
       test('returns empty list when results array is empty', () async {
@@ -206,8 +228,7 @@ void main() {
       });
 
       test('returns empty list when page has no js-store element', () async {
-        nextHtml = (_) =>
-            '<html><body><h1>404 Not Found</h1></body></html>';
+        nextHtml = (_) => '<html><body><h1>404 Not Found</h1></body></html>';
         final results = await source.search('anysong');
         expect(results, isEmpty);
       });
@@ -231,17 +252,19 @@ void main() {
       });
 
       test('parses rating as double when present', () async {
-        nextHtml = (_) => buildSearchHtml(results: [
-              {
-                'song_name': 'Wonderwall',
-                'artist_name': 'Oasis',
-                'tab_url':
-                    'https://www.ultimate-guitar.com/tab/oasis/wonderwall-chords-1',
-                'type_name': 'Chords',
-                'rating': '4.9',
-                'is_pro': false,
-              },
-            ]);
+        nextHtml = (_) => buildSearchHtml(
+          results: [
+            {
+              'song_name': 'Wonderwall',
+              'artist_name': 'Oasis',
+              'tab_url':
+                  'https://www.ultimate-guitar.com/tab/oasis/wonderwall-chords-1',
+              'type_name': 'Chords',
+              'rating': '4.9',
+              'is_pro': false,
+            },
+          ],
+        );
 
         final results = await source.search('wonderwall');
         expect(results.first.rating, closeTo(4.9, 0.001));
@@ -254,12 +277,12 @@ void main() {
     group('getSong()', () {
       test('parses title, artist and UG-format content', () async {
         nextHtml = (_) => buildSongHtml(
-              songName: 'Yellow Submarine',
-              artistName: 'The Beatles',
-              content: _yellowContent,
-              type: 'Chords',
-              rating: 4.8,
-            );
+          songName: 'Yellow Submarine',
+          artistName: 'The Beatles',
+          content: _yellowContent,
+          type: 'Chords',
+          rating: 4.8,
+        );
 
         final song = await source.getSong(
           'https://www.ultimate-guitar.com/tab/the-beatles/yellow-submarine-chords-46953',
@@ -274,10 +297,10 @@ void main() {
 
       test('parses Bohemian Rhapsody content', () async {
         nextHtml = (_) => buildSongHtml(
-              songName: 'Bohemian Rhapsody',
-              artistName: 'Queen',
-              content: _bohemianContent,
-            );
+          songName: 'Bohemian Rhapsody',
+          artistName: 'Queen',
+          content: _bohemianContent,
+        );
 
         final song = await source.getSong(
           'https://www.ultimate-guitar.com/tab/queen/bohemian-rhapsody-chords-1234',
@@ -289,18 +312,20 @@ void main() {
         expect(song.lyrics, contains('[ch]Bb[/ch]'));
       });
 
-      test('returns SongContent with fallback values on empty js-store', () async {
-        nextHtml = (_) =>
-            '<html><body><h1>Error</h1></body></html>';
+      test(
+        'returns SongContent with fallback values on empty js-store',
+        () async {
+          nextHtml = (_) => '<html><body><h1>Error</h1></body></html>';
 
-        final song = await source.getSong(
-          'https://www.ultimate-guitar.com/tab/artist/song-1',
-        );
+          final song = await source.getSong(
+            'https://www.ultimate-guitar.com/tab/artist/song-1',
+          );
 
-        // Should not throw — returns a SongContent with error indication
-        expect(song, isA<SongContent>());
-        expect(song.title, isNotEmpty);
-      });
+          // Should not throw — returns a SongContent with error indication
+          expect(song, isA<SongContent>());
+          expect(song.title, isNotEmpty);
+        },
+      );
 
       test('throws on Cloudflare bot-detection page', () async {
         nextHtml = (_) =>

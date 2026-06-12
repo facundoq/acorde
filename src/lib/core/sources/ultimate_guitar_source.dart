@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 import 'dart:convert';
 import 'package:html/parser.dart' as parser;
+import 'package:html/dom.dart' as dom;
 import '../models.dart';
 import '../../services/fetcher.dart';
 import './source.dart';
@@ -12,6 +13,49 @@ class UltimateGuitarSource implements Source {
   final Future<String> Function(String url)? fetchHtmlFn;
 
   UltimateGuitarSource({this.fetchHtmlFn});
+
+  bool _isExcluded(
+    String url,
+    String type, {
+    dynamic isProValue,
+    dynamic marketingType,
+    dynamic isOfficialValue,
+  }) {
+    final isPro =
+        isProValue == true ||
+        isProValue == 1 ||
+        isProValue.toString() == '1' ||
+        isProValue.toString().toLowerCase() == 'true';
+
+    final isOfficial =
+        isOfficialValue == true ||
+        isOfficialValue == 1 ||
+        isOfficialValue.toString() == '1' ||
+        isOfficialValue.toString().toLowerCase() == 'true';
+
+    final mType = (marketingType ?? '').toString().toLowerCase();
+    final isProMarketing =
+        mType == 'pro' || mType == 'official' || mType == 'premium';
+
+    final lowerType = type.toLowerCase();
+    final lowerUrl = url.toLowerCase();
+
+    // Regex for matching URL suffixes like -official, -pro, -power, -guitar-pro, -video
+    final urlSuffixPattern = RegExp(
+      r'-(?:official|pro|power|guitar-pro|video)(?:-\d+)?$',
+      caseSensitive: false,
+    );
+
+    return isPro ||
+        isOfficial ||
+        isProMarketing ||
+        lowerType.contains('pro') ||
+        lowerType.contains('official') ||
+        lowerType.contains('power') ||
+        lowerType.contains('guitar pro') ||
+        lowerType.contains('video') ||
+        urlSuffixPattern.hasMatch(lowerUrl);
+  }
 
   Future<String> _fetch(String url) {
     if (fetchHtmlFn != null) return fetchHtmlFn!(url);
@@ -40,17 +84,15 @@ class UltimateGuitarSource implements Source {
               if (res == null || res is! Map) continue;
               final typeName = (res['type_name'] ?? res['type'] ?? '')
                   .toString();
-              final type = typeName.toLowerCase();
               final url = (res['tab_url'] ?? '').toString();
 
-              final isPro = res['is_pro'] == true;
-              final isExcludedType =
-                  isPro ||
-                  type.contains('pro') ||
-                  type.contains('official') ||
-                  type.contains('power') ||
-                  type.contains('guitar pro') ||
-                  type.contains('video');
+              final isExcludedType = _isExcluded(
+                url,
+                typeName,
+                isProValue: res['is_pro'],
+                marketingType: res['marketing_type'],
+                isOfficialValue: res['is_official'],
+              );
 
               final isPublicPattern = url.contains('ultimate-guitar.com/tab/');
 
@@ -84,10 +126,13 @@ class UltimateGuitarSource implements Source {
             final pathSegments = uri.pathSegments;
             if (pathSegments.length >= 3 && pathSegments[0] == 'tab') {
               final rawArtist = pathSegments[1].replaceAll('-', ' ');
-              final artist = rawArtist.split(' ').map((word) {
-                if (word.isEmpty) return '';
-                return word[0].toUpperCase() + word.substring(1);
-              }).join(' ');
+              final artist = rawArtist
+                  .split(' ')
+                  .map((word) {
+                    if (word.isEmpty) return '';
+                    return word[0].toUpperCase() + word.substring(1);
+                  })
+                  .join(' ');
 
               String instrument = 'Chords';
               final lastSegment = pathSegments[2].toLowerCase();
@@ -100,6 +145,8 @@ class UltimateGuitarSource implements Source {
               } else if (lastSegment.contains('tab')) {
                 instrument = 'Tab';
               }
+
+              if (_isExcluded(href, instrument)) continue;
 
               // De-duplicate: don't add the same tab twice
               if (!results.any((r) => r.url == href)) {
@@ -163,13 +210,7 @@ class UltimateGuitarSource implements Source {
           final artist = i < artistNames.length ? artistNames[i] : 'Unknown';
           final typeName = i < typeNames.length ? typeNames[i] : '';
 
-          final lowerType = typeName.toLowerCase();
-          final isExcludedType =
-              lowerType.contains('pro') ||
-              lowerType.contains('official') ||
-              lowerType.contains('power') ||
-              lowerType.contains('guitar pro') ||
-              lowerType.contains('video');
+          final isExcludedType = _isExcluded(url, typeName);
 
           final isPublicPattern = url.contains('ultimate-guitar.com/tab/');
 
@@ -241,6 +282,61 @@ class UltimateGuitarSource implements Source {
       }
     }
 
+    // Mobile layout fallback using application/ld+json and .js-tab-content or pre
+    final ldJsonScript = document.querySelector(
+      'script[type="application/ld+json"]',
+    );
+    final tabContentEl =
+        document.querySelector('.js-tab-content') ??
+        document.querySelector('pre');
+
+    if (ldJsonScript != null && tabContentEl != null) {
+      try {
+        final data = jsonDecode(ldJsonScript.text);
+        final title = (data['name'] ?? 'Unknown Title').toString();
+        final artist = (data['byArtist']?['name'] ?? 'Unknown Artist')
+            .toString();
+        final lyrics = _wrapTabBlocks(_convertHtmlToUgFormat(tabContentEl));
+
+        final ratingValue = data['aggregateRating']?['ratingValue'];
+        final rating = ratingValue != null
+            ? double.tryParse(ratingValue.toString())
+            : null;
+
+        // Parse instrument from url
+        String instrument = 'Chords';
+        final uri = Uri.tryParse(url);
+        if (uri != null) {
+          final pathSegments = uri.pathSegments;
+          if (pathSegments.length >= 3) {
+            final lastSegment = pathSegments[2].toLowerCase();
+            if (lastSegment.contains('chords')) {
+              instrument = 'Chords';
+            } else if (lastSegment.contains('ukulele')) {
+              instrument = 'Ukulele';
+            } else if (lastSegment.contains('bass')) {
+              instrument = 'Bass';
+            } else if (lastSegment.contains('tab')) {
+              instrument = 'Tab';
+            }
+          }
+        }
+
+        return SongContent(
+          title: title,
+          artist: artist,
+          lyrics: lyrics,
+          chords: lyrics,
+          url: url,
+          source: name,
+          instrument: instrument,
+          rating: rating,
+        );
+      } catch (e) {
+        print('UG mobile layout fallback error: $e');
+      }
+    }
+
     // Regex fallback
     final contentMatch = RegExp(
       r'[\x22\x27]?content[\x22\x27]?\s*:\s*[\x22\x27]([^\x22\x27]+)[\x22\x27]',
@@ -280,5 +376,60 @@ class UltimateGuitarSource implements Source {
       url: url,
       source: name,
     );
+  }
+
+  String _convertHtmlToUgFormat(dom.Element element) {
+    final buffer = StringBuffer();
+    void traverse(dom.Node node) {
+      if (node is dom.Element) {
+        if (node.localName == 'span' &&
+            (node.className.contains('tabContent-chord') ||
+                node.className.contains('js-chord-chord') ||
+                node.attributes.containsKey('data-name') ||
+                node.attributes.containsKey('data-original-chord'))) {
+          buffer.write('[ch]${node.text.trim()}[/ch]');
+        } else {
+          for (final child in node.nodes) {
+            traverse(child);
+          }
+        }
+      } else if (node is dom.Text) {
+        buffer.write(node.text);
+      }
+    }
+
+    for (final child in element.nodes) {
+      traverse(child);
+    }
+    return buffer.toString();
+  }
+
+  String _wrapTabBlocks(String content) {
+    final lines = content.split('\n');
+    final List<String> result = [];
+
+    for (int i = 0; i < lines.length; i++) {
+      final currentLine = lines[i];
+      final nextLine = (i + 1 < lines.length) ? lines[i + 1] : null;
+
+      final hasChords = currentLine.contains('[ch]');
+      final nextIsLyrics =
+          nextLine != null &&
+          !nextLine.contains('[ch]') &&
+          !nextLine.contains('[') &&
+          nextLine.trim().isNotEmpty;
+
+      if (hasChords && nextIsLyrics) {
+        result.add('[tab]$currentLine');
+        result.add('$nextLine[/tab]');
+        i++; // skip next line
+      } else if (hasChords) {
+        result.add('[tab]$currentLine[/tab]');
+      } else {
+        result.add(currentLine);
+      }
+    }
+
+    return result.join('\n');
   }
 }

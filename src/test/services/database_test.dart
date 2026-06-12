@@ -12,16 +12,16 @@ void main() {
       // Reset database singleton for each test
       DatabaseService.reset();
       DatabaseService.dbName = inMemoryDatabasePath;
+      final db = await DatabaseService.database;
+      await db.delete('songs');
     });
 
-    test('should initialize and seed database with default song', () async {
+    test('should initialize database empty', () async {
       final db = await DatabaseService.database;
       expect(db, isNotNull);
 
       final songs = await DatabaseService.getSongs();
-      expect(songs.length, equals(1));
-      expect(songs[0].title, equals('Yellow Submarine'));
-      expect(songs[0].artist, equals('The Beatles'));
+      expect(songs.length, equals(0));
     });
 
     test('should save and retrieve a song', () async {
@@ -48,7 +48,7 @@ void main() {
       expect(song.rating, equals(5.0));
 
       final allSongs = await DatabaseService.getSongs();
-      expect(allSongs.length, equals(2)); // Default + New
+      expect(allSongs.length, equals(1)); // New only
     });
 
     test('should search local songs by title or artist', () async {
@@ -65,6 +65,20 @@ void main() {
         rating: 5.0,
       );
       await DatabaseService.saveSong(newSong);
+
+      final beatlesSong = SavedSong(
+        sourceId: 'test-song-id-2',
+        title: 'Yellow Submarine',
+        artist: 'The Beatles',
+        lyrics: 'We all live in...',
+        chords: 'G D C G',
+        source: 'testsource',
+        url: 'https://example.com/yellow',
+        createdAt: '',
+        instrument: 'Chords',
+        rating: 4.8,
+      );
+      await DatabaseService.saveSong(beatlesSong);
 
       // Search by title
       var results = await DatabaseService.searchLocalSongs('Imag');
@@ -98,13 +112,41 @@ void main() {
       final id = await DatabaseService.saveSong(newSong);
 
       var allSongs = await DatabaseService.getSongs();
-      expect(allSongs.length, equals(2));
+      expect(allSongs.length, equals(1));
 
       await DatabaseService.deleteSong(id);
 
       allSongs = await DatabaseService.getSongs();
-      expect(allSongs.length, equals(1));
-      expect(allSongs[0].title, equals('Yellow Submarine'));
+      expect(allSongs.length, equals(0));
+    });
+
+    test('should get a song by source and sourceId', () async {
+      final newSong = SavedSong(
+        sourceId: 'test-source-id-123',
+        title: 'Yesterday',
+        artist: 'The Beatles',
+        lyrics: 'Yesterday, all my troubles seemed so far away...',
+        chords: 'F Em A7 Dm',
+        source: 'testsource',
+        url: 'https://example.com/yesterday',
+        createdAt: '',
+        instrument: 'Chords',
+        rating: 4.9,
+      );
+      await DatabaseService.saveSong(newSong);
+
+      final found = await DatabaseService.getSongBySourceAndId(
+        'testsource',
+        'test-source-id-123',
+      );
+      expect(found, isNotNull);
+      expect(found!.title, equals('Yesterday'));
+
+      final notFound = await DatabaseService.getSongBySourceAndId(
+        'wrongsource',
+        'test-source-id-123',
+      );
+      expect(notFound, isNull);
     });
   });
 }

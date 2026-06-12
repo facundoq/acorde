@@ -59,17 +59,20 @@ void main() {
       expect(html, contains('chromium result'));
     });
 
-    test('skips unavailable binaries and uses the next available one', () async {
-      final html = await simulateChromiumFetch(
-        url: 'https://example.com',
-        // chromium-browser and chromium are NOT available
-        available: {'google-chrome-stable'},
-        htmlByBinary: {
-          'google-chrome-stable': '<html>chrome-stable result</html>',
-        },
-      );
-      expect(html, contains('chrome-stable result'));
-    });
+    test(
+      'skips unavailable binaries and uses the next available one',
+      () async {
+        final html = await simulateChromiumFetch(
+          url: 'https://example.com',
+          // chromium-browser and chromium are NOT available
+          available: {'google-chrome-stable'},
+          htmlByBinary: {
+            'google-chrome-stable': '<html>chrome-stable result</html>',
+          },
+        );
+        expect(html, contains('chrome-stable result'));
+      },
+    );
 
     test('falls back to HTTP when no browser is available', () async {
       final html = await simulateChromiumFetch(
@@ -92,17 +95,20 @@ void main() {
       );
     });
 
-    test('skips a binary that returns empty output and tries the next', () async {
-      final html = await simulateChromiumFetch(
-        url: 'https://example.com',
-        available: {'chromium-browser', 'chromium'},
-        htmlByBinary: {
-          'chromium-browser': '', // empty → treat as failure
-          'chromium': '<html>fallback chromium</html>',
-        },
-      );
-      expect(html, contains('fallback chromium'));
-    });
+    test(
+      'skips a binary that returns empty output and tries the next',
+      () async {
+        final html = await simulateChromiumFetch(
+          url: 'https://example.com',
+          available: {'chromium-browser', 'chromium'},
+          htmlByBinary: {
+            'chromium-browser': '', // empty → treat as failure
+            'chromium': '<html>fallback chromium</html>',
+          },
+        );
+        expect(html, contains('fallback chromium'));
+      },
+    );
   });
 
   // -------------------------------------------------------------------------
@@ -114,10 +120,13 @@ void main() {
       expect(fetchHtml, isA<Future<String> Function(String)>());
     });
 
-    test('terminateLinuxWebView is exported and callable as a Future<void>', () async {
-      expect(terminateLinuxWebView, isA<Future<void> Function()>());
-      // Calling it on the test VM should complete without errors (stub is used).
-      await expectLater(terminateLinuxWebView(), completes);
-    });
+    test(
+      'terminateLinuxWebView is exported and callable as a Future<void>',
+      () async {
+        expect(terminateLinuxWebView, isA<Future<void> Function()>());
+        // Calling it on the test VM should complete without errors (stub is used).
+        await expectLater(terminateLinuxWebView(), completes);
+      },
+    );
   });
 }

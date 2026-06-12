@@ -19,6 +19,9 @@ import 'package:acorde/core/models.dart';
 import 'package:acorde/core/sources/source.dart';
 import 'package:acorde/ui/screens/home_tabs.dart';
 import 'package:acorde/ui/screens/search_screen.dart';
+import 'package:acorde/ui/screens/collection_screen.dart';
+import 'package:acorde/ui/screens/diagrams_screen.dart';
+import 'package:acorde/ui/screens/tuner_screen.dart';
 
 // ---------------------------------------------------------------------------
 // Lightweight mock source for integration tests
@@ -76,7 +79,7 @@ class _MockUGSource implements Source {
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  group('End-to-End App UI Tests', () {
+  group('End-to-End App Flow', () {
     // -----------------------------------------------------------------------
     // 1. Navigation smoke test (no network)
     // -----------------------------------------------------------------------
@@ -88,26 +91,27 @@ void main() {
         app.main();
         await tester.pumpAndSettle();
 
-        // App bar title on the Search/My Tabs screen
-        expect(find.text('Acorde'), findsOneWidget);
+        // Starts on Collection screen check
+        expect(find.byType(CollectionScreen), findsOneWidget);
+        expect(find.text('Acorde'), findsWidgets);
         expect(find.byType(TextField), findsOneWidget);
         expect(find.byType(HomeTabs), findsOneWidget);
 
         // Navigate to Diagrams
         await tester.tap(find.text('Diagrams'));
         await tester.pumpAndSettle();
-        expect(find.text('Chord Diagrams'), findsOneWidget);
+        expect(find.byType(DiagramsScreen), findsOneWidget);
 
         // Navigate to Tuner
         await tester.tap(find.text('Tuner'));
         await tester.pumpAndSettle();
-        expect(find.text('Guitar Tuner'), findsOneWidget);
+        expect(find.byType(TunerScreen), findsOneWidget);
         expect(find.text('Start Tuning'), findsOneWidget);
 
-        // Navigate back to My Tabs
-        await tester.tap(find.text('My Tabs'));
+        // Navigate to Search
+        await tester.tap(find.text('Search'));
         await tester.pumpAndSettle();
-        expect(find.text('Acorde'), findsOneWidget);
+        expect(find.byType(SearchScreen), findsOneWidget);
       },
     );
 
@@ -127,22 +131,21 @@ void main() {
 
         // Build just the SearchScreen with the mock source injected
         await tester.pumpWidget(
-          MaterialApp(
-            home: SearchScreen(sources: [_MockUGSource()]),
-          ),
+          MaterialApp(home: SearchScreen(sources: [_MockUGSource()])),
         );
         await tester.pumpAndSettle();
 
         // The search field must be present
         expect(find.byType(TextField), findsOneWidget);
 
-        // Type a query longer than 2 chars (required for "Add Online" to appear)
+        // Type a query longer than 2 chars (required for "Search" to appear)
         await tester.enterText(find.byType(TextField), 'yellow');
         await tester.pumpAndSettle();
 
-        // Tap the "Add Online" ElevatedButton
-        expect(find.text('Add Online'), findsOneWidget);
-        await tester.tap(find.text('Add Online'));
+        // Tap the "Search" ElevatedButton
+        final searchButton = find.widgetWithText(ElevatedButton, 'Search');
+        expect(searchButton, findsOneWidget);
+        await tester.tap(searchButton);
 
         // Allow the async search (30 ms mock delay) to complete
         await tester.pump(const Duration(milliseconds: 200));
@@ -168,7 +171,7 @@ void main() {
         await tester.tap(find.text('Diagrams'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Chord Diagrams'), findsOneWidget);
+        expect(find.byType(DiagramsScreen), findsOneWidget);
 
         // Search for a chord
         await tester.enterText(find.byType(TextField), 'C');

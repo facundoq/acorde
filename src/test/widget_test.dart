@@ -4,6 +4,10 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:acorde/main.dart';
 import 'package:acorde/services/database.dart';
 import 'package:acorde/ui/screens/home_tabs.dart';
+import 'package:acorde/ui/screens/search_screen.dart';
+import 'package:acorde/ui/screens/collection_screen.dart';
+import 'package:acorde/ui/screens/diagrams_screen.dart';
+import 'package:acorde/ui/screens/tuner_screen.dart';
 
 void main() {
   setUpAll(() {
@@ -30,25 +34,37 @@ void main() {
     expect(find.byType(HomeTabs), findsOneWidget);
 
     // Verify the tabs are rendered in the NavigationBar
-    expect(find.text('My Tabs'), findsOneWidget);
+    expect(find.text('Search'), findsOneWidget);
+    expect(find.text('Collection'), findsOneWidget);
     expect(find.text('Diagrams'), findsOneWidget);
     expect(find.text('Tuner'), findsOneWidget);
 
-    // Verify we start on the Search Screen / My Tabs screen
-    expect(find.text('Acorde'), findsOneWidget);
+    // Verify we start on the Collection Screen
+    expect(find.byType(CollectionScreen), findsOneWidget);
+    expect(find.text('Acorde'), findsWidgets);
+
+    // Switch to Search tab
+    await tester.tap(find.text('Search'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SearchScreen), findsOneWidget);
 
     // Switch to Diagrams tab
     await tester.tap(find.text('Diagrams'));
     await tester.pumpAndSettle();
 
-    // Verify Diagrams title is visible
-    expect(find.text('Chord Diagrams'), findsOneWidget);
+    // Verify Diagrams screen is visible
+    expect(find.byType(DiagramsScreen), findsOneWidget);
 
     // Switch to Tuner tab
     await tester.tap(find.text('Tuner'));
     await tester.pumpAndSettle();
 
-    // Verify Tuner title is visible
-    expect(find.text('Guitar Tuner'), findsOneWidget);
+    // Verify Tuner screen is visible
+    expect(find.byType(TunerScreen), findsOneWidget);
+
+    // Switch back to Collection tab
+    await tester.tap(find.text('Collection'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CollectionScreen), findsOneWidget);
   });
 }

@@ -159,27 +159,23 @@ const _chromiumBinaries = [
 Future<String> _fetchWithHeadlessChromium(String url) async {
   for (final binary in _chromiumBinaries) {
     try {
-      final result = await Process.run(
-        binary,
-        [
-          '--headless',
-          '--disable-gpu',
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-blink-features=AutomationControlled',
-          '--dump-dom',
-          '--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
-              '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-          url,
-        ],
-        runInShell: false,
-      ).timeout(
-        const Duration(seconds: 30),
-        onTimeout: () => throw TimeoutException(
-          'headless $binary timed out for $url',
-        ),
-      );
+      final result =
+          await Process.run(binary, [
+            '--headless',
+            '--disable-gpu',
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-blink-features=AutomationControlled',
+            '--dump-dom',
+            '--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+                '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            url,
+          ], runInShell: false).timeout(
+            const Duration(seconds: 30),
+            onTimeout: () =>
+                throw TimeoutException('headless $binary timed out for $url'),
+          );
 
       final out = result.stdout as String;
       if (result.exitCode == 0 && out.trim().isNotEmpty) {
@@ -247,8 +243,8 @@ Future<String> _fetchWithMobileOverlay(
 
   entry = OverlayEntry(
     builder: (_) => Positioned(
-      left: 0,
-      top: 0,
+      left: -4000,
+      top: -4000,
       width: 1024,
       height: 768,
       child: IgnorePointer(
@@ -294,7 +290,8 @@ Future<String> _fetchWithHeadlessInAppWebView(String url) async {
 
   final userScripts = UnmodifiableListView<UserScript>([
     UserScript(
-      source: "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});",
+      source:
+          "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});",
       injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
     ),
   ]);
@@ -312,7 +309,8 @@ Future<String> _fetchWithHeadlessInAppWebView(String url) async {
                 // Block known ad/tracking domains to save memory and avoid renderer crashes
                 ContentBlocker(
                   trigger: ContentBlockerTrigger(
-                    urlFilter: ".*doubleclick\\.net.*|.*googleads.*|.*googlesyndication.*|.*securepubads.*|.*google-analytics.*|.*analytics.*|.*amazon-adsystem.*|.*taboola.*",
+                    urlFilter:
+                        ".*doubleclick\\.net.*|.*googleads.*|.*googlesyndication.*|.*securepubads.*|.*google-analytics.*|.*analytics.*|.*amazon-adsystem.*|.*taboola.*",
                   ),
                   action: ContentBlockerAction(
                     type: ContentBlockerActionType.BLOCK,
@@ -431,7 +429,8 @@ class _MobileWebViewWidgetState extends State<MobileWebViewWidget> {
   Widget build(BuildContext context) {
     final userScripts = UnmodifiableListView<UserScript>([
       UserScript(
-        source: "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});",
+        source:
+            "Object.defineProperty(navigator, 'webdriver', {get: () => undefined});",
         injectionTime: UserScriptInjectionTime.AT_DOCUMENT_START,
       ),
     ]);
@@ -508,9 +507,11 @@ Future<String> _fetchHttp(String url) async {
   final response = await http.get(
     Uri.parse(url),
     headers: {
-      'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
+      'User-Agent':
+          'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
           '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,'
+      'Accept':
+          'text/html,application/xhtml+xml,application/xml;q=0.9,'
           'image/avif,image/webp,image/apng,*/*;q=0.8,'
           'application/signed-exchange;v=b3;q=0.7',
       'Accept-Language': 'en-US,en;q=0.9',

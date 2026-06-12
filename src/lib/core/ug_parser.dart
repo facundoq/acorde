@@ -168,47 +168,81 @@ List<AlignedLine> parseAlignedSegments(String content) {
 
       final List<_ChordMatch> chords = [];
       final chordRegex = RegExp(r'\[ch\](.*?)\[\/ch\]');
-      int charPos = 0;
+
       int lastIndex = 0;
+      int strippedPos = 0;
+      final strippedChordsLineBuffer = StringBuffer();
 
       for (final Match match in chordRegex.allMatches(currentLine)) {
         final prefix = currentLine.substring(lastIndex, match.start);
-        charPos += prefix.length;
-        chords.add(_ChordMatch(match.group(1)!, charPos));
+        strippedChordsLineBuffer.write(prefix);
+        strippedPos += prefix.length;
+        chords.add(_ChordMatch(match.group(1)!, strippedPos));
+
+        strippedChordsLineBuffer.write(match.group(1)!);
+        strippedPos += match.group(1)!.length;
         lastIndex = match.end;
       }
+      final suffix = currentLine.substring(lastIndex);
+      strippedChordsLineBuffer.write(suffix);
+      strippedPos += suffix.length;
+      final strippedChordsLineLength = strippedPos;
 
       if (chords.isNotEmpty) {
-        if (chords[0].pos > 0) {
-          segments.add(
-            AlignedSegment(
-              chord: null,
-              text: nextLine.substring(0, chords[0].pos),
-            ),
-          );
-        }
+        final wordRegex = RegExp(r'\S+\s*|\s+');
+        final matches = wordRegex.allMatches(nextLine).toList();
 
-        for (int j = 0; j < chords.length; j++) {
-          final chord = chords[j];
-          final nextChordPos = (j + 1 < chords.length)
-              ? chords[j + 1].pos
-              : (nextLine.length > currentLine.length
-                    ? nextLine.length
-                    : currentLine.length);
+        for (int j = 0; j < matches.length; j++) {
+          final m = matches[j];
+          int start = m.start;
+          int end = m.end;
 
-          final startIdx = chord.pos < nextLine.length
-              ? chord.pos
+          // Extend first and last segments to catch leading/trailing chords
+          if (j == 0) {
+            start = 0;
+          }
+          if (j == matches.length - 1) {
+            end = strippedChordsLineLength > nextLine.length
+                ? strippedChordsLineLength
+                : nextLine.length;
+          }
+
+          final segmentChords = chords
+              .where((c) => c.pos >= start && c.pos < end)
+              .toList();
+
+          final textStart = m.start < nextLine.length
+              ? m.start
               : nextLine.length;
-          final endIdx = nextChordPos < nextLine.length
-              ? nextChordPos
-              : nextLine.length;
+          final textEnd = m.end < nextLine.length ? m.end : nextLine.length;
+          final wordText = nextLine.substring(textStart, textEnd);
 
-          segments.add(
-            AlignedSegment(
-              chord: chord.name,
-              text: nextLine.substring(startIdx, endIdx),
-            ),
-          );
+          if (segmentChords.isEmpty) {
+            segments.add(AlignedSegment(chord: null, text: wordText));
+          } else if (segmentChords.length == 1) {
+            segments.add(
+              AlignedSegment(chord: segmentChords[0].name, text: wordText),
+            );
+          } else {
+            // First chord is aligned with the text of the word
+            final firstChord = segmentChords[0];
+            segments.add(
+              AlignedSegment(chord: firstChord.name, text: wordText),
+            );
+
+            int lastPos = firstChord.pos + firstChord.name.length;
+            for (int k = 1; k < segmentChords.length; k++) {
+              final c = segmentChords[k];
+              final spacesCount = c.pos - lastPos;
+              if (spacesCount > 0) {
+                segments.add(
+                  AlignedSegment(chord: null, text: ' ' * spacesCount),
+                );
+              }
+              segments.add(AlignedSegment(chord: c.name, text: ''));
+              lastPos = c.pos + c.name.length;
+            }
+          }
         }
 
         result.add(
