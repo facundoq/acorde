@@ -22,6 +22,9 @@ jobs:
           distribution: 'temurin' # Recommended Eclipse Temurin distribution
           java-version: '21'      # Sets JAVA_HOME to Java 21
           cache: 'gradle'         # Automatically caches Gradle dependencies
+          cache-dependency-path: |
+            src/android/build.gradle.kts
+            src/android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
