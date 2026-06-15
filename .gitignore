@@ -155,8 +155,8 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
-android/
-ios/
+acorde-app/android/
+acorde-app/ios/
 
 # Metro
 .metro-health-check*
