@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/models.dart';
 import '../../core/sources/source.dart';
 import '../../core/sources/ultimate_guitar_source.dart';
@@ -593,7 +594,7 @@ class SearchScreenState extends State<SearchScreen> {
           title: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Image.asset('assets/images/icon.png', width: 24, height: 24),
+              SvgPicture.asset('assets/images/icon.svg', width: 24, height: 24),
               const SizedBox(width: 8),
               const Text(
                 'Acorde',

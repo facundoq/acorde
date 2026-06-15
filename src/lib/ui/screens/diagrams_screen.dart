@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/chord_shapes.dart';
 import '../components/chord_diagram.dart';
 
@@ -53,7 +54,7 @@ class _DiagramsScreenState extends State<DiagramsScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/images/icon.png', width: 24, height: 24),
+            SvgPicture.asset('assets/images/icon.svg', width: 24, height: 24),
             const SizedBox(width: 8),
             const Text(
               'Acorde',

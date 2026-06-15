@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'tuner/tuner_controller.dart';
 
@@ -407,7 +408,7 @@ class _TunerScreenState extends State<TunerScreen> {
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset('assets/images/icon.png', width: 24, height: 24),
+            SvgPicture.asset('assets/images/icon.svg', width: 24, height: 24),
             const SizedBox(width: 8),
             const Text(
               'Acorde',
