@@ -106,6 +106,14 @@ class UltimateGuitarSource implements Source {
                     url: url,
                     instrument: typeName,
                     rating: double.tryParse((res['rating'] ?? '').toString()),
+                    ratingCount: int.tryParse(
+                      (res['votes'] ??
+                              res['rating_votes'] ??
+                              res['rating_count'] ??
+                              res['ratingCount'] ??
+                              '')
+                          .toString(),
+                    ),
                   ),
                 );
               }
@@ -275,6 +283,14 @@ class UltimateGuitarSource implements Source {
             source: name,
             instrument: (tabData['type_name'] ?? '').toString(),
             rating: double.tryParse((tabData['rating'] ?? '').toString()),
+            ratingCount: int.tryParse(
+              (tabData['votes'] ??
+                      tabData['rating_votes'] ??
+                      tabData['rating_count'] ??
+                      tabData['ratingCount'] ??
+                      '')
+                  .toString(),
+            ),
           );
         }
       } catch (e) {
@@ -301,6 +317,11 @@ class UltimateGuitarSource implements Source {
         final ratingValue = data['aggregateRating']?['ratingValue'];
         final rating = ratingValue != null
             ? double.tryParse(ratingValue.toString())
+            : null;
+
+        final ratingCountValue = data['aggregateRating']?['ratingCount'];
+        final ratingCount = ratingCountValue != null
+            ? int.tryParse(ratingCountValue.toString())
             : null;
 
         // Parse instrument from url
@@ -331,6 +352,7 @@ class UltimateGuitarSource implements Source {
           source: name,
           instrument: instrument,
           rating: rating,
+          ratingCount: ratingCount,
         );
       } catch (e) {
         print('UG mobile layout fallback error: $e');

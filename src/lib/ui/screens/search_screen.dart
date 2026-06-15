@@ -235,10 +235,11 @@ class SearchScreenState extends State<SearchScreen> {
     return Icons.music_note;
   }
 
-  Widget _buildStars(double? rating) {
+  Widget _buildStars(double? rating, int? ratingCount) {
     if (rating == null) return const SizedBox.shrink();
     final fullStars = rating.floor();
     final hasHalfStar = (rating % 1) >= 0.5;
+    final reviewsText = ratingCount != null ? ' ($ratingCount reviews)' : '';
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -256,7 +257,7 @@ class SearchScreenState extends State<SearchScreen> {
         }),
         const SizedBox(width: 4),
         Text(
-          rating.toStringAsFixed(1),
+          reviewsText,
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
@@ -515,7 +516,7 @@ class SearchScreenState extends State<SearchScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _buildStars(item.rating),
+                    _buildStars(item.rating, item.ratingCount),
                     const SizedBox(height: 4),
                     ElevatedButton(
                       onPressed: () {

@@ -13,6 +13,7 @@ class SavedSong {
   final String createdAt;
   final String? instrument;
   final double? rating;
+  final int? ratingCount;
 
   SavedSong({
     this.id,
@@ -26,6 +27,7 @@ class SavedSong {
     required this.createdAt,
     this.instrument,
     this.rating,
+    this.ratingCount,
   });
 
   Map<String, dynamic> toMap() {
@@ -40,6 +42,7 @@ class SavedSong {
       'url': url,
       'instrument': instrument,
       'rating': rating,
+      'rating_count': ratingCount,
     };
   }
 
@@ -56,6 +59,7 @@ class SavedSong {
       createdAt: map['created_at'] as String? ?? '',
       instrument: map['instrument'] as String?,
       rating: (map['rating'] as num?)?.toDouble(),
+      ratingCount: map['rating_count'] as int?,
     );
   }
 }
@@ -85,7 +89,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE songs (
@@ -99,10 +103,18 @@ class DatabaseService {
             url TEXT,
             instrument TEXT,
             rating REAL,
+            rating_count INTEGER,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(source, source_id)
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute(
+            'ALTER TABLE songs ADD COLUMN rating_count INTEGER;',
+          );
+        }
       },
     );
   }

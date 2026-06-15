@@ -6,6 +6,7 @@ class SongSearchResult {
   final String url;
   final String? instrument;
   final double? rating;
+  final int? ratingCount;
   final String? type; // 'song' or 'artist'
 
   SongSearchResult({
@@ -16,6 +17,7 @@ class SongSearchResult {
     required this.url,
     this.instrument,
     this.rating,
+    this.ratingCount,
     this.type,
   });
 
@@ -28,6 +30,7 @@ class SongSearchResult {
       'url': url,
       'instrument': instrument,
       'rating': rating,
+      'rating_count': ratingCount,
       'type': type,
     };
   }
@@ -41,6 +44,7 @@ class SongSearchResult {
       url: json['url'] as String,
       instrument: json['instrument'] as String?,
       rating: (json['rating'] as num?)?.toDouble(),
+      ratingCount: json['rating_count'] as int?,
       type: json['type'] as String?,
     );
   }
@@ -55,6 +59,7 @@ class SongContent {
   final String source;
   final String? instrument;
   final double? rating;
+  final int? ratingCount;
 
   SongContent({
     required this.title,
@@ -65,6 +70,7 @@ class SongContent {
     required this.source,
     this.instrument,
     this.rating,
+    this.ratingCount,
   });
 
   Map<String, dynamic> toJson() {
@@ -77,6 +83,7 @@ class SongContent {
       'source': source,
       'instrument': instrument,
       'rating': rating,
+      'rating_count': ratingCount,
     };
   }
 
@@ -90,6 +97,7 @@ class SongContent {
       source: json['source'] as String,
       instrument: json['instrument'] as String?,
       rating: (json['rating'] as num?)?.toDouble(),
+      ratingCount: json['rating_count'] as int?,
     );
   }
 }

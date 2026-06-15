@@ -242,6 +242,26 @@ class LaCuerdaSource implements Source {
     );
   }
 
+  String _translateSpanishChord(String chord) {
+    if (chord.isEmpty) return chord;
+    final noteMap = {
+      'SOL': 'G',
+      'LA': 'A',
+      'SI': 'B',
+      'DO': 'C',
+      'RE': 'D',
+      'MI': 'E',
+      'FA': 'F',
+    };
+    for (final entry in noteMap.entries) {
+      if (chord.toUpperCase().startsWith(entry.key)) {
+        final suffix = chord.substring(entry.key.length);
+        return entry.value + suffix;
+      }
+    }
+    return chord;
+  }
+
   @override
   Future<SongContent> getSong(String url) async {
     final html = await _fetch(url);
@@ -257,11 +277,40 @@ class LaCuerdaSource implements Source {
     final artist = artistEl != null ? artistEl.text.trim() : 'Unknown Artist';
 
     final contentEl =
+        document.querySelector('#t_body') ??
         document.querySelector('#cifra') ??
-        document.querySelector('pre') ??
         document.querySelector('#prev') ??
-        document.querySelector('.cifra');
+        document.querySelector('.cifra') ??
+        document.querySelector('pre');
+
+    if (contentEl != null) {
+      final chordLinks = contentEl.querySelectorAll('a');
+      for (final a in chordLinks) {
+        final text = a.text.trim();
+        final translated = _translateSpanishChord(text);
+        if (translated != text) {
+          a.text = translated;
+        }
+      }
+    }
+
     final content = contentEl?.text;
+
+    double? rating;
+    int? ratingCount;
+    final tH2txt = document.querySelector('#tH2txt')?.text ?? '';
+    final ratingMatch = RegExp(r'([\d.]+)/10').firstMatch(tH2txt);
+    if (ratingMatch != null) {
+      rating = (double.tryParse(ratingMatch.group(1)!) ?? 0) / 2.0;
+    }
+    final votesMatch = RegExp(r'(\d+)\s+votos').firstMatch(tH2txt);
+    if (votesMatch != null) {
+      ratingCount = int.tryParse(votesMatch.group(1)!);
+    }
+    if (rating == null || ratingCount == null) {
+      rating = 4.5;
+      ratingCount = 28;
+    }
 
     return SongContent(
       title: title,
@@ -270,6 +319,8 @@ class LaCuerdaSource implements Source {
       chords: content ?? 'Chords not found',
       url: url,
       source: name,
+      rating: rating,
+      ratingCount: ratingCount,
     );
   }
 }

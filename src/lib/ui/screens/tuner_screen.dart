@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'tuner/tuner_controller.dart';
 
 class TunedString {
@@ -153,9 +154,20 @@ class _TunerScreenState extends State<TunerScreen> {
     _tunerController = TunerController();
   }
 
+  void _updateWakelock(bool enable) {
+    try {
+      if (enable) {
+        WakelockPlus.enable().catchError((_) {});
+      } else {
+        WakelockPlus.disable().catchError((_) {});
+      }
+    } catch (_) {}
+  }
+
   @override
   void dispose() {
     _tunerController.stop();
+    _updateWakelock(false);
     super.dispose();
   }
 
@@ -193,6 +205,7 @@ class _TunerScreenState extends State<TunerScreen> {
       },
       onError: (err) {
         if (!mounted) return;
+        _updateWakelock(false);
         setState(() {
           _error = err;
           _isListening = false;
@@ -200,6 +213,7 @@ class _TunerScreenState extends State<TunerScreen> {
       },
     );
 
+    _updateWakelock(true);
     setState(() {
       _isListening = true;
     });
@@ -207,6 +221,7 @@ class _TunerScreenState extends State<TunerScreen> {
 
   void _stopTuning() {
     _tunerController.stop();
+    _updateWakelock(false);
     setState(() {
       _isListening = false;
       _pitch = null;

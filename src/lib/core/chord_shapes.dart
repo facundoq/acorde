@@ -377,7 +377,22 @@ const Map<String, List<ChordShape>> chordShapes = {
       name: 'Eb',
       frets: [-1, -1, 5, 3, 4, 3],
       fingers: [0, 0, 3, 1, 2, 1],
-      barre: 3,
+    ),
+  ],
+  'Ebmaj7': [
+    ChordShape(
+      name: 'Ebmaj7',
+      frets: [-1, 6, 8, 7, 8, 6],
+      fingers: [0, 1, 3, 2, 4, 1],
+      barre: 6,
+    ),
+  ],
+  'D#maj7': [
+    ChordShape(
+      name: 'D#maj7',
+      frets: [-1, 6, 8, 7, 8, 6],
+      fingers: [0, 1, 3, 2, 4, 1],
+      barre: 6,
     ),
   ],
   'Ebadd11': [
@@ -471,6 +486,19 @@ const Map<String, List<ChordShape>> chordShapes = {
       frets: [-1, 8, 10, 10, 10, 8],
       fingers: [0, 1, 3, 3, 3, 1],
       barre: 8,
+    ),
+  ],
+  'F6': [
+    ChordShape(
+      name: 'F6',
+      frets: [-1, -1, 3, 2, 3, 1],
+      fingers: [0, 0, 3, 2, 4, 1],
+    ),
+    ChordShape(
+      name: 'F6',
+      frets: [1, 3, 3, 2, 3, 1],
+      fingers: [1, 3, 4, 2, 4, 1],
+      barre: 1,
     ),
   ],
   'Fsus2': [
@@ -782,6 +810,51 @@ const Map<String, List<ChordShape>> chordShapes = {
       fingers: [0, 0, 1, 2, 3, 0],
     ),
   ],
+  'A7sus4': [
+    ChordShape(
+      name: 'A7sus4',
+      frets: [-1, 0, 2, 0, 3, 3],
+      fingers: [0, 0, 1, 0, 3, 4],
+    ),
+    ChordShape(
+      name: 'A7sus4',
+      frets: [-1, 0, 2, 0, 3, 0],
+      fingers: [0, 0, 1, 0, 2, 0],
+    ),
+  ],
+  'A11': [
+    ChordShape(
+      name: 'A11',
+      frets: [-1, 0, 0, 0, 0, 0],
+      fingers: [0, 0, 0, 0, 0, 0],
+    ),
+    ChordShape(
+      name: 'A11',
+      frets: [-1, 0, 2, 0, 3, 3],
+      fingers: [0, 0, 1, 0, 3, 4],
+    ),
+  ],
+  'A9': [
+    ChordShape(
+      name: 'A9',
+      frets: [-1, 0, 2, 4, 2, 3],
+      fingers: [0, 0, 1, 3, 1, 2],
+      barre: 2,
+    ),
+  ],
+  'Bm11': [
+    ChordShape(
+      name: 'Bm11',
+      frets: [7, 9, 7, 7, 7, 7],
+      fingers: [1, 3, 1, 1, 1, 1],
+      barre: 7,
+    ),
+    ChordShape(
+      name: 'Bm11',
+      frets: [-1, 2, 0, 2, 2, 0],
+      fingers: [0, 1, 0, 2, 3, 0],
+    ),
+  ],
   'A6': [
     ChordShape(
       name: 'A6',
@@ -1017,6 +1090,14 @@ const Map<String, List<ChordShape>> chordShapes = {
       frets: [4, 6, 6, 4, 4, 4],
       fingers: [1, 3, 4, 1, 1, 1],
       barre: 4,
+    ),
+  ],
+  'Gm': [
+    ChordShape(
+      name: 'Gm',
+      frets: [3, 5, 5, 3, 3, 3],
+      fingers: [1, 3, 4, 1, 1, 1],
+      barre: 3,
     ),
   ],
   'Bbm': [
@@ -1334,15 +1415,75 @@ const Map<String, List<ChordShape>> chordShapes = {
 List<ChordShape> getChordShapes(String name) {
   if (name.isEmpty) return [];
 
-  // Try exact match first
-  if (chordShapes.containsKey(name)) return chordShapes[name]!;
+  // Normalize Portuguese/Spanish notations before search
+  var normalized = name;
+  normalized = normalized.replaceAll('7M', 'maj7');
 
-  // Try case-insensitive match
-  final lowerName = name.toLowerCase();
-  for (final key in chordShapes.keys) {
-    if (key.toLowerCase() == lowerName) {
-      return chordShapes[key]!;
+  // Replace '4' with 'sus4' (e.g. G4 -> Gsus4, E4 -> Esus4) only if not already preceded by 'sus'
+  normalized = normalized.replaceAll(RegExp(r'(?<!sus)4(?![0-9])'), 'sus4');
+
+  // Helper for lookup
+  List<ChordShape>? lookup(String chordName) {
+    if (chordShapes.containsKey(chordName)) return chordShapes[chordName];
+    final rootMatch = RegExp(r'^[A-G][#b]?').firstMatch(chordName);
+    if (rootMatch != null) {
+      final root = rootMatch.group(0)!;
+      final rest = chordName.substring(root.length);
+      final enharmonicMap = {
+        'A#': 'Bb',
+        'Bb': 'A#',
+        'C#': 'Db',
+        'Db': 'C#',
+        'D#': 'Eb',
+        'Eb': 'D#',
+        'F#': 'Gb',
+        'Gb': 'F#',
+        'G#': 'Ab',
+        'Ab': 'G#',
+      };
+      if (enharmonicMap.containsKey(root)) {
+        final altRoot = enharmonicMap[root]!;
+        final altChord = altRoot + rest;
+        if (chordShapes.containsKey(altChord)) return chordShapes[altChord];
+      }
     }
+    final lowerName = chordName.toLowerCase();
+    for (final key in chordShapes.keys) {
+      if (key.toLowerCase() == lowerName) {
+        return chordShapes[key];
+      }
+    }
+    return null;
+  }
+
+  // 1. Try exact/case-insensitive match of normalized name
+  var shapes = lookup(normalized);
+  if (shapes != null) return shapes;
+
+  // 2. Try slash fallback (e.g. Am7/G -> Am7)
+  if (normalized.contains('/')) {
+    final baseName = normalized.split('/')[0].trim();
+    if (baseName.isNotEmpty && baseName != normalized) {
+      final baseShapes = getChordShapes(baseName);
+      if (baseShapes.isNotEmpty) return baseShapes;
+    }
+  }
+
+  // 3. Fallback to basic major/minor chord by simplifying the name
+  final rootMatch = RegExp(r'^[A-G][#b]?').firstMatch(normalized);
+  if (rootMatch != null) {
+    final root = rootMatch.group(0)!;
+    final rest = normalized.substring(root.length);
+
+    // Determine if it is minor (contains 'm', 'dim', 'min' but not 'maj' or 'min7' etc.
+    // Standard rule: if the remainder contains 'm' (minor), 'min', 'dim' and not 'maj'
+    final isMinor =
+        (rest.contains('m') || rest.contains('dim') || rest.contains('min')) &&
+        !rest.contains('maj');
+    final fallbackChord = isMinor ? '${root}m' : root;
+
+    final fallbackShapes = lookup(fallbackChord);
+    if (fallbackShapes != null) return fallbackShapes;
   }
 
   return [];

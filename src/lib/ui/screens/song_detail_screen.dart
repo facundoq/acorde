@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../core/logger.dart';
 import '../../core/ug_parser.dart';
 import '../../core/models.dart';
@@ -60,10 +61,21 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     });
   }
 
+  void _updateWakelock(bool enable) {
+    try {
+      if (enable) {
+        WakelockPlus.enable().catchError((_) {});
+      } else {
+        WakelockPlus.disable().catchError((_) {});
+      }
+    } catch (_) {}
+  }
+
   @override
   void dispose() {
     _scrollTimer?.cancel();
     _scrollController.dispose();
+    _updateWakelock(false);
     super.dispose();
   }
 
@@ -137,6 +149,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           createdAt: DateTime.now().toIso8601String(),
           instrument: widget.searchResult!.instrument ?? songContent.instrument,
           rating: widget.searchResult!.rating ?? songContent.rating,
+          ratingCount:
+              widget.searchResult!.ratingCount ?? songContent.ratingCount,
         );
 
         setState(() {
@@ -174,6 +188,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           createdAt: DateTime.now().toIso8601String(),
           instrument: song.instrument,
           rating: song.rating,
+          ratingCount: song.ratingCount,
         );
         final newId = await DatabaseService.saveSong(savedSong);
         final updatedSong = SavedSong(
@@ -188,6 +203,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           createdAt: savedSong.createdAt,
           instrument: savedSong.instrument,
           rating: savedSong.rating,
+          ratingCount: savedSong.ratingCount,
         );
         if (!mounted) return;
         setState(() {
@@ -211,6 +227,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           createdAt: song.createdAt,
           instrument: song.instrument,
           rating: song.rating,
+          ratingCount: song.ratingCount,
         );
         if (!mounted) return;
         setState(() {
@@ -265,6 +282,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   }
 
   void _startAutoScroll(int intervalMs) {
+    _updateWakelock(true);
     _scrollTimer?.cancel();
     _scrollTimer = Timer.periodic(Duration(milliseconds: intervalMs), (timer) {
       if (!_scrollController.hasClients) return;
@@ -283,6 +301,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   void _stopAutoScroll() {
     _scrollTimer?.cancel();
     _scrollTimer = null;
+    _updateWakelock(false);
     setState(() {
       _scrollSpeed = ScrollSpeed.none;
     });
