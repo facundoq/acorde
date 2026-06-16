@@ -12,8 +12,8 @@ class MobileTunerController implements TunerController {
   AudioRecorder? _recorder;
   StreamSubscription<Uint8List>? _subscription;
 
-  // The AudioRecorder uses 44100 Hz PCM-16 by default; we'll set it explicitly.
-  static const int _sampleRate = 44100;
+  // The AudioRecorder uses 16000 Hz PCM-16 for universal compatibility and low CPU usage.
+  static const int _sampleRate = 16000;
 
   @override
   bool get isListening => _isListening;
@@ -39,6 +39,12 @@ class MobileTunerController implements TunerController {
     final isSupported = await _recorder!.hasPermission();
     if (!isSupported) {
       onError('Microphone is not available on this device.');
+      return;
+    }
+
+    final isPcmSupported = await _recorder!.isEncoderSupported(AudioEncoder.pcm16bits);
+    if (!isPcmSupported) {
+      onError('PCM 16-bit audio recording is not supported on this device.');
       return;
     }
 

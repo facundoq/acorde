@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
+import '../../services/wakelock_helper.dart';
 import 'tuner/tuner_controller.dart';
 
 class TunedString {
@@ -156,13 +156,11 @@ class _TunerScreenState extends State<TunerScreen> {
   }
 
   void _updateWakelock(bool enable) {
-    try {
-      if (enable) {
-        WakelockPlus.enable().catchError((_) {});
-      } else {
-        WakelockPlus.disable().catchError((_) {});
-      }
-    } catch (_) {}
+    if (enable) {
+      WakelockHelper.enable();
+    } else {
+      WakelockHelper.disable();
+    }
   }
 
   @override

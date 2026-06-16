@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
+import '../../services/wakelock_helper.dart';
 import '../../core/logger.dart';
 import '../../core/ug_parser.dart';
 import '../../core/models.dart';
@@ -62,13 +62,11 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   }
 
   void _updateWakelock(bool enable) {
-    try {
-      if (enable) {
-        WakelockPlus.enable().catchError((_) {});
-      } else {
-        WakelockPlus.disable().catchError((_) {});
-      }
-    } catch (_) {}
+    if (enable) {
+      WakelockHelper.enable();
+    } else {
+      WakelockHelper.disable();
+    }
   }
 
   @override
