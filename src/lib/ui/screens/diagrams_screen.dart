@@ -147,7 +147,7 @@ class _DiagramsScreenState extends State<DiagramsScreen> {
                               children: [
                                 if (shapes.isNotEmpty)
                                   Container(
-                                    height: 250,
+                                    height: 290,
                                     padding: const EdgeInsets.only(bottom: 15),
                                     child: ListView.builder(
                                       scrollDirection: Axis.horizontal,
@@ -166,8 +166,8 @@ class _DiagramsScreenState extends State<DiagramsScreen> {
                                                 MainAxisAlignment.center,
                                             children: [
                                               SizedBox(
-                                                width: 180,
-                                                height: 180,
+                                                width: 215,
+                                                height: 240,
                                                 child: ChordDiagram(
                                                   shape: shape,
                                                 ),

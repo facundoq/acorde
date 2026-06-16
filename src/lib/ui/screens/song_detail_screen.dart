@@ -522,7 +522,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Row(
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     GestureDetector(
                       onTap: () => _openBrowser(_song!.url),
@@ -545,7 +548,6 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
                     ElevatedButton.icon(
                       onPressed: _toggleSaveCollection,
                       icon: Icon(
