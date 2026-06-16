@@ -1,3 +1,5 @@
+import 'dart:convert' show jsonDecode;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
 
@@ -108,6 +110,33 @@ class DatabaseService {
             UNIQUE(source, source_id)
           )
         ''');
+
+        // Seed default songs from assets (only for real database, not in-memory test database)
+        if (dbName != inMemoryDatabasePath) {
+          try {
+            final jsonStr = await rootBundle.loadString(
+              'assets/default_songs.json',
+            );
+            final List<dynamic> songsJson = jsonDecode(jsonStr);
+            for (final songMap in songsJson) {
+              await db.insert('songs', {
+                'source_id': songMap['source_id'],
+                'title': songMap['title'],
+                'artist': songMap['artist'],
+                'lyrics': songMap['lyrics'],
+                'chords': songMap['chords'],
+                'source': songMap['source'],
+                'url': songMap['url'],
+                'instrument': songMap['instrument'],
+                'rating': songMap['rating'],
+                'rating_count': songMap['rating_count'],
+              }, conflictAlgorithm: ConflictAlgorithm.replace);
+            }
+          } catch (e) {
+            // Log or ignore seeding errors during first runs
+            print('Error seeding default songs: $e');
+          }
+        }
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
