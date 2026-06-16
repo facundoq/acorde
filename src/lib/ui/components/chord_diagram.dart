@@ -59,8 +59,6 @@ class ChordDiagram extends StatelessWidget {
               height: 180,
               decoration: BoxDecoration(
                 border: Border(
-                  left: BorderSide(color: onSurfaceColor, width: 1),
-                  right: BorderSide(color: onSurfaceColor, width: 1),
                   top: BorderSide(color: onSurfaceColor, width: 1),
                 ),
               ),
