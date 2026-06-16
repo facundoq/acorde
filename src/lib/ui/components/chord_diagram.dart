@@ -16,7 +16,10 @@ class ChordDiagram extends StatelessWidget {
     final subtextColor = colorScheme.onSurfaceVariant;
 
     final strings = List.generate(6, (i) => i);
-    final frets = [1, 2, 3, 4, 5];
+    final nonZeroFrets = shape.frets.where((f) => f > 0).toList();
+    final minFret = nonZeroFrets.isEmpty ? 1 : nonZeroFrets.reduce((a, b) => a < b ? a : b);
+    final startFret = minFret > 4 ? minFret - 1 : 1;
+    final displayFrets = List.generate(5, (i) => startFret + i);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -31,9 +34,11 @@ class ChordDiagram extends StatelessWidget {
               height: 180,
               child: Stack(
                 clipBehavior: Clip.none,
-                children: frets.map((f) {
+                children: displayFrets.asMap().entries.map((entry) {
+                  final i = entry.key;
+                  final f = entry.value;
                   return Positioned(
-                    top: (f - 0.5) * 30 + 5,
+                    top: (i + 0.5) * 30 + 5,
                     right: 5,
                     child: Text(
                       '$f',
@@ -63,17 +68,18 @@ class ChordDiagram extends StatelessWidget {
                 clipBehavior: Clip.none,
                 children: [
                   // Nut (thick top line)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(height: 5, color: onSurfaceColor),
-                  ),
+                  if (startFret == 1)
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(height: 5, color: onSurfaceColor),
+                    ),
 
                   // Frets (horizontal lines)
-                  ...frets.map((f) {
+                  ...List.generate(5, (i) {
                     return Positioned(
-                      top: f * 30.0,
+                      top: (i + 1) * 30.0,
                       left: 0,
                       right: 0,
                       child: Container(
@@ -86,7 +92,7 @@ class ChordDiagram extends StatelessWidget {
                   // Barre Line
                   if (shape.barre != null)
                     Positioned(
-                      top: (shape.barre! - 0.5) * 30 - 4,
+                      top: (shape.barre! - startFret + 0.5) * 30 - 4,
                       left: 10,
                       right: 10,
                       child: Container(
@@ -116,7 +122,7 @@ class ChordDiagram extends StatelessWidget {
                           final isBarredFinger = isBarreFret && finger == 1;
 
                           return SizedBox(
-                            width: 20,
+                             width: 20,
                             height: double.infinity,
                             child: Stack(
                               alignment: Alignment.topCenter,
@@ -160,7 +166,7 @@ class ChordDiagram extends StatelessWidget {
                                 // Finger Circle
                                 if (fret > 0 && !isBarredFinger)
                                   Positioned(
-                                    top: (fret - 0.5) * 30 + 5,
+                                    top: (fret - startFret + 0.5) * 30 + 5,
                                     child: Container(
                                       width: 18,
                                       height: 18,
