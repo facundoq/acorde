@@ -17,7 +17,9 @@ class ChordDiagram extends StatelessWidget {
 
     final strings = List.generate(6, (i) => i);
     final nonZeroFrets = shape.frets.where((f) => f > 0).toList();
-    final minFret = nonZeroFrets.isEmpty ? 1 : nonZeroFrets.reduce((a, b) => a < b ? a : b);
+    final minFret = nonZeroFrets.isEmpty
+        ? 1
+        : nonZeroFrets.reduce((a, b) => a < b ? a : b);
     final startFret = minFret > 4 ? minFret - 1 : 1;
     final displayFrets = List.generate(5, (i) => startFret + i);
 
@@ -120,7 +122,7 @@ class ChordDiagram extends StatelessWidget {
                           final isBarredFinger = isBarreFret && finger == 1;
 
                           return SizedBox(
-                             width: 20,
+                            width: 20,
                             height: double.infinity,
                             child: Stack(
                               alignment: Alignment.topCenter,

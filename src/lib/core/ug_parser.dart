@@ -1,4 +1,4 @@
-enum UGPartType { text, chord, header, tab }
+enum UGPartType { text, chord, header, tab, tablature }
 
 class UGPart {
   final UGPartType type;
@@ -284,6 +284,90 @@ class _ChordMatch {
   _ChordMatch(this.name, this.pos);
 }
 
+bool isTabLine(String line) {
+  final trimmed = line.trim();
+  if (trimmed.length < 10) return false;
+  if (!trimmed.contains('|')) return false;
+  final dashCount = '-'.allMatches(trimmed).length;
+  if (dashCount < 4) return false;
+
+  final tabLineRegex = RegExp(
+    r'^\s*([a-gA-G]?[#b]?\||\|)[0-9\-\|\s~/\\()\[\]p+h*rxvbtg\.\u2013\u2014]+$',
+    caseSensitive: true,
+  );
+  return tabLineRegex.hasMatch(trimmed);
+}
+
+List<UGPart> _detectTablatureBlocks(UGPart part) {
+  if (part.type != UGPartType.text && part.type != UGPartType.tab) {
+    return [part];
+  }
+
+  final content = part.content;
+  final lines = content.split('\n');
+  final List<UGPart> result = [];
+
+  int i = 0;
+  int lastPartEndIndex = 0;
+
+  while (i < lines.length) {
+    int count = 0;
+    while (i + count < lines.length && isTabLine(lines[i + count])) {
+      count++;
+    }
+
+    bool isValidBlock = false;
+    int blockSize = 0;
+
+    if (count >= 4 && count <= 9) {
+      final blockLines = lines.sublist(i, i + count);
+      final lengths = blockLines.map((l) => l.length).toList();
+      final minLength = lengths.reduce((a, b) => a < b ? a : b);
+      final maxLength = lengths.reduce((a, b) => a > b ? a : b);
+      if (maxLength - minLength <= 5) {
+        isValidBlock = true;
+        blockSize = count;
+      }
+    } else if (count > 9) {
+      for (int size in [6, 7, 8, 4, 5, 9]) {
+        if (size <= count) {
+          final blockLines = lines.sublist(i, i + size);
+          final lengths = blockLines.map((l) => l.length).toList();
+          final minLength = lengths.reduce((a, b) => a < b ? a : b);
+          final maxLength = lengths.reduce((a, b) => a > b ? a : b);
+          if (maxLength - minLength <= 5) {
+            isValidBlock = true;
+            blockSize = size;
+            break;
+          }
+        }
+      }
+    }
+
+    if (isValidBlock) {
+      if (i > lastPartEndIndex) {
+        final textBefore = lines.sublist(lastPartEndIndex, i).join('\n');
+        result.add(UGPart(type: part.type, content: textBefore));
+      }
+
+      final tablatureContent = lines.sublist(i, i + blockSize).join('\n');
+      result.add(UGPart(type: UGPartType.tablature, content: tablatureContent));
+
+      i += blockSize;
+      lastPartEndIndex = i;
+    } else {
+      i++;
+    }
+  }
+
+  if (lastPartEndIndex < lines.length) {
+    final textAfter = lines.sublist(lastPartEndIndex).join('\n');
+    result.add(UGPart(type: part.type, content: textAfter));
+  }
+
+  return result;
+}
+
 List<UGPart> parseUGTabs(String content) {
   // Pre-process to ensure chords are tagged
   final taggedContent = autoTagChords(content);
@@ -331,5 +415,76 @@ List<UGPart> parseUGTabs(String content) {
     );
   }
 
-  return parts;
+  // Post-process parts to extract tablature blocks
+  final List<UGPart> finalParts = [];
+  for (final part in parts) {
+    finalParts.addAll(_detectTablatureBlocks(part));
+  }
+
+  return finalParts;
+}
+
+List<UGPart> parseGenericTabs(String content) {
+  final lines = content.split('\n');
+  final List<UGPart> result = [];
+
+  int i = 0;
+  int lastPartEndIndex = 0;
+
+  while (i < lines.length) {
+    int count = 0;
+    while (i + count < lines.length && isTabLine(lines[i + count])) {
+      count++;
+    }
+
+    bool isValidBlock = false;
+    int blockSize = 0;
+
+    if (count >= 4 && count <= 9) {
+      final blockLines = lines.sublist(i, i + count);
+      final lengths = blockLines.map((l) => l.length).toList();
+      final minLength = lengths.reduce((a, b) => a < b ? a : b);
+      final maxLength = lengths.reduce((a, b) => a > b ? a : b);
+      if (maxLength - minLength <= 5) {
+        isValidBlock = true;
+        blockSize = count;
+      }
+    } else if (count > 9) {
+      for (int size in [6, 7, 8, 4, 5, 9]) {
+        if (size <= count) {
+          final blockLines = lines.sublist(i, i + size);
+          final lengths = blockLines.map((l) => l.length).toList();
+          final minLength = lengths.reduce((a, b) => a < b ? a : b);
+          final maxLength = lengths.reduce((a, b) => a > b ? a : b);
+          if (maxLength - minLength <= 5) {
+            isValidBlock = true;
+            blockSize = size;
+            break;
+          }
+        }
+      }
+    }
+
+    if (isValidBlock) {
+      if (i > lastPartEndIndex) {
+        final textBefore = lines.sublist(lastPartEndIndex, i).join('\n');
+        result.add(UGPart(type: UGPartType.text, content: textBefore));
+      }
+
+      final tablatureContent = lines.sublist(i, i + blockSize).join('\n');
+      result.add(UGPart(type: UGPartType.tablature, content: tablatureContent));
+
+      i += blockSize;
+      lastPartEndIndex = i;
+    } else {
+      i++;
+    }
+  }
+
+  if (lastPartEndIndex < lines.length) {
+    final textAfter = lines.sublist(lastPartEndIndex).join('\n');
+    result.add(UGPart(type: UGPartType.text, content: textAfter));
+  }
+
+  return result;
 }

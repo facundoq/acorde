@@ -42,7 +42,9 @@ class MobileTunerController implements TunerController {
       return;
     }
 
-    final isPcmSupported = await _recorder!.isEncoderSupported(AudioEncoder.pcm16bits);
+    final isPcmSupported = await _recorder!.isEncoderSupported(
+      AudioEncoder.pcm16bits,
+    );
     if (!isPcmSupported) {
       onError('PCM 16-bit audio recording is not supported on this device.');
       return;

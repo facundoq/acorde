@@ -135,5 +135,62 @@ void main() {
         expect(hasTab, isTrue);
       });
     });
+
+    group('parseUGTabs tablature blocks', () {
+      test('should parse guitar tablature blocks as UGPartType.tablature', () {
+        const content =
+            'Intro:\n'
+            '|---7------7--7----------------3-------------------------------------|\n'
+            'B|---6------6--6-----3-------2--2-------2-----2-2-------6--------6----|\n'
+            'G|---7------7--7-----2-----3------3-----3-----3-3-----0--------0------| \n'
+            'D|-----------------3---3--------------2---2-2---2---7-----7--5-----5--|\n'
+            'A|-5----5-5----5------------------------------------------------------|\n'
+            'E|--------------------------------------------------------------------|';
+
+        final parts = parseUGTabs(content);
+        final tabParts = parts
+            .where((p) => p.type == UGPartType.tablature)
+            .toList();
+        expect(tabParts.length, equals(1));
+        expect(tabParts[0].content, contains('|---7------7--7'));
+        expect(tabParts[0].content, contains('E|-------'));
+      });
+    });
+
+    group('parseGenericTabs', () {
+      test(
+        'should parse generic tablature blocks without autotagging chords',
+        () {
+          const content =
+              'Intro:\n'
+              'C G Am F\n'
+              '|---7------7--7----------------3---|\n'
+              'B|---6------6--6-----3-------2--2---|\n'
+              'G|---7------7--7-----2-----3------3-|\n'
+              'D|-----------------3---3------------|\n'
+              'A|-5----5-5----5--------------------|\n'
+              'E|----------------------------------|\n'
+              'Some regular lyrics';
+
+          final parts = parseGenericTabs(content);
+          final tabParts = parts
+              .where((p) => p.type == UGPartType.tablature)
+              .toList();
+          final textParts = parts
+              .where((p) => p.type == UGPartType.text)
+              .toList();
+
+          expect(tabParts.length, equals(1));
+          expect(tabParts[0].content, contains('|---7------7--7'));
+
+          // It should NOT contain [ch] tags in text parts because it does not autotag chords
+          expect(textParts.any((p) => p.content.contains('[ch]')), isFalse);
+          expect(
+            textParts.any((p) => p.content.contains('Some regular lyrics')),
+            isTrue,
+          );
+        },
+      );
+    });
   });
 }

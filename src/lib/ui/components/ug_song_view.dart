@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/ug_parser.dart';
 import '../../core/chord_shapes.dart';
 import 'chord_detail_modal.dart';
+import 'tablature_view.dart';
 
 class UGSongView extends StatelessWidget {
   final String content;
@@ -75,6 +76,9 @@ class UGSongView extends StatelessWidget {
                 .toList(),
           ),
         );
+
+      case UGPartType.tablature:
+        return TablatureView(content: part.content, fontSize: fontSize);
 
       case UGPartType.text:
         return Text(

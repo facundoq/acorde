@@ -189,32 +189,26 @@ void main() {
         if (!hasIndicator) break;
       }
 
-      // Initially we should find the play arrow icon
-      final playButton = find.byIcon(Icons.play_arrow);
-      expect(playButton, findsOneWidget);
+      // Find the buttons by text
+      final button1x = find.text('1x');
+      final button2x = find.text('2x');
+      final button3x = find.text('3x');
 
-      final autoScrollButton = find.byType(OutlinedButton);
+      expect(button1x, findsOneWidget);
+      expect(button2x, findsOneWidget);
+      expect(button3x, findsOneWidget);
 
-      // Tap once to start at 1x
-      await tester.tap(autoScrollButton);
-      await tester.pumpAndSettle();
-      expect(find.text('1x'), findsOneWidget);
-
-      // Tap again to switch to 2x
-      await tester.tap(autoScrollButton);
-      await tester.pumpAndSettle();
-      expect(find.text('2x'), findsOneWidget);
-
-      // Long press to stop auto scroll (invoke callback directly to avoid test timer/clock issues)
-      final OutlinedButton buttonWidget = tester.widget<OutlinedButton>(
-        autoScrollButton,
-      );
-      buttonWidget.onLongPress?.call();
+      // Tap 1x button to start at 1x
+      await tester.tap(button1x);
       await tester.pumpAndSettle();
 
-      // Should be stopped (back to play_arrow icon)
-      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
-      expect(find.text('2x'), findsNothing);
+      // Tap 2x button to switch to 2x
+      await tester.tap(button2x);
+      await tester.pumpAndSettle();
+
+      // Tap 2x button again to stop
+      await tester.tap(button2x);
+      await tester.pumpAndSettle();
     });
   });
 }

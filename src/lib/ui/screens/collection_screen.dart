@@ -111,7 +111,6 @@ class CollectionScreenState extends State<CollectionScreen> {
     return Icons.music_note;
   }
 
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -283,11 +282,9 @@ class CollectionScreenState extends State<CollectionScreen> {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: colorScheme
-                                          .surfaceContainerHighest,
-                                      borderRadius: BorderRadius.circular(
-                                        4,
-                                      ),
+                                      color:
+                                          colorScheme.surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       song.source,
