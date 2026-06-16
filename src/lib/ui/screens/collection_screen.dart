@@ -111,38 +111,6 @@ class CollectionScreenState extends State<CollectionScreen> {
     return Icons.music_note;
   }
 
-  Widget _buildStars(double? rating, int? ratingCount) {
-    if (rating == null) return const SizedBox.shrink();
-    final fullStars = rating.floor();
-    final hasHalfStar = (rating % 1) >= 0.5;
-    final reviewsText = ratingCount != null ? ' ($ratingCount reviews)' : '';
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ...List.generate(5, (index) {
-          IconData icon;
-          if (index < fullStars) {
-            icon = Icons.star;
-          } else if (index == fullStars && hasHalfStar) {
-            icon = Icons.star_half;
-          } else {
-            icon = Icons.star_border;
-          }
-          return Icon(icon, size: 14, color: Colors.amber);
-        }),
-        const SizedBox(width: 4),
-        Text(
-          reviewsText,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Colors.amber,
-          ),
-        ),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -309,36 +277,25 @@ class CollectionScreenState extends State<CollectionScreen> {
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      _buildStars(
-                                        song.rating,
-                                        song.ratingCount,
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme
+                                          .surfaceContainerHighest,
+                                      borderRadius: BorderRadius.circular(
+                                        4,
                                       ),
-                                      const SizedBox(height: 4),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: colorScheme
-                                              .surfaceContainerHighest,
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          song.source,
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            color: colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
+                                    ),
+                                    child: Text(
+                                      song.source,
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
-                                    ],
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
                                   IconButton(

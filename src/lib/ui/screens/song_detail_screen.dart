@@ -388,6 +388,39 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     );
   }
 
+  Widget _buildStars(double? rating, int? ratingCount) {
+    if (rating == null) return const SizedBox.shrink();
+    final fullStars = rating.floor();
+    final hasHalfStar = (rating % 1) >= 0.5;
+    final reviewsText = ratingCount != null ? ' ($ratingCount reviews)' : '';
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...List.generate(5, (index) {
+          IconData icon;
+          if (index < fullStars) {
+            icon = Icons.star;
+          } else if (index == fullStars && hasHalfStar) {
+            icon = Icons.star_half;
+          } else {
+            icon = Icons.star_border;
+          }
+          return Icon(icon, size: 14, color: Colors.amber);
+        }),
+        const SizedBox(width: 4),
+        Text(
+          reviewsText,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.amber,
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -519,6 +552,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
+                if (_song!.rating != null) ...[
+                  const SizedBox(height: 6),
+                  _buildStars(_song!.rating, _song!.ratingCount),
+                ],
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 12,
