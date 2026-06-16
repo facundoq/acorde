@@ -58,8 +58,8 @@ Future<void> terminateLinuxWebView() async {
 /// Wire this in [MyApp]: `navigatorKey: fetcherNavigatorKey`.
 ///
 /// When set, the Linux fetcher can mount an invisible overlay WebView
-/// (CEF-backed via flutter_linux_webview) that bypasses Cloudflare and
-/// other bot-detection systems, because CEF renders as a real browser.
+/// (CEF-backed via flutter_linux_webview) to support full client-side
+/// rendering, since CEF compiles and executes JavaScript in a real browser context.
 ///
 /// If null, the fetcher falls back to headless Chromium → plain HTTP.
 final GlobalKey<NavigatorState> fetcherNavigatorKey =

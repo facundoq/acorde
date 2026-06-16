@@ -327,7 +327,7 @@ void main() {
         },
       );
 
-      test('throws on Cloudflare bot-detection page', () async {
+      test('throws on Cloudflare verification page', () async {
         nextHtml = (_) =>
             '<html><body><h1>Just a moment...</h1><div id="challenge-running"></div></body></html>';
 

@@ -24,7 +24,7 @@ sudo apt-get install -y libsqlite3-dev
 ```
 
 ### 3. Chromium (Required for Web Scraping)
-Because `flutter_inappwebview` does not support Linux desktop, the application uses a **headless Chromium subprocess** to execute JavaScript and bypass bot-detection mechanisms when fetching tabs from sites like Ultimate Guitar and Cifra Club.
+Because `flutter_inappwebview` does not support Linux desktop, the application uses a **headless Chromium subprocess** to execute JavaScript and render page contents dynamically when fetching tabs from sites like Ultimate Guitar and Cifra Club.
 
 You must install Chromium (or Google Chrome) to use the online search features:
 
@@ -40,7 +40,7 @@ The application will check the following binaries on your PATH in order:
 3. `google-chrome-stable`
 4. `google-chrome`
 
-If none are available, the app falls back to a plain HTTP scraper, which will likely be blocked by bot-detection.
+If none are available, the app falls back to a plain HTTP scraper, which may fail to render dynamic client-side content.
 
 ---
 

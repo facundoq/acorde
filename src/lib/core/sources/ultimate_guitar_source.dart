@@ -248,7 +248,7 @@ class UltimateGuitarSource implements Source {
     if (html.contains('Just a moment...') ||
         html.contains('challenge-running')) {
       throw Exception(
-        'Ultimate Guitar bot detection active. Please try again later or use the Android app.',
+        'Ultimate Guitar requires client-side verification. Please try again later or use the Android app.',
       );
     }
 

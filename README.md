@@ -40,7 +40,7 @@ sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-
 sudo apt-get install -y chromium-browser
 ```
 
-*Note: Headless Chromium is required on Linux because `flutter_inappwebview` lacks Linux desktop support. The app uses Chromium to execute JavaScript and bypass bot detection on tab sites. Supported PATH binaries include: `chromium-browser`, `chromium`, `google-chrome-stable`, and `google-chrome`.*
+*Note: Headless Chromium is required on Linux because `flutter_inappwebview` lacks Linux desktop support. The app uses Chromium to execute JavaScript and render page contents dynamically from tab sites. Supported PATH binaries include: `chromium-browser`, `chromium`, `google-chrome-stable`, and `google-chrome`.*
 
 
 ## Android Testing Container

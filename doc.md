@@ -42,7 +42,7 @@ Acorde is a cross-platform application (Android, Linux, Web, iOS, and Windows) b
 *   **Framework:** Flutter (Dart) with Material 3.
 *   **Database:** `sqflite` for persistent local storage of saved songs. `sqflite_common_ffi` is used for desktop (Linux, macOS, Windows) support.
 *   **HTML Parsing:** `html` (Dart package) for scraping and custom regex-based parsers for tab alignment.
-*   **Network Fetching:** `flutter_inappwebview` (headless WebView) for native platforms to bypass CORS and execute JavaScript; falls back to `http` for web or when WebView initialization fails.
+*   **Network Fetching:** `flutter_inappwebview` (headless WebView) for native platforms to handle client-side rendering and execute JavaScript; falls back to `http` for web or when WebView initialization fails.
 *   **Settings:** `shared_preferences` for user preferences persistence.
 *   **UI:** Custom Material 3 themed widgets supporting Light and Dark modes (system-adaptive).
 
@@ -82,8 +82,8 @@ src/
 ```
 
 ### Cross-Platform Strategy
-*   **Network / Bot-Detection Bypass:**
-    *   **Android / iOS / macOS:** Uses a headless `flutter_inappwebview` WebView to load pages with full JavaScript execution, bypassing bot-detection (Cloudflare, etc.).
+*   **Network Scraper Architecture:**
+    *   **Android / iOS / macOS:** Uses a headless `flutter_inappwebview` WebView to load pages with full JavaScript execution, ensuring accurate page rendering.
     *   **Linux Desktop:** Uses a **headless Chromium subprocess** (`chromium --headless=new --dump-dom <url>`) for full JS rendering. Tries `chromium-browser`, `chromium`, `google-chrome-stable`, and `google-chrome` in order. Falls back to plain HTTP if no browser binary is found. Requires `chromium-browser` or equivalent to be installed.
     *   **Web:** Fetches directly via `http`; CORS must be handled by the target servers or a proxy.
 *   **Desktop Database:** `sqflite_common_ffi` provides SQLite support on Linux, macOS, and Windows (where the native `sqflite` plugin is not available).
