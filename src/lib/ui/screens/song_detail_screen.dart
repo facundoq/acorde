@@ -41,7 +41,7 @@ class SongDetailScreen extends StatefulWidget {
 class _SongDetailScreenState extends State<SongDetailScreen> {
   SavedSong? _song;
   bool _loading = true;
-  int _fontSize = 14;
+  int _fontSize = 12;
   ScrollSpeed _scrollSpeed = ScrollSpeed.none;
 
   final ScrollController _scrollController = ScrollController();

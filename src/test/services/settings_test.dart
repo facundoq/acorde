@@ -11,7 +11,7 @@ void main() {
 
     test('should get default font size', () async {
       final size = await SettingsService.getFontSize();
-      expect(size, equals(14));
+      expect(size, equals(12));
     });
 
     test('should save and get font size', () async {

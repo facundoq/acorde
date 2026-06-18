@@ -368,9 +368,14 @@ List<UGPart> _detectTablatureBlocks(UGPart part) {
   return result;
 }
 
+String _cleanNewlines(String content) {
+  return content.replaceAll(RegExp(r'(\r?\n\s*){3,}'), '\n\n').trim();
+}
+
 List<UGPart> parseUGTabs(String content) {
-  // Pre-process to ensure chords are tagged
-  final taggedContent = autoTagChords(content);
+  // Pre-process to clean newlines and ensure chords are tagged
+  final cleaned = _cleanNewlines(content);
+  final taggedContent = autoTagChords(cleaned);
   final List<UGPart> parts = [];
   int currentPos = 0;
 
@@ -425,7 +430,8 @@ List<UGPart> parseUGTabs(String content) {
 }
 
 List<UGPart> parseGenericTabs(String content) {
-  final lines = content.split('\n');
+  final cleaned = _cleanNewlines(content);
+  final lines = cleaned.split('\n');
   final List<UGPart> result = [];
 
   int i = 0;

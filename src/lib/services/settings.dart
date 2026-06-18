@@ -2,7 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsService {
   static const String _settingsKey = 'acorde_font_size';
-  static const int defaultFontSize = 14;
+  static const int defaultFontSize = 12;
 
   static Future<int> getFontSize() async {
     final prefs = await SharedPreferences.getInstance();
