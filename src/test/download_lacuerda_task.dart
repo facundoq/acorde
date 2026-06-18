@@ -7,7 +7,7 @@ import 'package:acorde/core/sources/la_cuerda_source.dart';
 import 'package:acorde/core/models.dart';
 import 'package:html/parser.dart' as parser;
 
-const String defaultSongsPath = '/home/facundoq/dev/acorde/src/assets/default_songs.json';
+const String defaultSongsPathGz = '/home/facundoq/dev/acorde/src/assets/default_songs.json.gz';
 const String statusCsvPath = '/home/facundoq/dev/acorde/src/assets/lacuerda_scrape_status.csv';
 
 final List<String> targetArtists = [
@@ -108,9 +108,11 @@ void main() {
 
     // Load existing songs
     List<dynamic> existingSongs = [];
-    if (FileSystemEntity.typeSync(defaultSongsPath) != FileSystemEntityType.notFound) {
+    if (FileSystemEntity.typeSync(defaultSongsPathGz) != FileSystemEntityType.notFound) {
       try {
-        final content = File(defaultSongsPath).readAsStringSync();
+        final bytes = File(defaultSongsPathGz).readAsBytesSync();
+        final decompressed = gzip.decode(bytes);
+        final content = utf8.decode(decompressed);
         existingSongs = jsonDecode(content) as List<dynamic>;
         print('Loaded ${existingSongs.length} existing songs.');
       } catch (e) {
@@ -263,9 +265,11 @@ void main() {
               'rating_count': songContent.ratingCount ?? 20,
             };
 
-            // Save incrementally to default_songs.json
+            // Save incrementally to default_songs.json.gz
             existingSongs.add(songData);
-            File(defaultSongsPath).writeAsStringSync(jsonEncode(existingSongs));
+            final jsonStr = jsonEncode(existingSongs);
+            final compressed = gzip.encode(utf8.encode(jsonStr));
+            File(defaultSongsPathGz).writeAsBytesSync(compressed);
             existingUrls.add(songUrl);
 
             print('Successfully saved: $artist - $title');
