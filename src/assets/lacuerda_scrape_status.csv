@@ -28,7 +28,7 @@ Ambar Violeta,LaCuerda,Downloaded
 Amor es dinero,LaCuerda,Downloaded
 Arde,LaCuerda,Downloaded
 Asilo en tu corazón,LaCuerda,Downloaded
-"""""""""""""""Ay bruja""""""",bruja,"""""""brujita"""""""""""""""
+"""""""""""""""""""""""""""""""Ay bruja""""""""""""""",bruja,"""""""""""""""brujita"""""""""""""""""""""""""""""""
 Ayer soñé con Walter,LaCuerda,Downloaded
 B-Ode y Evelyn,LaCuerda,Downloaded
 Bailando hasta que se vaya la noche,LaCuerda,Downloaded
@@ -55,7 +55,7 @@ Las habladurías del mundo,LaCuerda,Downloaded
 A 18´ del sol,LaCuerda,Downloaded
 A estos hombres tristes,LaCuerda,Downloaded
 A mi dama,LaCuerda,Downloaded
-"""""""""""""""A starosta""""""","""""""el idiota""""""""""""""",LaCuerda
+"""""""""""""""""""""""""""""""A starosta""""""""""""""","""""""""""""""el idiota""""""""""""""""""""""""""""""",LaCuerda
 A su amor allí,LaCuerda,Downloaded
 Abrazame inoscentemente,LaCuerda,Downloaded
 Adentro Tuyo,LaCuerda,Downloaded
@@ -64,11 +64,11 @@ Agua de la miseria,LaCuerda,Downloaded
 Agua de Río,LaCuerda,Downloaded
 Aguas claras de Olimpo,LaCuerda,Downloaded
 Aguila de Trueno,LaCuerda,Downloaded
-"""""""""""""""Aguila de trueno""""""","""""""parte 2""""""""""""""",LaCuerda
+"""""""""""""""""""""""""""""""Aguila de trueno""""""""""""""","""""""""""""""parte 2""""""""""""""""""""""""""""""",LaCuerda
 Al ver verás,LaCuerda,Downloaded
 Alas de la mañana,LaCuerda,Downloaded
 Alcanfor,LaCuerda,Downloaded
-"""""""""""""""Alfin""""""","""""""ella no cambia nada""""""""""""""",LaCuerda
+"""""""""""""""""""""""""""""""Alfin""""""""""""""","""""""""""""""ella no cambia nada""""""""""""""""""""""""""""""",LaCuerda
 Alma de diamante,LaCuerda,Downloaded
 Almendra,LaCuerda,Downloaded
 Amor de Primavera,LaCuerda,Downloaded
@@ -89,10 +89,10 @@ Peperina,LaCuerda,Downloaded
 San Francisco y el Lobo,LaCuerda,Downloaded
 La grasa de las capitales,LaCuerda,Downloaded
 Salir de la melancolía,LaCuerda,Downloaded
-"""""""""""""""A cada hombre""""""","""""""a cada mujer""""""""""""""",LaCuerda
+"""""""""""""""""""""""""""""""A cada hombre""""""""""""""","""""""""""""""a cada mujer""""""""""""""""""""""""""""""",LaCuerda
 A los jóvenes de ayer,LaCuerda,Downloaded
 Alto en la torre,LaCuerda,Downloaded
-"""""""""""""""Autos""""""",Jets,Aviones
+"""""""""""""""""""""""""""""""Autos""""""""""""""",Jets,Aviones
 Cancion de Hollywwod,LaCuerda,Downloaded
 Cuanto tiempo mas llevará,LaCuerda,Downloaded
 Déjame Entrar,LaCuerda,Downloaded
@@ -108,7 +108,7 @@ Hundiendo el Titanic,LaCuerda,Downloaded
 Inconsciente Colectivo,LaCuerda,Downloaded
 La canción de Hollywood,LaCuerda,Downloaded
 Llorando en el espejo,LaCuerda,Downloaded
-"""""""""""""""Loco""""""","""""""no te sobra una moneda?""""""""""""""",LaCuerda
+"""""""""""""""""""""""""""""""Loco""""""""""""""","""""""""""""""no te sobra una moneda?""""""""""""""""""""""""""""""",LaCuerda
 Los Dinosaurios,LaCuerda,Downloaded
 Los Sobrevivientes,LaCuerda,Downloaded
 Mientras miro las nuevas olas,LaCuerda,Downloaded
@@ -131,7 +131,7 @@ Aquí no podemos hacerlo,LaCuerda,Downloaded
 Diez Años Después,LaCuerda,Downloaded
 A los Ojos,LaCuerda,Downloaded
 Acto Simple,LaCuerda,Downloaded
-"""""""""""""""Adiós amigos""""""","""""""adiós""""""""""""""",LaCuerda
+"""""""""""""""""""""""""""""""Adiós amigos""""""""""""""","""""""""""""""adiós""""""""""""""""""""""""""""""",LaCuerda
 Algún Lugar Encontraré,LaCuerda,Downloaded
 Algunos hombres buenos,LaCuerda,Downloaded
 Boogie de los piratas,LaCuerda,Downloaded
@@ -144,8 +144,751 @@ Demasiado Tarde,LaCuerda,Downloaded
 Dispara,LaCuerda,Downloaded
 El Profesional,LaCuerda,Downloaded
 el Tiempo lo Dirá,LaCuerda,Downloaded
-"""""""Ay bruja""",bruja,"""brujita"""""""
-"""""""A starosta""","""el idiota""""""",LaCuerda
-"""""""Aguila de trueno""","""parte 2""""""",LaCuerda
-"""""""Alfin""","""ella no cambia nada""""""",LaCuerda
-"Ay bruja, bruja, brujita",LaCuerda,Downloaded
+"""""""""""""""Ay bruja""""""",bruja,"""""""brujita"""""""""""""""
+"""""""""""""""A starosta""""""","""""""el idiota""""""""""""""",LaCuerda
+"""""""""""""""Aguila de trueno""""""","""""""parte 2""""""""""""""",LaCuerda
+"""""""""""""""Alfin""""""","""""""ella no cambia nada""""""""""""""",LaCuerda
+"""Ay bruja",bruja,"brujita"""
+"""A starosta","el idiota""",LaCuerda
+"""Aguila de trueno","parte 2""",LaCuerda
+"""Alfin","ella no cambia nada""",LaCuerda
+"""A cada hombre","a cada mujer""",LaCuerda
+"""Autos",Jets,Aviones
+"""Loco","no te sobra una moneda?""",LaCuerda
+"""Adiós amigos","adiós""",LaCuerda
+En el último trago,LaCuerda,Downloaded
+En un hotel de 1000 estrellas,LaCuerda,Downloaded
+Engánchate Conmigo,LaCuerda,Downloaded
+Especies que desaparecen,LaCuerda,Downloaded
+Extraño,LaCuerda,Downloaded
+Hablando Solo,LaCuerda,Error: Exception: Chrome headless timed out: TimeoutException after 0:00:20.000000: Future not completed
+Hace Calor,LaCuerda,Downloaded
+Hasta que el sueño venga,LaCuerda,Downloaded
+la mirada del adios,LaCuerda,Downloaded
+La mujer de un amigo,LaCuerda,Downloaded
+la Puerta de al lado,LaCuerda,Downloaded
+Loco por tí,LaCuerda,Downloaded
+Mala Suerte,LaCuerda,Downloaded
+Me estás atrapando otra vez,LaCuerda,Downloaded
+Mi Rock Perdido,LaCuerda,Downloaded
+Tan solo,LaCuerda,Downloaded
+Bicho de ciudad,LaCuerda,Downloaded
+Vine hasta aqui,LaCuerda,Downloaded
+Ando Ganas,LaCuerda,Downloaded
+Canción de cuna,LaCuerda,Downloaded
+Muy Despacito,LaCuerda,Downloaded
+Ruleta,LaCuerda,Downloaded
+El Farolito,LaCuerda,Downloaded
+Civilización,LaCuerda,Downloaded
+Pacífico,LaCuerda,Downloaded
+A Veces,LaCuerda,Downloaded
+A Ver Cuándo,LaCuerda,Downloaded
+Agua,LaCuerda,Downloaded
+Al Atardecer,LaCuerda,Downloaded
+Al desierto,LaCuerda,Downloaded
+Amor de Perros,LaCuerda,Downloaded
+Ando Ganas (llora llora),LaCuerda,Downloaded
+Angelito,LaCuerda,Downloaded
+Arco,LaCuerda,Downloaded
+Arco Ii,LaCuerda,Downloaded
+Around & Around (zapatos de gamuza azul),LaCuerda,Downloaded
+Ay ay ay,LaCuerda,Downloaded
+Ay que maravilla,LaCuerda,Downloaded
+Babilonia,LaCuerda,Downloaded
+Basta de penas,LaCuerda,Downloaded
+Blues del Traje Gris,LaCuerda,Downloaded
+Buenos dias palomar,LaCuerda,Downloaded
+Cancheros,LaCuerda,Downloaded
+Chac tu chac,LaCuerda,Downloaded
+Como Alí,LaCuerda,Downloaded
+Cruces y flores,LaCuerda,Downloaded
+Cruel,LaCuerda,Downloaded
+Desde Lejos No Se Ve,LaCuerda,Downloaded
+Dientes de cordero,LaCuerda,Downloaded
+Difícil,LaCuerda,Downloaded
+Don´t say tomorrow,LaCuerda,Downloaded
+El Balneario de los Doctores Crotos,LaCuerda,Downloaded
+El mendigo del doc sud,LaCuerda,Downloaded
+El Viejo,LaCuerda,Downloaded
+Entrando en tu ciudad,LaCuerda,Downloaded
+A veces vuelvo,LaCuerda,Downloaded
+Magia veneno,LaCuerda,Downloaded
+Entero o a pedazos,LaCuerda,Downloaded
+Plan B,LaCuerda,Downloaded
+Anhelo de satisfacción,LaCuerda,Downloaded
+Y lo que quiero es que pises,LaCuerda,Downloaded
+Cuadros dentro de cuadros,LaCuerda,Downloaded
+En los sueños,LaCuerda,Downloaded
+Acaba el fín,LaCuerda,Downloaded
+Apirié Omapare Piaroló,LaCuerda,Downloaded
+Bata y bajo,LaCuerda,Downloaded
+Batalla,LaCuerda,Downloaded
+Calavera deforme,LaCuerda,Downloaded
+Come together,LaCuerda,Downloaded
+Confusión,LaCuerda,Error: Exception: Chrome headless timed out: TimeoutException after 0:00:20.000000: Future not completed
+Cosas de goces,LaCuerda,Downloaded
+Cuantos son,LaCuerda,Downloaded
+Cuentos Decapitados,LaCuerda,Downloaded
+Dale,LaCuerda,Downloaded
+Dialecto,LaCuerda,Downloaded
+El lugar,LaCuerda,Downloaded
+El numero imperfecto,LaCuerda,Downloaded
+El rostro (mi espejo),LaCuerda,Downloaded
+El sueño,LaCuerda,Downloaded
+Elevador,LaCuerda,Downloaded
+Epico,LaCuerda,Downloaded
+Es todo lo que tengo,LaCuerda,Downloaded
+Eso Espero,LaCuerda,Downloaded
+Eso Vive,LaCuerda,Downloaded
+Foto en blanco y negro,LaCuerda,Downloaded
+Grandes Esperanzas,LaCuerda,Downloaded
+Gritale al viento,LaCuerda,Downloaded
+Gritarle al Viento,LaCuerda,Downloaded
+Hay casi un metro al agua,LaCuerda,Downloaded
+Hechizo,LaCuerda,Downloaded
+Hechizos,LaCuerda,Downloaded
+Héroes Anónimos,LaCuerda,Downloaded
+Hormigas,LaCuerda,Downloaded
+Juego Sagrado,LaCuerda,Downloaded
+Alfonsina y el Mar,LaCuerda,Downloaded
+Balderrama,LaCuerda,Downloaded
+Gracias a la vida,LaCuerda,Downloaded
+Todo cambia,LaCuerda,Downloaded
+Canción de las simples cosas,LaCuerda,Downloaded
+Como la cigarra,LaCuerda,Downloaded
+Zamba para olvidar,LaCuerda,Downloaded
+Solo le pido a Dios,LaCuerda,Downloaded
+El Cosechero,LaCuerda,Downloaded
+Arenosa,LaCuerda,Downloaded
+A Monteros,LaCuerda,Downloaded
+A que florezca mi pueblo,LaCuerda,Downloaded
+A quien doy,LaCuerda,Downloaded
+Acércate Cholito,LaCuerda,Downloaded
+Agitando pañuelos,LaCuerda,Downloaded
+Al jardín de la republica,LaCuerda,Downloaded
+"""Algarrobo","Algarrobal""",LaCuerda
+Allá lejos y hace tiempo,LaCuerda,Downloaded
+Años,LaCuerda,Downloaded
+Arana,LaCuerda,Downloaded
+Ay! este azul,LaCuerda,Downloaded
+Aya Marcay Quilla,LaCuerda,Downloaded
+Bajo el azote del sol,LaCuerda,Downloaded
+Bajo este sauce solo,LaCuerda,Downloaded
+Botecitos de papel,LaCuerda,Downloaded
+Cambia,LaCuerda,Downloaded
+Canción con todos,LaCuerda,Downloaded
+Canción de amor para mi patria,LaCuerda,Downloaded
+Canción de las cantinas,LaCuerda,Downloaded
+Canciones y Momentos,LaCuerda,Downloaded
+Canto a mi América,LaCuerda,Downloaded
+Cantor de oficio,LaCuerda,Downloaded
+Cantor del obraje,LaCuerda,Downloaded
+Carito,LaCuerda,Downloaded
+Caserón de tejas,LaCuerda,Downloaded
+Celador de sueños,LaCuerda,Downloaded
+Chacarera de un triste,LaCuerda,Downloaded
+Chacarera del 55,LaCuerda,Downloaded
+Cinco siglos igual,LaCuerda,Downloaded
+Como dos extraños,LaCuerda,Downloaded
+Artist Songs List,astor piazzolla,Not Found/Empty
+Artist Songs List,canticuenticos,Not Found/Empty
+Artist Songs List,pequeño pez,Not Found/Empty
+Artist Songs List,los raviolis,Not Found/Empty
+Artist Songs List,soda stereo,Not Found/Empty
+Artist Songs List,patricio rey y sus redonditos de ricota,Not Found/Empty
+Artist Songs List,sumo,Not Found/Empty
+Artist Songs List,almendra,Not Found/Empty
+Artist Songs List,pescado rabioso,Not Found/Empty
+Artist Songs List,virus,Not Found/Empty
+Artist Songs List,divididos,Not Found/Empty
+Artist Songs List,rata blanca,Not Found/Empty
+Artist Songs List,la bersuit,Not Found/Empty
+Artist Songs List,los pericos,Not Found/Empty
+Artist Songs List,ataque 77,Not Found/Empty
+Artist Songs List,sui generis,Not Found/Empty
+Artist Songs List,invisible,Not Found/Empty
+Artist Songs List,mi amigo invencible,Not Found/Empty
+Artist Songs List,manal,Not Found/Empty
+Artist Songs List,los gatos,Not Found/Empty
+"Algarrobo, Algarrobal",LaCuerda,Downloaded
+Sálvame,LaCuerda,Downloaded
+Obsesionario en La Mayor,LaCuerda,Downloaded
+Danzaré,LaCuerda,Downloaded
+Mi estrella blanca,LaCuerda,Downloaded
+La noche sin tí,LaCuerda,Downloaded
+La de la mala suerte,LaCuerda,Downloaded
+La melodía de Dios,LaCuerda,Downloaded
+Ojos Marrones,LaCuerda,Downloaded
+Intento,LaCuerda,Downloaded
+Quién como él,LaCuerda,Downloaded
+Adios Nonino,LaCuerda,Downloaded
+Balada para un loco,LaCuerda,Downloaded
+Chiquilin de Bachin,LaCuerda,Downloaded
+Cité Tango,LaCuerda,Downloaded
+Fuga Y Misterio,LaCuerda,Downloaded
+La Cumparsita,LaCuerda,Downloaded
+Libertango,LaCuerda,Downloaded
+Los pájaros perdidos,LaCuerda,Downloaded
+Milonga del Angel,LaCuerda,Downloaded
+Nightclub 1960,LaCuerda,Downloaded
+El toque de su gloria,LaCuerda,Downloaded
+Merecedor de alabanzas,LaCuerda,Downloaded
+Mirenla,LaCuerda,Downloaded
+Algo que decirte,LaCuerda,Downloaded
+Bailecito del viento,LaCuerda,Downloaded
+Bate con la cucharita,LaCuerda,Downloaded
+Cachafaz,LaCuerda,Downloaded
+Cumbia del monstruo,LaCuerda,Downloaded
+El Mamboreta,LaCuerda,Downloaded
+Hornero ¿qué ves?,LaCuerda,Downloaded
+Luna Cansada,LaCuerda,Downloaded
+Noni Noni,LaCuerda,Downloaded
+Pañuelito Blanco,LaCuerda,Downloaded
+Por tu forma de mirar,LaCuerda,Downloaded
+Quiero para mí,LaCuerda,Downloaded
+Santo Remedio,LaCuerda,Downloaded
+Vaguito,LaCuerda,Downloaded
+Viene para acá,LaCuerda,Downloaded
+Ya va ya voy,LaCuerda,Downloaded
+Zamba de los relojes,LaCuerda,Downloaded
+Regalo de Dios,LaCuerda,Downloaded
+Siento la unción,LaCuerda,Downloaded
+Disfruto,LaCuerda,Downloaded
+Reunidos en el nombre del Señor,LaCuerda,Downloaded
+Chocolate,LaCuerda,Downloaded
+Hoy no viene la niñera,LaCuerda,Downloaded
+De Música Ligera,LaCuerda,Downloaded
+Tratame Suavemente,LaCuerda,Downloaded
+Té para 3,LaCuerda,Downloaded
+Persiana Americana,LaCuerda,Downloaded
+la Ciudad de la Furia,LaCuerda,Downloaded
+Entre Caníbales,LaCuerda,Downloaded
+Cuando pase el temblor,LaCuerda,Downloaded
+Prófugos,LaCuerda,Downloaded
+Signos,LaCuerda,Downloaded
+un misil en mi placard,LaCuerda,Downloaded
+1990,LaCuerda,Downloaded
+Afrodisiacos,LaCuerda,Downloaded
+Algun día,LaCuerda,Downloaded
+Ameba,LaCuerda,Downloaded
+Angel Eléctrico,LaCuerda,Downloaded
+Cae el sol,LaCuerda,Downloaded
+Camaleón,LaCuerda,Downloaded
+Canción Animal,LaCuerda,Downloaded
+Cibersirena,LaCuerda,Downloaded
+Claroscuro,LaCuerda,Downloaded
+Coral,LaCuerda,Downloaded
+Corazón Delator,LaCuerda,Downloaded
+Crema de Estrellas,LaCuerda,Downloaded
+Cuando pase el temblor (unplugged),LaCuerda,Downloaded
+Danza Rota,LaCuerda,Downloaded
+Dietetico,LaCuerda,Downloaded
+Disco Eterno,LaCuerda,Downloaded
+Disco eterno (unplugged),LaCuerda,Downloaded
+Doble vida,LaCuerda,Downloaded
+Ecos,LaCuerda,Downloaded
+Efecto Doppler,LaCuerda,Downloaded
+El cuerpo del delito,LaCuerda,Downloaded
+El ritmo de tus ojos,LaCuerda,Downloaded
+el Rito,LaCuerda,Downloaded
+El tiempo es dinero,LaCuerda,Downloaded
+Ella uso mi cabeza como un revolver,LaCuerda,Downloaded
+Ella usó mi cabeza con un revolver,LaCuerda,Downloaded
+En Camino,LaCuerda,Downloaded
+En el borde,LaCuerda,Downloaded
+En el séptimo día,LaCuerda,Downloaded
+Ji Ji Ji,LaCuerda,Downloaded
+un angel para tu soledad,LaCuerda,Downloaded
+Esa estrella era mi lujo,LaCuerda,Downloaded
+un poco de amor francés,LaCuerda,Downloaded
+Tarea Fina,LaCuerda,Downloaded
+Etiqueta negra,LaCuerda,Downloaded
+El pibe de los astilleros,LaCuerda,Downloaded
+Mi genio amor,LaCuerda,Downloaded
+Motorpsico,LaCuerda,Downloaded
+Todo un palo,LaCuerda,Downloaded
+Alien duce,LaCuerda,Downloaded
+Aquella solitaria vaca cubana,LaCuerda,Downloaded
+Bajo las palmeras,LaCuerda,Downloaded
+Barba Azul vs. el amor letal,LaCuerda,Downloaded
+Blues de la artillería,LaCuerda,Downloaded
+Blues de la libertad,LaCuerda,Downloaded
+Blues del Gallo Malo,LaCuerda,Downloaded
+Blues del noticiero,LaCuerda,Downloaded
+Botija Rapado,LaCuerda,Downloaded
+Buenas Noticias,LaCuerda,Downloaded
+Caña seca y un membrillo,LaCuerda,Downloaded
+Canción para naufragio,LaCuerda,Downloaded
+Cancion Para Naufragios.,LaCuerda,Downloaded
+Capitán Buscapina,LaCuerda,Downloaded
+Criminal Mambo,LaCuerda,Downloaded
+Cruz Diablo,LaCuerda,Downloaded
+Cua Cua Amen,LaCuerda,Downloaded
+De esos polvos futuros lodos,LaCuerda,Downloaded
+Divina TV Fuhrer,LaCuerda,Downloaded
+Doctor Saturno,LaCuerda,Downloaded
+Drogocop,LaCuerda,Downloaded
+El árbol del gran bonete,LaCuerda,Downloaded
+El arte del buen comer,LaCuerda,Downloaded
+El gordo tramposo,LaCuerda,Downloaded
+El Hidromedusa,LaCuerda,Downloaded
+El hombre electrico,LaCuerda,Downloaded
+El infierno esta encantador esta noche,LaCuerda,Downloaded
+El lobo caído,LaCuerda,Downloaded
+El Pogo Del Payaso Asesino,LaCuerda,Downloaded
+El regreso de Mao,LaCuerda,Downloaded
+Redemption Song,LaCuerda,Downloaded
+Mañana en el abasto,LaCuerda,Downloaded
+No tan distintos,LaCuerda,Downloaded
+Estallando desde el océano,LaCuerda,Downloaded
+Mejor no hablar de ciertas cosas,LaCuerda,Downloaded
+Regtest,LaCuerda,Downloaded
+El Ojo Blindado,LaCuerda,Downloaded
+Telefonos sonando en habitaciones vacias,LaCuerda,Downloaded
+Breaking Away,LaCuerda,Downloaded
+Heroina,LaCuerda,Downloaded
+Aquí vienen los blues jeans,LaCuerda,Downloaded
+Banderitas y Globos,LaCuerda,Downloaded
+Basura Blanca,LaCuerda,Downloaded
+Beautiful Loser,LaCuerda,Downloaded
+Billy,LaCuerda,Downloaded
+Breacking away,LaCuerda,Downloaded
+Brigthon Past,LaCuerda,Downloaded
+Brilla tu luz para mi,LaCuerda,Downloaded
+Cambalache,LaCuerda,Downloaded
+Cinco Magnificos,LaCuerda,Downloaded
+Crua Chan,LaCuerda,Downloaded
+"Cuerdas, gargantas y cables",LaCuerda,Downloaded
+Debede,LaCuerda,Downloaded
+Déjame en paz,LaCuerda,Downloaded
+Divididos por la felicidad,LaCuerda,Downloaded
+Don't Cry,LaCuerda,Downloaded
+El reggae de paz y amor,LaCuerda,Downloaded
+Fiebre,LaCuerda,Downloaded
+Fuck you,LaCuerda,Downloaded
+Heroin,LaCuerda,Downloaded
+Hola Frank,LaCuerda,Downloaded
+Kaya,LaCuerda,Downloaded
+La gota en el ojo,LaCuerda,Downloaded
+La Rubia Tarada,LaCuerda,Downloaded
+Lament,LaCuerda,Downloaded
+Like London,LaCuerda,Downloaded
+Lo quiero ya,LaCuerda,Downloaded
+Los viejos vinagres,LaCuerda,Downloaded
+Luces Rojas,LaCuerda,Downloaded
+Muchacha ojos de papel,LaCuerda,Downloaded
+Plegaria para un niño dormido,LaCuerda,Downloaded
+Tema de Pototo,LaCuerda,Downloaded
+Chocolate con almendras,LaCuerda,Downloaded
+Fermin,LaCuerda,Downloaded
+Que el viento borró tus manos,LaCuerda,Downloaded
+Color Humano,LaCuerda,Downloaded
+Figuración,LaCuerda,Downloaded
+Laura Va,LaCuerda,Downloaded
+A esos hombres tristes,LaCuerda,Downloaded
+Aire de amor,LaCuerda,Downloaded
+Amidama,LaCuerda,Downloaded
+Amor de aire,LaCuerda,Downloaded
+Aunque pudo ser,LaCuerda,Downloaded
+"Buen día, día de sol",LaCuerda,Downloaded
+Cambiándome el futuro,LaCuerda,Downloaded
+Camino dificil,LaCuerda,Downloaded
+Campos verdes,LaCuerda,Downloaded
+Carmen,LaCuerda,Downloaded
+Chocolates,LaCuerda,Downloaded
+Cielo fuerte (amor guaraní),LaCuerda,Downloaded
+Cometa Azul,LaCuerda,Downloaded
+El mundo entre las manos,LaCuerda,Downloaded
+En las cúpulas,LaCuerda,Downloaded
+Final,LaCuerda,Downloaded
+Florecen los nardos,LaCuerda,Downloaded
+Hermano perro,LaCuerda,Downloaded
+Hilando Fino,LaCuerda,Downloaded
+Hombre de Luz,LaCuerda,Downloaded
+Hoy todo el hielo en la ciudad,LaCuerda,Downloaded
+Jaguar Herido,LaCuerda,Downloaded
+Jingle,LaCuerda,Downloaded
+Las cosas para hacer,LaCuerda,Downloaded
+Leves Instrucciones,LaCuerda,Downloaded
+Los Elefantes,LaCuerda,Downloaded
+Mestizo,LaCuerda,Downloaded
+"Miguelito, mi espíritu ha partido a tiempo7",LaCuerda,Downloaded
+Mosca Muerta,LaCuerda,Downloaded
+Cementerio Club,LaCuerda,Downloaded
+Despiertate nena,LaCuerda,Downloaded
+Post-crucifixión,LaCuerda,Downloaded
+"A Starosta, el Idiota",LaCuerda,Downloaded
+Superchería,LaCuerda,Downloaded
+Algo flota en la laguna,LaCuerda,Downloaded
+Amame Peteribi,LaCuerda,Downloaded
+Como el viento voy a ver,LaCuerda,Downloaded
+Corto,LaCuerda,Downloaded
+Credulidad,LaCuerda,Downloaded
+Cristálida,LaCuerda,Downloaded
+Dulce 3 nocturno,LaCuerda,Downloaded
+El jardinero (temprano amaneció),LaCuerda,Downloaded
+Hola dulce viento,LaCuerda,Downloaded
+Hola pequeño ser,LaCuerda,Downloaded
+Iniciado del alba,LaCuerda,Downloaded
+La cereza del zar,LaCuerda,Downloaded
+La fiebre paranóica,LaCuerda,Downloaded
+La sed verdadera,LaCuerda,Downloaded
+Mañana o pasado,LaCuerda,Downloaded
+Me gusta ese tajo,LaCuerda,Downloaded
+Mi espíritu se fue,LaCuerda,Downloaded
+Nena boba,LaCuerda,Downloaded
+Petiribi,LaCuerda,Downloaded
+Por,LaCuerda,Downloaded
+Poseido del alba,LaCuerda,Downloaded
+Rock de la selva madre,LaCuerda,Downloaded
+Señorita Zapada,LaCuerda,Downloaded
+Serpiente (viaja por la sal),LaCuerda,Downloaded
+Sombras de la noche negra,LaCuerda,Downloaded
+Viajero naciendo,LaCuerda,Downloaded
+Pronta Entrega,LaCuerda,Downloaded
+Luna de Miel en la mano,LaCuerda,Downloaded
+Imágenes Paganas,LaCuerda,Downloaded
+Amor Descartable,LaCuerda,Downloaded
+Sin Disfraz,LaCuerda,Downloaded
+Superficies de placer,LaCuerda,Downloaded
+Tomo Lo Que Encuentro,LaCuerda,Downloaded
+Cuando es con vos,LaCuerda,Downloaded
+Dame una señal,LaCuerda,Downloaded
+Wadu Wadu,LaCuerda,Downloaded
+A Mil,LaCuerda,Downloaded
+After Hours,LaCuerda,Downloaded
+América Fatal,LaCuerda,Downloaded
+Amor o acuerdo,LaCuerda,Downloaded
+Amores perpetuos,LaCuerda,Downloaded
+Atmósfera Pesada,LaCuerda,Downloaded
+Ausencia,LaCuerda,Downloaded
+Autocontrol,LaCuerda,Downloaded
+Ay que mambo,LaCuerda,Downloaded
+Bandas chantas arañan la nada,LaCuerda,Downloaded
+Buenos Aires smog,LaCuerda,Downloaded
+Caliente café,LaCuerda,Downloaded
+Caricia azul o sino soledad carmesí,LaCuerda,Downloaded
+Carolina,LaCuerda,Downloaded
+Cave Canem,LaCuerda,Downloaded
+Completo el stock,LaCuerda,Downloaded
+Cuando yo desespere,LaCuerda,Downloaded
+Danza de Bengalas,LaCuerda,Downloaded
+Danza Narcotica,LaCuerda,Downloaded
+Densa Realidad,LaCuerda,Downloaded
+Desesperado secuencia uno,LaCuerda,Downloaded
+Destino Circular,LaCuerda,Downloaded
+Dicha feliz,LaCuerda,Downloaded
+El 146,LaCuerda,Downloaded
+El Banquete,LaCuerda,Downloaded
+El corazón destrozado de Francisco,LaCuerda,Downloaded
+El de moño negro,LaCuerda,Downloaded
+El probador,LaCuerda,Downloaded
+El rock es mi forma de ser,LaCuerda,Downloaded
+Spaghetti del rock,LaCuerda,Downloaded
+Guanuqueando,LaCuerda,Downloaded
+Como un Cuento,LaCuerda,Downloaded
+La flor azul,LaCuerda,Downloaded
+Qué Ves,LaCuerda,Downloaded
+El Arriero,LaCuerda,Downloaded
+Ala Delta,LaCuerda,Downloaded
+Par Mil,LaCuerda,Downloaded
+10,LaCuerda,Downloaded
+15-5,LaCuerda,Downloaded
+Aburridos peligrosos,LaCuerda,Downloaded
+Agua en Buenos Aires,LaCuerda,Downloaded
+Aliados en un viaje,LaCuerda,Downloaded
+Alma de Budín,LaCuerda,Downloaded
+Amapola del ´66,LaCuerda,Downloaded
+Amor japonés,LaCuerda,Downloaded
+Andá a lavártelos,LaCuerda,Downloaded
+Avanzando Retroceden,LaCuerda,Downloaded
+Ay que dios boludo,LaCuerda,Downloaded
+Azulejo,LaCuerda,Downloaded
+Bafles en el mar,LaCuerda,Downloaded
+Basta Fuerte,LaCuerda,Downloaded
+Boyar Nocturno,LaCuerda,Downloaded
+Brillo triste de un canchero,LaCuerda,Downloaded
+Buscando un angel,LaCuerda,Downloaded
+Cabeza de maceta,LaCuerda,Downloaded
+Cabezon,LaCuerda,Downloaded
+Cajita Musical,LaCuerda,Downloaded
+Camarón Bombay,LaCuerda,Downloaded
+Caminando,LaCuerda,Downloaded
+Capo Capón,LaCuerda,Downloaded
+Casi Estatua,LaCuerda,Downloaded
+"Casitas Inundadas, a votar",LaCuerda,Downloaded
+Che que esperás,LaCuerda,Downloaded
+Cielito Lindo,LaCuerda,Downloaded
+Clavador de Querubín,LaCuerda,Downloaded
+Cosas De Baboon,LaCuerda,Downloaded
+Cristófolo Cacarnu,LaCuerda,Downloaded
+Cuadros Colgados,LaCuerda,Downloaded
+Cuantas veces,LaCuerda,Downloaded
+Mujer Amante,LaCuerda,Downloaded
+Talisman,LaCuerda,Downloaded
+Aun estás en mis sueños,LaCuerda,Downloaded
+Wish you were here,LaCuerda,Downloaded
+La leyenda del hada y el mago,LaCuerda,Downloaded
+Ella,LaCuerda,Downloaded
+Volviendo a casa,LaCuerda,Downloaded
+Solo para amarte,LaCuerda,Downloaded
+El sueño de la gitana,LaCuerda,Downloaded
+Noche sin sueños,LaCuerda,Downloaded
+Abeja reina,LaCuerda,Downloaded
+Abrazando el rock´n roll,LaCuerda,Downloaded
+Agord la bruja,LaCuerda,Downloaded
+Amo del camino,LaCuerda,Downloaded
+Amor sin fín,LaCuerda,Downloaded
+Angel,LaCuerda,Downloaded
+Angeles de Acero,LaCuerda,Downloaded
+Aria en Sol,LaCuerda,Downloaded
+Asesinos,LaCuerda,Downloaded
+Bajo Control,LaCuerda,Downloaded
+Bajo el poder del sol,LaCuerda,Downloaded
+Basura,LaCuerda,Downloaded
+Blues,LaCuerda,Downloaded
+Breaking away,LaCuerda,Downloaded
+Buscando Pelea,LaCuerda,Downloaded
+Caballo Salvaje,LaCuerda,Downloaded
+Capricho Arabe,LaCuerda,Downloaded
+Chico Callejero,LaCuerda,Downloaded
+Como yo nadie te ha amado,LaCuerda,Downloaded
+Corte porteño,LaCuerda,Downloaded
+Cuando hoy es ayer,LaCuerda,Downloaded
+Cuando la luz obscurece,LaCuerda,Downloaded
+Cuando la luz oscurece,LaCuerda,Downloaded
+Cuando sane tu corazón,LaCuerda,Downloaded
+Cuarto poder,LaCuerda,Downloaded
+Diario de una sombra,LaCuerda,Downloaded
+Días duros,LaCuerda,Downloaded
+El Beso de la Bruja,LaCuerda,Downloaded
+El Camino del Sol,LaCuerda,Downloaded
+El Círculo de fuego,LaCuerda,Downloaded
+Pupilas lejanas,LaCuerda,Downloaded
+Sin cadenas,LaCuerda,Downloaded
+Runaway,LaCuerda,Downloaded
+Complicado y aturdido,LaCuerda,Downloaded
+Run away,LaCuerda,Downloaded
+Mucha Experiencia,LaCuerda,Downloaded
+Casi nunca lo ves,LaCuerda,Downloaded
+Waitin',LaCuerda,Downloaded
+Waiting for your love,LaCuerda,Downloaded
+Anónimos,LaCuerda,Downloaded
+Agradezco que respiro,LaCuerda,Downloaded
+Amandla,LaCuerda,Downloaded
+Amores Ciegos,LaCuerda,Downloaded
+Babel,LaCuerda,Downloaded
+Bajo el mismo cielo,LaCuerda,Downloaded
+Bajo la lluvia,LaCuerda,Downloaded
+Bésame,LaCuerda,Downloaded
+Big Yuyo,LaCuerda,Downloaded
+Bolero,LaCuerda,Downloaded
+Boulevard,LaCuerda,Downloaded
+Cerca de mí,LaCuerda,Downloaded
+Corazón de bruja,LaCuerda,Downloaded
+Desde Cero,LaCuerda,Downloaded
+Desigual,LaCuerda,Downloaded
+Desorden,LaCuerda,Downloaded
+Días De Sol,LaCuerda,Downloaded
+Don Juan,LaCuerda,Downloaded
+El gran desfile,LaCuerda,Downloaded
+El Hombre,LaCuerda,Downloaded
+El mejor lugar,LaCuerda,Downloaded
+El Ritual de la Banana,LaCuerda,Downloaded
+Eso es real,LaCuerda,Downloaded
+Eu vi chegar,LaCuerda,Downloaded
+Eu vi llegar,LaCuerda,Downloaded
+Fácil de engañar,LaCuerda,Downloaded
+Fronteras en América,LaCuerda,Downloaded
+Hace lo que Quieras,LaCuerda,Downloaded
+Home sweet Home,LaCuerda,Downloaded
+Inalcanzable,LaCuerda,Downloaded
+Jamaica Reggae,LaCuerda,Downloaded
+Ataque,Dos Minutos,Downloaded
+Ataque,Juanse,Downloaded
+Ataque de Caca,Mox,Downloaded
+Alcatraz,Ataque Escampe,Downloaded
+Arder,Ataque Escampe,Downloaded
+Ataqué,Gato a Secas,Downloaded
+Ataque al corazón,M-Clan,Downloaded
+Ataque de pánico,Snake,Downloaded
+Ataque de tos,Joaquín Sabina,Downloaded
+La Pesca,Ataque de Caspa,Downloaded
+Nadina,Ataque Escampe,Downloaded
+Ataque de amor,Marcos Llunas,Downloaded
+el Ataque de las Chicas Cocodrilo,Hombres G,Downloaded
+El ataque de los gorilas,Fito Paez,Downloaded
+El ataque de los hambrientos,La Polla Records,Downloaded
+El Ultimo Ataque,Rata Blanca,Downloaded
+Festa Malandrómica,Ataque Escampe,Downloaded
+Hombres al borde de un ataque,Yuri,Downloaded
+Noites de agosto,Ataque Escampe,Downloaded
+Viaje a Egipto,Ataque de Caspa,Downloaded
+Al borde de un ataque de nervios,Fernando Blanco,Downloaded
+Ataque preventivo de la URSS,Polanski y el Ardor,Downloaded
+Ya no formo parte de esto,Ataque Frontal,Downloaded
+Cuando el arte ataque,Luis Alberto Spinetta,Downloaded
+Confesiones de Invierno,LaCuerda,Downloaded
+Canción para mi Muerte,LaCuerda,Downloaded
+Quizás Porque,LaCuerda,Downloaded
+Aprendizaje,LaCuerda,Downloaded
+Cuando ya me empiece a quedar solo,LaCuerda,Downloaded
+Rasguña las Piedras,LaCuerda,Downloaded
+Estación,LaCuerda,Downloaded
+el Fantasma de Canterville,LaCuerda,Downloaded
+Necesito,LaCuerda,Downloaded
+Bienvenidos al Trén,LaCuerda,Downloaded
+Afuera de la ciudad,LaCuerda,Downloaded
+Aguante la amistad,LaCuerda,Downloaded
+Aguate la amistad,LaCuerda,Downloaded
+Alto en la Torre,LaCuerda,Downloaded
+Amigo vuelve a casa pronto,LaCuerda,Downloaded
+Amo lo extraño,LaCuerda,Downloaded
+Aquí sin tu amor,LaCuerda,Downloaded
+Bienvenida Casandra,LaCuerda,Downloaded
+Blues del levante,LaCuerda,Downloaded
+Botas Locas,LaCuerda,Downloaded
+Bubulina,LaCuerda,Downloaded
+Cassandra,LaCuerda,Downloaded
+Cuando Comenzamos A Nacer,LaCuerda,Downloaded
+Cuando te vayas,LaCuerda,Downloaded
+Digo de voz,LaCuerda,Downloaded
+Dime quién me lo robó,LaCuerda,Downloaded
+El chico y yo,LaCuerda,Downloaded
+El día que apagaron la luz,LaCuerda,Downloaded
+El Show de los muertos,LaCuerda,Downloaded
+el Tuerto y los Ciegos,LaCuerda,Downloaded
+Entra lectrico,LaCuerda,Downloaded
+"Entra, seas bienvenido a casa",LaCuerda,Downloaded
+Espejos,LaCuerda,Downloaded
+Fabricante de Mentiras,LaCuerda,Downloaded
+Gaby,LaCuerda,Downloaded
+Instituciones,LaCuerda,Downloaded
+Juan Represión,LaCuerda,Downloaded
+La bicicleta oxidada,LaCuerda,Downloaded
+La niña juega en el gran jardín,LaCuerda,Downloaded
+Las increíbles aventuras del señor tijeras,LaCuerda,Downloaded
+Elementales Leches,LaCuerda,Downloaded
+Que ves el cielo,LaCuerda,Downloaded
+Durazno Sangrando,LaCuerda,Downloaded
+El anillo del capitán Beto,LaCuerda,Downloaded
+Perdonado (niño condenado),LaCuerda,Downloaded
+Dios de adolescencia,LaCuerda,Downloaded
+Lo que nos ocupa es esa abuela la conciencia,LaCuerda,Downloaded
+La azafata del tren fantasma,LaCuerda,Downloaded
+Encadenado al ánima,LaCuerda,Downloaded
+200 años,LaCuerda,Downloaded
+Alarma entre los ángeles,LaCuerda,Downloaded
+El diluvio y la pasajera,LaCuerda,Downloaded
+El tema de Elmo Lesto,LaCuerda,Downloaded
+En una lejana playa del animus,LaCuerda,Downloaded
+Encadenado al ánima (parte 2),LaCuerda,Downloaded
+Estado de coma,LaCuerda,Downloaded
+Irregular,LaCuerda,Downloaded
+Jugo de lucuma,LaCuerda,Downloaded
+La llave del Mándala,LaCuerda,Downloaded
+Las golondrinas de plaza de mayo,LaCuerda,Downloaded
+Oso del sueño,LaCuerda,Downloaded
+Pleamar de águilas,LaCuerda,Downloaded
+Ruido de magia,LaCuerda,Downloaded
+Suspensión,LaCuerda,Downloaded
+Viejos ratones del tiempo,LaCuerda,Downloaded
+Colinas,LaCuerda,Downloaded
+Suavemente Entusiasmado,LaCuerda,Downloaded
+Máquina del tiempo,LaCuerda,Downloaded
+Pantera,LaCuerda,Downloaded
+Impecable,LaCuerda,Downloaded
+La Araña,LaCuerda,Downloaded
+Caballos,LaCuerda,Downloaded
+Llamada Perdida,LaCuerda,Downloaded
+Jinete del atardecer,LaCuerda,Downloaded
+Jardín Secreto,LaCuerda,Downloaded
+Acto de fé,LaCuerda,Downloaded
+Algo no ha terminado,LaCuerda,Downloaded
+Bahía del puente Olive,LaCuerda,Downloaded
+Batalla Gigante,LaCuerda,Downloaded
+Bip-bip no me hables,LaCuerda,Downloaded
+Colmillos,LaCuerda,Downloaded
+Desayuno Continental,LaCuerda,Downloaded
+Descanso sobre ruinas,LaCuerda,Downloaded
+Dutsiland,LaCuerda,Downloaded
+Edmundo año cero,LaCuerda,Downloaded
+El estudia semiología mientras ella filma el choto que extraña,LaCuerda,Downloaded
+Entre los cuerpos,LaCuerda,Downloaded
+Fósil,LaCuerda,Downloaded
+Gato negro pasa,LaCuerda,Downloaded
+Hacernos Extraños,LaCuerda,Downloaded
+La danza de los principiantes,LaCuerda,Downloaded
+La nostalgia soundsystem,LaCuerda,Downloaded
+Lejos de todo,LaCuerda,Downloaded
+Los Lobos,LaCuerda,Downloaded
+Los Pájaros,LaCuerda,Downloaded
+Los últimos minutos de la noche,LaCuerda,Downloaded
+Mapa,LaCuerda,Downloaded
+Mateo,LaCuerda,Downloaded
+Me cuidé tanto,LaCuerda,Downloaded
+Nada peor que la sed,LaCuerda,Downloaded
+Noches de ciencia ficción,LaCuerda,Downloaded
+Nuestra Noche,LaCuerda,Downloaded
+Olímpica,LaCuerda,Downloaded
+Piñas,LaCuerda,Downloaded
+Puentes Rotos,LaCuerda,Downloaded
+Dueles,LaCuerda,Downloaded
+Ya te olvidé,LaCuerda,Downloaded
+El Alfarero,LaCuerda,Downloaded
+Partido en dos,LaCuerda,Downloaded
+Mi mayor anhelo,LaCuerda,Downloaded
+Cara a la muerte,LaCuerda,Downloaded
+El Tesoro,LaCuerda,Downloaded
+Confieso,LaCuerda,Downloaded
+Todo se lo debo a él,LaCuerda,Downloaded
+Digno y santo,LaCuerda,Downloaded
+Avellaneda Blues,LaCuerda,Downloaded
+Avenida Rivadavia,LaCuerda,Downloaded
+Blues de la amenaza nocturna,LaCuerda,Downloaded
+Hoy todo anda bien,LaCuerda,Downloaded
+Informe de un día,LaCuerda,Downloaded
+Jugo de tomate,LaCuerda,Downloaded
+Jugo de tomate frio,LaCuerda,Downloaded
+Libre como ayer,LaCuerda,Downloaded
+Mujer sin nombre,LaCuerda,Downloaded
+Necesito un amor,LaCuerda,Downloaded
+No hay tiempo de más,LaCuerda,Downloaded
+No pibe,LaCuerda,Downloaded
+Para ser un hombre más,LaCuerda,Downloaded
+Porque hoy nací,LaCuerda,Downloaded
+Que pena me das,LaCuerda,Downloaded
+Todo el día me pregunto,LaCuerda,Downloaded
+Una casa con diez pinos,LaCuerda,Downloaded
+La Balsa,LaCuerda,Downloaded
+Viento dile a la Lluvia,LaCuerda,Downloaded
+Ayer Nomás,LaCuerda,Downloaded
+El Rey Lloró,LaCuerda,Downloaded
+Madre Escúchame,LaCuerda,Downloaded
+Solo se trata de vivir,LaCuerda,Downloaded
+Dónde está esa promesa,LaCuerda,Downloaded
+El Vagabundo,LaCuerda,Downloaded
+Rock de la mujer perdida,LaCuerda,Downloaded
+Inadaptado,LaCuerda,Downloaded
+Amorcito,LaCuerda,Downloaded
+Déjame buscar felicidad,LaCuerda,Downloaded
+El día llegará,LaCuerda,Downloaded
+Esperando a Dios,LaCuerda,Downloaded
+Hogar,LaCuerda,Downloaded
+Jamás Creí,LaCuerda,Downloaded
+La casa de diarios viejos,LaCuerda,Downloaded
+La chica del paraguas,LaCuerda,Downloaded
+La mujer sin nombre,LaCuerda,Downloaded
+La Respuesta,LaCuerda,Downloaded
+Lo Olvidarás,LaCuerda,Downloaded
+Los días de Actemio,LaCuerda,Downloaded
+Los payasos no saben reir,LaCuerda,Downloaded
+Me harás pensar el el amor,LaCuerda,Downloaded
+Riete,LaCuerda,Downloaded
+Rosemary,LaCuerda,Downloaded
+Sabes,LaCuerda,Downloaded
+Seremos Amigos,LaCuerda,Downloaded
+Soy de cualquier lugar,LaCuerda,Downloaded
+Sueña y corre,LaCuerda,Downloaded
+Un día de fiesta,LaCuerda,Downloaded
+Un día de otoño,LaCuerda,Downloaded
