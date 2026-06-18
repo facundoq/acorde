@@ -1,10 +1,29 @@
-# Acorde
+# <img src="web_landing/icon.svg" width="40" height="40" valign="middle"> Acorde
 
 A Flutter app for Android, Linux, Web, iOS, and Windows to search, download, and store guitar tabs and lyrics. Includes a chord diagram explorer and a guitar tuner.
 
-The app is located in the `src/` directory.
+[**⬇️ Download Latest Android APK**](https://github.com/facundoq/acorde/releases/latest/download/app-arm64-v8a-release.apk)  
+*Requires Android 8.0+ and a 64-bit (ARMv8) device.*
 
-## Getting Started
+---
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src="web_landing/screenshots/view_tab.png" width="250" alt="View Tab Interface">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="web_landing/screenshots/chord_diagrams.png" width="250" alt="Chord Diagrams Interface">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="web_landing/screenshots/tuner.png" width="250" alt="Tuner Interface">
+</p>
+
+---
+
+## 🛠️ Development
+
+The app codebase is located in the `src/` directory.
+
+### Getting Started
 
 1. **Navigate to the app directory:**
    ```bash
@@ -23,11 +42,11 @@ The app is located in the `src/` directory.
 
 See [`src/README.md`](src/README.md) for full build, run, and testing instructions.
 
-## 🛠️ Linux Desktop Prerequisites
+### Linux Desktop Prerequisites
 
 Before building or running the application on Linux, you must install the following system dependencies, libraries, and utilities.
 
-### System dependencies install command:
+#### System dependencies install command:
 
 ```bash
 # 1. Update your package lists
@@ -43,11 +62,11 @@ sudo apt-get install -y chromium-browser
 *Note: Headless Chromium is required on Linux because `flutter_inappwebview` lacks Linux desktop support. The app uses Chromium to execute JavaScript and render page contents dynamically from tab sites. Supported PATH binaries include: `chromium-browser`, `chromium`, `google-chrome-stable`, and `google-chrome`.*
 
 
-## Android Testing Container
+### Android Testing Container
 
 You can run an Android emulator in a Docker container to execute test suites for the Android version of the app. This relies on `budtmo/docker-android`.
 
-### Starting the Container
+#### Starting the Container
 
 Run the following command at the root of the project to spin up the Android emulator container:
 
@@ -55,7 +74,7 @@ Run the following command at the root of the project to spin up the Android emul
 docker-compose -f docker-compose.android.yml up -d
 ```
 
-### Accessing the Emulator
+#### Accessing the Emulator
 
 - **Web UI**: Access the emulator's screen directly from your browser by navigating to `http://localhost:6080`.
 - **ADB Access**: You can connect to the emulator using ADB for running test suites:
