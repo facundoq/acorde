@@ -31,6 +31,17 @@ class LaCuerdaSource implements Source {
       final html = await _fetch(searchUrl);
       final document = parser.parse(html);
 
+      // Determine if we got redirected to an artist page by checking canonical URL
+      String currentPageUrl = searchUrl;
+      final canonicalEl = document.querySelector('link[rel="canonical"]');
+      if (canonicalEl != null) {
+        final canonicalUrl = canonicalEl.attributes['href'];
+        if (canonicalUrl != null && !canonicalUrl.contains('busca.php')) {
+          currentPageUrl = canonicalUrl;
+        }
+      }
+      final isArtistUrlOrRedirected = isArtistUrl || (currentPageUrl != searchUrl);
+
       // Case 1: Search hits only artists (Artist list)
       if (document.querySelector('#i_main') != null) {
         final elements = document.querySelectorAll('#i_main li a.sb');
@@ -121,7 +132,7 @@ class LaCuerdaSource implements Source {
       }
 
       // Case 3: Artist page or direct results list
-      final linkElements = document.querySelectorAll('#b_main a, #rList a');
+      final linkElements = document.querySelectorAll('#b_main a');
       for (final el in linkElements) {
         final href = el.attributes['href'];
         // Get only immediate text nodes to filter out inner tags
@@ -137,10 +148,10 @@ class LaCuerdaSource implements Source {
             !href.contains('busca.php')) {
           String cleanUrl = href;
           if (!href.startsWith('http') && !href.startsWith('//')) {
-            if (isArtistUrl) {
-              final baseUrl = searchUrl.endsWith('/')
-                  ? searchUrl
-                  : '$searchUrl/';
+            if (isArtistUrlOrRedirected) {
+              final baseUrl = currentPageUrl.endsWith('/')
+                  ? currentPageUrl
+                  : '$currentPageUrl/';
               cleanUrl =
                   '$baseUrl${href.startsWith('/') ? href.substring(1) : href}';
             } else {
@@ -161,7 +172,7 @@ class LaCuerdaSource implements Source {
             String artist = 'LaCuerda';
             String title = text;
 
-            if (isArtistUrl) {
+            if (isArtistUrlOrRedirected) {
               final firstH1 = document.querySelector('h1');
               artist = firstH1 != null ? firstH1.text.trim() : 'LaCuerda';
             } else if (text.contains(' - ')) {
