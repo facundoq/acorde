@@ -19,7 +19,7 @@ Abre,LaCuerda,Downloaded
 Absolut vacio,LaCuerda,Downloaded
 Acerca del niño proletario,LaCuerda,Downloaded
 Actuar para vivir,LaCuerda,Downloaded
-Ahi voy,LaCuerda,Downloaded
+Ahi voy,LaCuerda,Error: Exception: Chrome headless timed out: TimeoutException after 0:00:20.000000: Future not completed
 Al Lado Del Camino,LaCuerda,Downloaded
 Alacrán (resaca),LaCuerda,Downloaded
 Aleluya al Sol,LaCuerda,Downloaded
@@ -28,7 +28,7 @@ Ambar Violeta,LaCuerda,Downloaded
 Amor es dinero,LaCuerda,Downloaded
 Arde,LaCuerda,Downloaded
 Asilo en tu corazón,LaCuerda,Downloaded
-"Ay bruja, bruja, brujita",LaCuerda,Downloaded
+"""""""""""""""Ay bruja""""""",bruja,"""""""brujita"""""""""""""""
 Ayer soñé con Walter,LaCuerda,Downloaded
 B-Ode y Evelyn,LaCuerda,Downloaded
 Bailando hasta que se vaya la noche,LaCuerda,Downloaded
@@ -55,7 +55,7 @@ Las habladurías del mundo,LaCuerda,Downloaded
 A 18´ del sol,LaCuerda,Downloaded
 A estos hombres tristes,LaCuerda,Downloaded
 A mi dama,LaCuerda,Downloaded
-"A starosta, el idiota",LaCuerda,Downloaded
+"""""""""""""""A starosta""""""","""""""el idiota""""""""""""""",LaCuerda
 A su amor allí,LaCuerda,Downloaded
 Abrazame inoscentemente,LaCuerda,Downloaded
 Adentro Tuyo,LaCuerda,Downloaded
@@ -64,11 +64,11 @@ Agua de la miseria,LaCuerda,Downloaded
 Agua de Río,LaCuerda,Downloaded
 Aguas claras de Olimpo,LaCuerda,Downloaded
 Aguila de Trueno,LaCuerda,Downloaded
-"Aguila de trueno, parte 2",LaCuerda,Downloaded
+"""""""""""""""Aguila de trueno""""""","""""""parte 2""""""""""""""",LaCuerda
 Al ver verás,LaCuerda,Downloaded
 Alas de la mañana,LaCuerda,Downloaded
 Alcanfor,LaCuerda,Downloaded
-"Alfin, ella no cambia nada",LaCuerda,Downloaded
+"""""""""""""""Alfin""""""","""""""ella no cambia nada""""""""""""""",LaCuerda
 Alma de diamante,LaCuerda,Downloaded
 Almendra,LaCuerda,Downloaded
 Amor de Primavera,LaCuerda,Downloaded
@@ -89,10 +89,10 @@ Peperina,LaCuerda,Downloaded
 San Francisco y el Lobo,LaCuerda,Downloaded
 La grasa de las capitales,LaCuerda,Downloaded
 Salir de la melancolía,LaCuerda,Downloaded
-"A cada hombre, a cada mujer",LaCuerda,Downloaded
+"""""""""""""""A cada hombre""""""","""""""a cada mujer""""""""""""""",LaCuerda
 A los jóvenes de ayer,LaCuerda,Downloaded
 Alto en la torre,LaCuerda,Downloaded
-"Autos, Jets, Aviones, Barcos",LaCuerda,Downloaded
+"""""""""""""""Autos""""""",Jets,Aviones
 Cancion de Hollywwod,LaCuerda,Downloaded
 Cuanto tiempo mas llevará,LaCuerda,Downloaded
 Déjame Entrar,LaCuerda,Downloaded
@@ -108,7 +108,7 @@ Hundiendo el Titanic,LaCuerda,Downloaded
 Inconsciente Colectivo,LaCuerda,Downloaded
 La canción de Hollywood,LaCuerda,Downloaded
 Llorando en el espejo,LaCuerda,Downloaded
-"Loco, no te sobra una moneda?",LaCuerda,Downloaded
+"""""""""""""""Loco""""""","""""""no te sobra una moneda?""""""""""""""",LaCuerda
 Los Dinosaurios,LaCuerda,Downloaded
 Los Sobrevivientes,LaCuerda,Downloaded
 Mientras miro las nuevas olas,LaCuerda,Downloaded
@@ -131,7 +131,7 @@ Aquí no podemos hacerlo,LaCuerda,Downloaded
 Diez Años Después,LaCuerda,Downloaded
 A los Ojos,LaCuerda,Downloaded
 Acto Simple,LaCuerda,Downloaded
-"Adiós amigos, adiós",LaCuerda,Downloaded
+"""""""""""""""Adiós amigos""""""","""""""adiós""""""""""""""",LaCuerda
 Algún Lugar Encontraré,LaCuerda,Downloaded
 Algunos hombres buenos,LaCuerda,Downloaded
 Boogie de los piratas,LaCuerda,Downloaded
@@ -144,7 +144,8 @@ Demasiado Tarde,LaCuerda,Downloaded
 Dispara,LaCuerda,Downloaded
 El Profesional,LaCuerda,Downloaded
 el Tiempo lo Dirá,LaCuerda,Downloaded
-En el último trago,LaCuerda,Downloaded
-En un hotel de 1000 estrellas,LaCuerda,Downloaded
-Engánchate Conmigo,LaCuerda,Downloaded
-Especies que desaparecen,LaCuerda,Downloaded
+"""""""Ay bruja""",bruja,"""brujita"""""""
+"""""""A starosta""","""el idiota""""""",LaCuerda
+"""""""Aguila de trueno""","""parte 2""""""",LaCuerda
+"""""""Alfin""","""ella no cambia nada""""""",LaCuerda
+"Ay bruja, bruja, brujita",LaCuerda,Downloaded

@@ -44,7 +44,7 @@ final List<String> targetArtists = [
 
 Future<String> fetchWithHeadlessChrome(String url) async {
   print('Fetching via Chrome headless: $url');
-  final result = await Process.run('google-chrome-stable', [
+  final process = await Process.start('google-chrome-stable', [
     '--headless=new',
     '--disable-gpu',
     '--no-sandbox',
@@ -55,10 +55,32 @@ Future<String> fetchWithHeadlessChrome(String url) async {
     url
   ]);
 
-  if (result.exitCode == 0) {
-    return result.stdout as String;
-  } else {
-    throw Exception('Chrome headless exited with code ${result.exitCode}: ${result.stderr}');
+  final StringBuffer stdoutBuffer = StringBuffer();
+  final StringBuffer stderrBuffer = StringBuffer();
+
+  final stdoutSub = process.stdout.transform(utf8.decoder).listen((data) {
+    stdoutBuffer.write(data);
+  });
+  final stderrSub = process.stderr.transform(utf8.decoder).listen((data) {
+    stderrBuffer.write(data);
+  });
+
+  try {
+    final exitCode = await process.exitCode.timeout(const Duration(seconds: 20));
+    await stdoutSub.cancel();
+    await stderrSub.cancel();
+    
+    if (exitCode == 0) {
+      return stdoutBuffer.toString();
+    } else {
+      throw Exception('Chrome headless exited with code $exitCode: ${stderrBuffer.toString()}');
+    }
+  } catch (e) {
+    await stdoutSub.cancel();
+    await stderrSub.cancel();
+    process.kill();
+    print('Chrome headless failed or timed out for $url: $e');
+    throw Exception('Chrome headless timed out: $e');
   }
 }
 
@@ -96,11 +118,9 @@ void main() {
       }
     }
 
-    final Set<String> existingKeys = existingSongs.map((s) {
-      final title = (s['title'] as String? ?? '').toLowerCase().trim();
-      final artist = (s['artist'] as String? ?? '').toLowerCase().trim();
-      return '$artist:$title';
-    }).toSet();
+    final Set<String> existingUrls = existingSongs.map((s) {
+      return (s['url'] as String? ?? '').trim();
+    }).where((url) => url.isNotEmpty).toSet();
 
     final Map<String, String> htmlCache = {};
     Future<String> fetchWithCache(String url) async {
@@ -178,12 +198,10 @@ void main() {
             songUrl = 'https://acordes.lacuerda.net/$artistDir/$songName';
           }
           
-          final key = '${cleanArtist.toLowerCase().trim()}:${cleanTitle.toLowerCase().trim()}';
-
           print('\n[${i + 1}/${songsList.length}] Processing song: $cleanArtist - $cleanTitle (URL: $songUrl)');
 
-          if (existingKeys.contains(key)) {
-            print('Song already exists in default_songs.json, skipping.');
+          if (existingUrls.contains(songUrl)) {
+            print('Song already exists in default_songs.json (matched by URL), skipping.');
             // Update CSV status if not present
             if (!csvRows.any((row) => row['title'] == cleanTitle && row['artist'] == cleanArtist)) {
               csvRows.add({
@@ -248,7 +266,7 @@ void main() {
             // Save incrementally to default_songs.json
             existingSongs.add(songData);
             File(defaultSongsPath).writeAsStringSync(jsonEncode(existingSongs));
-            existingKeys.add(key);
+            existingUrls.add(songUrl);
 
             print('Successfully saved: $artist - $title');
             
