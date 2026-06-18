@@ -32,6 +32,10 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Compress default_songs.json
+        run: |
+          gzip -c assets/default_songs.json > src/assets/default_songs.json.gz
+
       - name: Install dependencies
         run: |
           cd src
