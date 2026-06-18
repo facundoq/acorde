@@ -373,13 +373,19 @@ class SearchScreenState extends State<SearchScreen> {
             color = Colors.red;
           }
 
+          final providerName =
+              source.name[0].toUpperCase() + source.name.substring(1);
+          final displayText = status['state'] == 'done'
+              ? '$providerName (${status['count']})'
+              : providerName;
+
           return Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 16, color: color),
               const SizedBox(width: 4),
               Text(
-                source.name[0].toUpperCase() + source.name.substring(1),
+                displayText,
                 style: TextStyle(
                   fontSize: 12,
                   color: color,

@@ -101,3 +101,38 @@ class SongContent {
     );
   }
 }
+
+String detectInstrument(String? url, String? title, String? lyrics) {
+  final cleanUrl = (url ?? '').toLowerCase();
+  final cleanTitle = (title ?? '').toLowerCase();
+  final cleanLyrics = (lyrics ?? '').toLowerCase();
+
+  if (cleanUrl.contains('ukulele') ||
+      cleanTitle.contains('ukulele') ||
+      cleanTitle.contains('ukelele')) {
+    return 'Ukulele';
+  }
+  if (cleanUrl.contains('bass') ||
+      cleanUrl.contains('bajo') ||
+      cleanTitle.contains('bass') ||
+      cleanTitle.contains('bajo')) {
+    return 'Bass';
+  }
+  if (cleanUrl.contains('harmonica') ||
+      cleanUrl.contains('armonica') ||
+      cleanTitle.contains('harmonica') ||
+      cleanTitle.contains('armonica') ||
+      cleanLyrics.contains('harmonica') ||
+      cleanLyrics.contains('armonica')) {
+    return 'Harmonica';
+  }
+  if (cleanUrl.contains('piano') ||
+      cleanUrl.contains('teclado') ||
+      cleanTitle.contains('piano') ||
+      cleanTitle.contains('teclado') ||
+      cleanUrl.contains('keyboard') ||
+      cleanTitle.contains('keyboard')) {
+    return 'Piano';
+  }
+  return 'Chords';
+}

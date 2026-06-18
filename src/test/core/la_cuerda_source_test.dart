@@ -57,7 +57,9 @@ void main() {
       expect(results[0].artist, equals('Spinetta Jade'));
       expect(
         results[0].url,
-        equals('https://acordes.lacuerda.net/spinetta_jade/alma_de_diamante'),
+        equals(
+          'https://acordes.lacuerda.net/spinetta_jade/alma_de_diamante.shtml',
+        ),
       );
     });
 
@@ -83,12 +85,14 @@ void main() {
       expect(results[0].artist, equals('Fito Paez'));
       expect(
         results[0].url,
-        equals('https://acordes.lacuerda.net/fito_paez/11_y_6'),
+        equals('https://acordes.lacuerda.net/fito_paez/11_y_6.shtml'),
       );
     });
 
-    test('should parse redirected artist search page correctly (canonical link check)', () async {
-      const redirectedPageHtml = '''
+    test(
+      'should parse redirected artist search page correctly (canonical link check)',
+      () async {
+        const redirectedPageHtml = '''
         <html>
           <head>
             <link rel="canonical" href="https://acordes.lacuerda.net/manal/">
@@ -105,22 +109,23 @@ void main() {
           </body>
         </html>
       ''';
-      mockResponse = redirectedPageHtml;
+        mockResponse = redirectedPageHtml;
 
-      final results = await source.search('manal');
-      // Should not contain "Dueles" because #rList is ignored
-      expect(results.length, equals(2));
-      expect(results[0].title, equals('Avellaneda Blues'));
-      expect(results[0].artist, equals('Manal'));
-      expect(
-        results[0].url,
-        equals('https://acordes.lacuerda.net/manal/avellaneda_blues'),
-      );
-      expect(results[1].title, equals('Avenida Rivadavia'));
-      expect(
-        results[1].url,
-        equals('https://acordes.lacuerda.net/manal/avenida_rivadavia'),
-      );
-    });
+        final results = await source.search('manal');
+        // Should not contain "Dueles" because #rList is ignored
+        expect(results.length, equals(2));
+        expect(results[0].title, equals('Avellaneda Blues'));
+        expect(results[0].artist, equals('Manal'));
+        expect(
+          results[0].url,
+          equals('https://acordes.lacuerda.net/manal/avellaneda_blues.shtml'),
+        );
+        expect(results[1].title, equals('Avenida Rivadavia'));
+        expect(
+          results[1].url,
+          equals('https://acordes.lacuerda.net/manal/avenida_rivadavia.shtml'),
+        );
+      },
+    );
   });
 }

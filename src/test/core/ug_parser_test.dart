@@ -63,21 +63,16 @@ void main() {
     });
 
     group('parseUGTabs', () {
-      test('should parse [ch] tags correctly', () {
+      test('should parse [ch] tags correctly by wrapping them in [tab]', () {
         const content = 'Some [ch]G[/ch] and [ch]C[/ch] chords';
         final parts = parseUGTabs(content);
 
-        expect(parts.length, equals(5));
-        expect(parts[0].type, equals(UGPartType.text));
-        expect(parts[0].content, equals('Some '));
-        expect(parts[1].type, equals(UGPartType.chord));
-        expect(parts[1].content, equals('G'));
-        expect(parts[2].type, equals(UGPartType.text));
-        expect(parts[2].content, equals(' and '));
-        expect(parts[3].type, equals(UGPartType.chord));
-        expect(parts[3].content, equals('C'));
-        expect(parts[4].type, equals(UGPartType.text));
-        expect(parts[4].content, equals(' chords'));
+        expect(parts.length, equals(1));
+        expect(parts[0].type, equals(UGPartType.tab));
+        expect(
+          parts[0].content,
+          equals('Some [ch]G[/ch] and [ch]C[/ch] chords'),
+        );
       });
 
       test('should parse [tab] tags correctly', () {

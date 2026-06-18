@@ -27,11 +27,23 @@ void main() {
   });
 
   group('CollectionScreen tests', () {
+    testWidgets('renders loading state initially', (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await tester.pumpWidget(buildTestApp(const CollectionScreen()));
+        await tester.pump(); // Render first frame containing loading animation
+
+        expect(find.text('Loading collection...'), findsOneWidget);
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      });
+    });
+
     testWidgets('renders empty state when there are no saved songs', (
       WidgetTester tester,
     ) async {
       await tester.runAsync(() async {
         await tester.pumpWidget(buildTestApp(const CollectionScreen()));
+        // Wait for async load from SQLite database to complete
+        await Future.delayed(const Duration(milliseconds: 100));
         await tester.pumpAndSettle();
 
         expect(find.text('Your Collection list is empty'), findsOneWidget);
@@ -117,6 +129,75 @@ void main() {
           await tester.pumpAndSettle();
 
           expect(triggeredQuery, equals('imagine'));
+        });
+      },
+    );
+
+    testWidgets(
+      'sorts songs by author then song title, and renders alphabet scrollbar',
+      (WidgetTester tester) async {
+        await tester.runAsync(() async {
+          // Seed songs out of alphabetical order
+          final song1 = SavedSong(
+            sourceId: '1',
+            title: 'Yesterday',
+            artist: 'The Beatles',
+            lyrics: 'lyrics',
+            chords: 'chords',
+            source: 'ultimateguitar',
+            url: 'https://example.com/1',
+            createdAt: '2026-06-09',
+          );
+          final song2 = SavedSong(
+            sourceId: '2',
+            title: 'A Hard Day\'s Night',
+            artist: 'The Beatles',
+            lyrics: 'lyrics',
+            chords: 'chords',
+            source: 'ultimateguitar',
+            url: 'https://example.com/2',
+            createdAt: '2026-06-09',
+          );
+          final song3 = SavedSong(
+            sourceId: '3',
+            title: 'Imagine',
+            artist: 'John Lennon',
+            lyrics: 'lyrics',
+            chords: 'chords',
+            source: 'ultimateguitar',
+            url: 'https://example.com/3',
+            createdAt: '2026-06-09',
+          );
+
+          await DatabaseService.saveSong(song1);
+          await DatabaseService.saveSong(song2);
+          await DatabaseService.saveSong(song3);
+
+          await tester.pumpWidget(buildTestApp(const CollectionScreen()));
+          await Future.delayed(const Duration(milliseconds: 100));
+          await tester.pumpAndSettle();
+
+          // Verify alphabet scrollbar is visible with letters J and T
+          expect(find.text('J'), findsOneWidget);
+          expect(find.text('T'), findsOneWidget);
+
+          // Verify sorted order in UI:
+          // 1. John Lennon - Imagine (starts with J)
+          // 2. The Beatles - A Hard Day's Night (starts with T, A before Y)
+          // 3. The Beatles - Yesterday (starts with T, Y after A)
+          final songTiles = find.byType(ListTile);
+          expect(songTiles, findsNWidgets(3));
+
+          final firstTile = tester.widget<ListTile>(songTiles.at(0));
+          final secondTile = tester.widget<ListTile>(songTiles.at(1));
+          final thirdTile = tester.widget<ListTile>(songTiles.at(2));
+
+          expect((firstTile.title as Text).data, equals('Imagine'));
+          expect(
+            (secondTile.title as Text).data,
+            equals('A Hard Day\'s Night'),
+          );
+          expect((thirdTile.title as Text).data, equals('Yesterday'));
         });
       },
     );

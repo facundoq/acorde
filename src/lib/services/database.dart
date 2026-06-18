@@ -115,9 +115,7 @@ class DatabaseService {
         // Seed default songs from assets (only for real database, not in-memory test database)
         if (dbName != inMemoryDatabasePath) {
           try {
-            final bytes = await rootBundle.load(
-              'assets/default_songs.json.gz',
-            );
+            final bytes = await rootBundle.load('assets/default_songs.json.gz');
             final buffer = bytes.buffer.asUint8List();
             final decompressed = gzip.decode(buffer);
             final jsonStr = utf8.decode(decompressed);

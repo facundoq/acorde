@@ -368,6 +368,35 @@ List<UGPart> _detectTablatureBlocks(UGPart part) {
   return result;
 }
 
+String _wrapTabBlocks(String content) {
+  final lines = content.split('\n');
+  final List<String> result = [];
+
+  for (int i = 0; i < lines.length; i++) {
+    final currentLine = lines[i];
+    final nextLine = (i + 1 < lines.length) ? lines[i + 1] : null;
+
+    final hasChords = currentLine.contains('[ch]');
+    final nextIsLyrics =
+        nextLine != null &&
+        !nextLine.contains('[ch]') &&
+        !nextLine.contains('[') &&
+        nextLine.trim().isNotEmpty;
+
+    if (hasChords && nextIsLyrics) {
+      result.add('[tab]$currentLine');
+      result.add('$nextLine[/tab]');
+      i++; // skip next line
+    } else if (hasChords) {
+      result.add('[tab]$currentLine[/tab]');
+    } else {
+      result.add(currentLine);
+    }
+  }
+
+  return result.join('\n');
+}
+
 String _cleanNewlines(String content) {
   return content.replaceAll(RegExp(r'(\r?\n\s*){3,}'), '\n\n').trim();
 }
@@ -376,6 +405,9 @@ List<UGPart> parseUGTabs(String content) {
   // Pre-process to clean newlines and ensure chords are tagged
   final cleaned = _cleanNewlines(content);
   final taggedContent = autoTagChords(cleaned);
+  final wrappedContent = taggedContent.contains('[tab]')
+      ? taggedContent
+      : _wrapTabBlocks(taggedContent);
   final List<UGPart> parts = [];
   int currentPos = 0;
 
@@ -385,13 +417,13 @@ List<UGPart> parseUGTabs(String content) {
     caseSensitive: false,
   );
 
-  for (final Match match in regex.allMatches(taggedContent)) {
+  for (final Match match in regex.allMatches(wrappedContent)) {
     // Add text before the match
     if (match.start > currentPos) {
       parts.add(
         UGPart(
           type: UGPartType.text,
-          content: taggedContent.substring(currentPos, match.start),
+          content: wrappedContent.substring(currentPos, match.start),
         ),
       );
     }
@@ -411,11 +443,11 @@ List<UGPart> parseUGTabs(String content) {
   }
 
   // Add remaining text
-  if (currentPos < taggedContent.length) {
+  if (currentPos < wrappedContent.length) {
     parts.add(
       UGPart(
         type: UGPartType.text,
-        content: taggedContent.substring(currentPos),
+        content: wrappedContent.substring(currentPos),
       ),
     );
   }

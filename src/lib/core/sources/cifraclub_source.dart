@@ -186,13 +186,17 @@ class CifraclubSource implements Source {
       ratingCount = 142;
     }
 
+    final songLyrics = content ?? 'Content not found';
+    final detected = detectInstrument(targetUrl, title, songLyrics);
+
     return SongContent(
       title: title,
       artist: artist,
-      lyrics: content ?? 'Content not found',
+      lyrics: songLyrics,
       chords: content ?? 'Chords not found',
       url: targetUrl,
       source: name,
+      instrument: detected,
       rating: rating,
       ratingCount: ratingCount,
     );

@@ -139,13 +139,17 @@ class CifrasSource implements Source {
       ratingCount = 89;
     }
 
+    final songLyrics = content ?? 'Content not found';
+    final detected = detectInstrument(url, title, songLyrics);
+
     return SongContent(
       title: title,
       artist: artist,
-      lyrics: content ?? 'Content not found',
+      lyrics: songLyrics,
       chords: content ?? 'Chords not found',
       url: url,
       source: name,
+      instrument: detected,
       rating: rating,
       ratingCount: ratingCount,
     );

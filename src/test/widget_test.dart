@@ -26,45 +26,50 @@ void main() {
   testWidgets('App main navigation tabs smoke test', (
     WidgetTester tester,
   ) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    await tester.runAsync(() async {
+      // Build our app and trigger a frame.
+      await tester.pumpWidget(const MyApp());
+      // Wait for async load from SQLite database to complete so the spinner disappears
+      await Future.delayed(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
 
-    // Verify that the HomeTabs screen is rendered
-    expect(find.byType(HomeTabs), findsOneWidget);
+      // Verify that the HomeTabs screen is rendered
+      expect(find.byType(HomeTabs), findsOneWidget);
 
-    // Verify the tabs are rendered in the NavigationBar
-    expect(find.text('Search'), findsOneWidget);
-    expect(find.text('Collection'), findsOneWidget);
-    expect(find.text('Diagrams'), findsOneWidget);
-    expect(find.text('Tuner'), findsOneWidget);
+      // Verify the tabs are rendered in the NavigationBar
+      expect(find.text('Search'), findsOneWidget);
+      expect(find.text('Collection'), findsOneWidget);
+      expect(find.text('Diagrams'), findsOneWidget);
+      expect(find.text('Tuner'), findsOneWidget);
 
-    // Verify we start on the Collection Screen
-    expect(find.byType(CollectionScreen), findsOneWidget);
-    expect(find.text('Acorde'), findsWidgets);
+      // Verify we start on the Collection Screen
+      expect(find.byType(CollectionScreen), findsOneWidget);
+      expect(find.text('Acorde'), findsWidgets);
 
-    // Switch to Search tab
-    await tester.tap(find.text('Search'));
-    await tester.pumpAndSettle();
-    expect(find.byType(SearchScreen), findsOneWidget);
+      // Switch to Search tab
+      await tester.tap(find.text('Search'));
+      await tester.pumpAndSettle();
+      expect(find.byType(SearchScreen), findsOneWidget);
 
-    // Switch to Diagrams tab
-    await tester.tap(find.text('Diagrams'));
-    await tester.pumpAndSettle();
+      // Switch to Diagrams tab
+      await tester.tap(find.text('Diagrams'));
+      await tester.pumpAndSettle();
 
-    // Verify Diagrams screen is visible
-    expect(find.byType(DiagramsScreen), findsOneWidget);
+      // Verify Diagrams screen is visible
+      expect(find.byType(DiagramsScreen), findsOneWidget);
 
-    // Switch to Tuner tab
-    await tester.tap(find.text('Tuner'));
-    await tester.pumpAndSettle();
+      // Switch to Tuner tab
+      await tester.tap(find.text('Tuner'));
+      await tester.pumpAndSettle();
 
-    // Verify Tuner screen is visible
-    expect(find.byType(TunerScreen), findsOneWidget);
+      // Verify Tuner screen is visible
+      expect(find.byType(TunerScreen), findsOneWidget);
 
-    // Switch back to Collection tab
-    await tester.tap(find.text('Collection'));
-    await tester.pumpAndSettle();
-    expect(find.byType(CollectionScreen), findsOneWidget);
+      // Switch back to Collection tab
+      await tester.tap(find.text('Collection'));
+      await Future.delayed(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
+      expect(find.byType(CollectionScreen), findsOneWidget);
+    });
   });
 }

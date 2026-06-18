@@ -40,7 +40,8 @@ class LaCuerdaSource implements Source {
           currentPageUrl = canonicalUrl;
         }
       }
-      final isArtistUrlOrRedirected = isArtistUrl || (currentPageUrl != searchUrl);
+      final isArtistUrlOrRedirected =
+          isArtistUrl || (currentPageUrl != searchUrl);
 
       // Case 1: Search hits only artists (Artist list)
       if (document.querySelector('#i_main') != null) {
@@ -111,18 +112,21 @@ class LaCuerdaSource implements Source {
                 final nVal = int.tryParse(idAttr.replaceAll('r', '')) ?? 0;
                 final index = nmax - nVal;
                 if (index >= 0 && index < hds.length && index < fns.length) {
-                  final url =
+                  final rawUrl =
                       'https://acordes.lacuerda.net/${hds[index]}/${fns[index]}';
-                  results.add(
-                    SongSearchResult(
-                      id: url,
-                      title: songName,
-                      artist: artistName,
-                      source: name,
-                      url: url,
-                      type: 'song',
-                    ),
-                  );
+                  final url = _cleanSongUrl(rawUrl);
+                  if (_isValidSongUrl(url)) {
+                    results.add(
+                      SongSearchResult(
+                        id: url,
+                        title: songName,
+                        artist: artistName,
+                        source: name,
+                        url: url,
+                        type: 'song',
+                      ),
+                    );
+                  }
                 }
               }
             }
@@ -181,16 +185,19 @@ class LaCuerdaSource implements Source {
               title = parts[1].trim();
             }
 
-            results.add(
-              SongSearchResult(
-                id: cleanUrl,
-                title: title,
-                artist: artist,
-                source: name,
-                url: cleanUrl,
-                type: 'song',
-              ),
-            );
+            final cleanedUrl = _cleanSongUrl(cleanUrl);
+            if (_isValidSongUrl(cleanedUrl)) {
+              results.add(
+                SongSearchResult(
+                  id: cleanedUrl,
+                  title: title,
+                  artist: artist,
+                  source: name,
+                  url: cleanedUrl,
+                  type: 'song',
+                ),
+              );
+            }
           }
         }
       }
@@ -224,16 +231,19 @@ class LaCuerdaSource implements Source {
                       ? href
                       : 'https://acordes.lacuerda.net/${href.startsWith('/') ? href.substring(1) : href}');
 
-            results.add(
-              SongSearchResult(
-                id: cleanUrl,
-                title: text,
-                artist: 'LaCuerda',
-                source: name,
-                url: cleanUrl,
-                type: 'song',
-              ),
-            );
+            final cleanedUrl = _cleanSongUrl(cleanUrl);
+            if (_isValidSongUrl(cleanedUrl)) {
+              results.add(
+                SongSearchResult(
+                  id: cleanedUrl,
+                  title: text,
+                  artist: 'LaCuerda',
+                  source: name,
+                  url: cleanedUrl,
+                  type: 'song',
+                ),
+              );
+            }
           }
         }
       }
@@ -251,6 +261,33 @@ class LaCuerdaSource implements Source {
       0,
       uniqueResults.length > 40 ? 40 : uniqueResults.length,
     );
+  }
+
+  String _cleanSongUrl(String url) {
+    var cleaned = url;
+    if (cleaned.endsWith('/')) {
+      cleaned = cleaned.substring(0, cleaned.length - 1);
+    }
+    if (!cleaned.endsWith('.shtml')) {
+      cleaned = '$cleaned.shtml';
+    }
+    return cleaned;
+  }
+
+  bool _isValidSongUrl(String url) {
+    try {
+      final uri = Uri.parse(url);
+      final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
+      if (segments.length != 2) return false;
+      if (segments[0] == 'tabs' ||
+          segments[0] == 'Extras' ||
+          segments[0] == 'busca.php') {
+        return false;
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   String _translateSpanishChord(String chord) {
@@ -323,13 +360,17 @@ class LaCuerdaSource implements Source {
       ratingCount = 28;
     }
 
+    final songLyrics = content ?? 'Content not found';
+    final detected = detectInstrument(url, title, songLyrics);
+
     return SongContent(
       title: title,
       artist: artist,
-      lyrics: content ?? 'Content not found',
+      lyrics: songLyrics,
       chords: content ?? 'Chords not found',
       url: url,
       source: name,
+      instrument: detected,
       rating: rating,
       ratingCount: ratingCount,
     );

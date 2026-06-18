@@ -34,6 +34,13 @@ const Map<String, List<ChordShape>> chordShapes = {
       barre: 8,
     ),
   ],
+  'C6': [
+    ChordShape(
+      name: 'C6',
+      frets: [-1, 3, 2, 2, 1, 0],
+      fingers: [0, 3, 2, 2, 1, 0],
+    ),
+  ],
   'Csus2': [
     ChordShape(
       name: 'Csus2',
@@ -223,6 +230,13 @@ const Map<String, List<ChordShape>> chordShapes = {
       barre: 10,
     ),
   ],
+  'D6': [
+    ChordShape(
+      name: 'D6',
+      frets: [-1, -1, 0, 2, 0, 2],
+      fingers: [0, 0, 0, 1, 0, 2],
+    ),
+  ],
   'D5': [
     ChordShape(
       name: 'D5',
@@ -301,6 +315,14 @@ const Map<String, List<ChordShape>> chordShapes = {
       frets: [-1, 6, 8, 8, 8, 6],
       fingers: [0, 1, 3, 3, 3, 1],
       barre: 6,
+    ),
+  ],
+  'D#6': [
+    ChordShape(
+      name: 'D#6',
+      frets: [-1, 6, 8, 8, 8, 8],
+      fingers: [0, 1, 3, 3, 3, 3],
+      barre: 8,
     ),
   ],
   'D#sus2': [
@@ -403,6 +425,13 @@ const Map<String, List<ChordShape>> chordShapes = {
       barre: 6,
     ),
   ],
+  'Ebdim': [
+    ChordShape(
+      name: 'Ebdim',
+      frets: [-1, -1, 1, 2, 1, 2],
+      fingers: [0, 0, 1, 3, 2, 4],
+    ),
+  ],
   'E': [
     ChordShape(
       name: 'E',
@@ -420,6 +449,13 @@ const Map<String, List<ChordShape>> chordShapes = {
       frets: [0, 7, 6, 4, 5, 4],
       fingers: [0, 4, 3, 1, 2, 1],
       barre: 4,
+    ),
+  ],
+  'E6': [
+    ChordShape(
+      name: 'E6',
+      frets: [0, 2, 2, 1, 2, 0],
+      fingers: [0, 2, 3, 1, 4, 0],
     ),
   ],
   'Esus2': [
@@ -472,6 +508,20 @@ const Map<String, List<ChordShape>> chordShapes = {
       name: 'Eadd11',
       frets: [0, 7, 9, 8, 10, 0],
       fingers: [0, 1, 3, 2, 4, 0],
+    ),
+  ],
+  'Em6': [
+    ChordShape(
+      name: 'Em6',
+      frets: [0, 2, 2, 0, 2, 0],
+      fingers: [0, 1, 2, 0, 3, 0],
+    ),
+  ],
+  'Edim7': [
+    ChordShape(
+      name: 'Edim7',
+      frets: [-1, -1, 2, 3, 2, 3],
+      fingers: [0, 0, 1, 3, 2, 4],
     ),
   ],
   'F': [
@@ -588,6 +638,22 @@ const Map<String, List<ChordShape>> chordShapes = {
       barre: 2,
     ),
   ],
+  'F#6': [
+    ChordShape(
+      name: 'F#6',
+      frets: [2, 4, 4, 3, 4, 2],
+      fingers: [1, 3, 4, 2, 4, 1],
+      barre: 2,
+    ),
+  ],
+  'F#m7': [
+    ChordShape(
+      name: 'F#m7',
+      frets: [2, 4, 2, 2, 2, 2],
+      fingers: [1, 3, 1, 1, 1, 1],
+      barre: 2,
+    ),
+  ],
   'F#sus2': [
     ChordShape(
       name: 'F#sus2',
@@ -640,6 +706,28 @@ const Map<String, List<ChordShape>> chordShapes = {
       fingers: [1, 3, 4, 2, 0, 0],
     ),
   ],
+  'F#dim': [
+    ChordShape(
+      name: 'F#dim',
+      frets: [-1, -1, 4, 2, 1, 2],
+      fingers: [0, 0, 4, 2, 1, 3],
+    ),
+  ],
+  'F#dim7': [
+    ChordShape(
+      name: 'F#dim7',
+      frets: [-1, -1, 1, 2, 1, 2],
+      fingers: [0, 0, 1, 3, 2, 4],
+    ),
+  ],
+  'Gb7': [
+    ChordShape(
+      name: 'Gb7',
+      frets: [2, 4, 2, 3, 2, 2],
+      fingers: [1, 3, 1, 2, 1, 1],
+      barre: 2,
+    ),
+  ],
   'Gb': [
     ChordShape(
       name: 'Gb',
@@ -673,6 +761,13 @@ const Map<String, List<ChordShape>> chordShapes = {
       frets: [-1, 10, 12, 12, 12, 10],
       fingers: [0, 1, 3, 3, 3, 1],
       barre: 10,
+    ),
+  ],
+  'G6': [
+    ChordShape(
+      name: 'G6',
+      frets: [3, 2, 0, 0, 0, 0],
+      fingers: [2, 1, 0, 0, 0, 0],
     ),
   ],
   'Gsus2': [
@@ -737,6 +832,13 @@ const Map<String, List<ChordShape>> chordShapes = {
       fingers: [2, 3, 0, 0, 0, 4],
     ),
   ],
+  'Gdim': [
+    ChordShape(
+      name: 'Gdim',
+      frets: [-1, -1, 5, 3, 2, 3],
+      fingers: [0, 0, 4, 2, 1, 3],
+    ),
+  ],
   'G#': [
     ChordShape(
       name: 'G#',
@@ -775,6 +877,20 @@ const Map<String, List<ChordShape>> chordShapes = {
       frets: [4, 4, 6, 5, 4, 4],
       fingers: [1, 1, 3, 2, 1, 1],
       barre: 4,
+    ),
+  ],
+  'Abdim': [
+    ChordShape(
+      name: 'Abdim',
+      frets: [-1, -1, 6, 4, 3, 4],
+      fingers: [0, 0, 4, 2, 1, 3],
+    ),
+  ],
+  'G#5': [
+    ChordShape(
+      name: 'G#5',
+      frets: [4, 6, 6, -1, -1, -1],
+      fingers: [1, 3, 4, 0, 0, 0],
     ),
   ],
   'A': [
@@ -876,6 +992,20 @@ const Map<String, List<ChordShape>> chordShapes = {
       barre: 5,
     ),
   ],
+  'A5': [
+    ChordShape(
+      name: 'A5',
+      frets: [5, 7, 7, -1, -1, -1],
+      fingers: [1, 3, 4, 0, 0, 0],
+    ),
+  ],
+  'Adim': [
+    ChordShape(
+      name: 'Adim',
+      frets: [-1, -1, 7, 5, 4, 5],
+      fingers: [0, 0, 4, 2, 1, 3],
+    ),
+  ],
   'A#': [
     ChordShape(
       name: 'A#',
@@ -892,11 +1022,26 @@ const Map<String, List<ChordShape>> chordShapes = {
       barre: 1,
     ),
   ],
+  'A#5': [
+    ChordShape(
+      name: 'A#5',
+      frets: [6, 8, 8, -1, -1, -1],
+      fingers: [1, 3, 4, 0, 0, 0],
+    ),
+  ],
   'A#m': [
     ChordShape(
       name: 'A#m',
       frets: [-1, 1, 3, 3, 2, 1],
       fingers: [0, 1, 3, 4, 2, 1],
+      barre: 1,
+    ),
+  ],
+  'A#m7': [
+    ChordShape(
+      name: 'A#m7',
+      frets: [-1, 1, 3, 1, 2, 1],
+      fingers: [0, 1, 3, 1, 2, 1],
       barre: 1,
     ),
   ],
@@ -926,6 +1071,29 @@ const Map<String, List<ChordShape>> chordShapes = {
       frets: [6, 6, 8, 7, 6, 6],
       fingers: [1, 1, 3, 2, 1, 1],
       barre: 6,
+    ),
+  ],
+  'Bb6': [
+    ChordShape(
+      name: 'Bb6',
+      frets: [-1, 1, 3, 0, 3, -1],
+      fingers: [0, 1, 2, 0, 3, 0],
+    ),
+  ],
+  'Bb7': [
+    ChordShape(
+      name: 'Bb7',
+      frets: [-1, 1, 3, 1, 3, 1],
+      fingers: [0, 1, 3, 1, 4, 1],
+      barre: 1,
+    ),
+  ],
+  'Bb9sus4': [
+    ChordShape(
+      name: 'Bb9sus4',
+      frets: [-1, 1, 1, 1, 1, 1],
+      fingers: [0, 1, 1, 1, 1, 1],
+      barre: 1,
     ),
   ],
   'B': [
@@ -983,6 +1151,43 @@ const Map<String, List<ChordShape>> chordShapes = {
       frets: [7, 7, 9, 8, 7, 7],
       fingers: [1, 1, 3, 2, 1, 1],
       barre: 7,
+    ),
+  ],
+  'B5': [
+    ChordShape(
+      name: 'B5',
+      frets: [7, 9, 9, -1, -1, -1],
+      fingers: [1, 3, 4, 0, 0, 0],
+    ),
+  ],
+  'Bm6': [
+    ChordShape(
+      name: 'Bm6',
+      frets: [-1, 2, 0, 1, 3, 2],
+      fingers: [0, 2, 0, 1, 4, 3],
+    ),
+  ],
+  'Baug': [
+    ChordShape(
+      name: 'Baug',
+      frets: [-1, 2, 1, 0, 0, 3],
+      fingers: [0, 2, 1, 0, 0, 4],
+    ),
+  ],
+  'Bsus2': [
+    ChordShape(
+      name: 'Bsus2',
+      frets: [-1, 2, 4, 4, 2, 2],
+      fingers: [0, 1, 3, 4, 1, 1],
+      barre: 2,
+    ),
+  ],
+  'Badd4': [
+    ChordShape(
+      name: 'Badd4',
+      frets: [-1, 2, 2, 4, 4, 2],
+      fingers: [0, 1, 1, 3, 4, 1],
+      barre: 2,
     ),
   ],
   'B#': [
