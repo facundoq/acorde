@@ -157,6 +157,7 @@ const _chromiumBinaries = [
 ];
 
 Future<String> _fetchWithHeadlessChromium(String url) async {
+  final disableJs = url.contains('lacuerda.net');
   for (final binary in _chromiumBinaries) {
     try {
       final result =
@@ -167,6 +168,7 @@ Future<String> _fetchWithHeadlessChromium(String url) async {
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
             '--disable-blink-features=AutomationControlled',
+            if (disableJs) '--disable-javascript',
             '--dump-dom',
             '--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 '
                 '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
