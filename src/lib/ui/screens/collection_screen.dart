@@ -142,6 +142,14 @@ class CollectionScreenState extends State<CollectionScreen> {
     return Icons.music_note;
   }
 
+  IconData _getEntryTypeIcon(String? instrument) {
+    final name = instrument?.toLowerCase() ?? '';
+    if (name.contains('tab')) {
+      return Icons.dehaze;
+    }
+    return Icons.grid_3x3;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -249,112 +257,134 @@ class CollectionScreenState extends State<CollectionScreen> {
                                     itemBuilder: (context, index) {
                                       final song = _songs[index];
 
-                                      return Card(
-                                        margin: const EdgeInsets.symmetric(
-                                          vertical: 4.0,
-                                        ),
-                                        color: colorScheme.surfaceContainerLow,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            8,
+                                      return GestureDetector(
+                                        onSecondaryTap: () =>
+                                            _confirmDelete(song),
+                                        child: Card(
+                                          margin: const EdgeInsets.symmetric(
+                                            vertical: 4.0,
                                           ),
-                                          side: BorderSide(
-                                            color: colorScheme.outlineVariant
-                                                .withOpacity(0.5),
-                                          ),
-                                        ),
-                                        elevation: 0,
-                                        child: ListTile(
-                                          onTap: () {
-                                            if (song.id != null) {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      SongDetailScreen(
-                                                        songId: song.id!,
-                                                      ),
-                                                ),
-                                              ).then((_) => loadSongs());
-                                            }
-                                          },
-                                          onLongPress: () =>
-                                              _confirmDelete(song),
-                                          title: Text(
-                                            song.title,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: colorScheme.onSurface,
+                                          color:
+                                              colorScheme.surfaceContainerLow,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            side: BorderSide(
+                                              color: colorScheme.outlineVariant
+                                                  .withOpacity(0.5),
                                             ),
                                           ),
-                                          subtitle: Row(
-                                            children: [
-                                              Flexible(
-                                                child: Text(
-                                                  song.artist,
-                                                  style: TextStyle(
+                                          elevation: 0,
+                                          child: ListTile(
+                                            onTap: () {
+                                              if (song.id != null) {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        SongDetailScreen(
+                                                          songId: song.id!,
+                                                        ),
+                                                  ),
+                                                ).then((_) => loadSongs());
+                                              }
+                                            },
+                                            onLongPress: () =>
+                                                _confirmDelete(song),
+                                            title: Text(
+                                              song.title,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: colorScheme.onSurface,
+                                              ),
+                                            ),
+                                            subtitle: Row(
+                                              children: [
+                                                Flexible(
+                                                  child: Text(
+                                                    song.artist,
+                                                    style: TextStyle(
+                                                      color: colorScheme
+                                                          .onSurfaceVariant,
+                                                    ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                                if (song.instrument !=
+                                                    null) ...[
+                                                  const SizedBox(width: 8),
+                                                  Icon(
+                                                    _getInstrumentIcon(
+                                                      song.instrument,
+                                                    ),
+                                                    size: 14,
+                                                    color: colorScheme.primary,
+                                                  ),
+                                                  const SizedBox(width: 2),
+                                                  Text(
+                                                    song.instrument!,
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color:
+                                                          colorScheme.primary,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            ),
+                                            trailing: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 5,
+                                                        vertical: 3,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: colorScheme
+                                                        .surfaceContainerHighest,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          4,
+                                                        ),
+                                                  ),
+                                                  child: Text(
+                                                    song.source ==
+                                                            'ultimateguitar'
+                                                        ? 'ultimate\nguitar'
+                                                        : song.source,
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 8.5,
+                                                      height: 1.1,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: colorScheme
+                                                          .onSurfaceVariant,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Tooltip(
+                                                  message:
+                                                      song.instrument ??
+                                                      'Chords',
+                                                  child: Icon(
+                                                    _getEntryTypeIcon(
+                                                      song.instrument,
+                                                    ),
+                                                    size: 20,
                                                     color: colorScheme
                                                         .onSurfaceVariant,
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ),
-                                              if (song.instrument != null) ...[
-                                                const SizedBox(width: 8),
-                                                Icon(
-                                                  _getInstrumentIcon(
-                                                    song.instrument,
-                                                  ),
-                                                  size: 14,
-                                                  color: colorScheme.primary,
-                                                ),
-                                                const SizedBox(width: 2),
-                                                Text(
-                                                  song.instrument!,
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    color: colorScheme.primary,
-                                                    fontWeight: FontWeight.w600,
                                                   ),
                                                 ),
                                               ],
-                                            ],
-                                          ),
-                                          trailing: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 6,
-                                                      vertical: 2,
-                                                    ),
-                                                decoration: BoxDecoration(
-                                                  color: colorScheme
-                                                      .surfaceContainerHighest,
-                                                  borderRadius:
-                                                      BorderRadius.circular(4),
-                                                ),
-                                                child: Text(
-                                                  song.source,
-                                                  style: TextStyle(
-                                                    fontSize: 10,
-                                                    color: colorScheme
-                                                        .onSurfaceVariant,
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.delete_outline,
-                                                  color: Colors.red,
-                                                ),
-                                                onPressed: () =>
-                                                    _confirmDelete(song),
-                                              ),
-                                            ],
+                                            ),
                                           ),
                                         ),
                                       );

@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -201,5 +202,106 @@ void main() {
         });
       },
     );
+
+    testWidgets('triggers delete dialog on long press', (
+      WidgetTester tester,
+    ) async {
+      await tester.runAsync(() async {
+        final song = SavedSong(
+          sourceId: '123',
+          title: 'Yesterday',
+          artist: 'The Beatles',
+          lyrics: 'lyrics',
+          chords: 'chords',
+          source: 'ultimateguitar',
+          url: 'https://example.com/yesterday',
+          createdAt: '2026-06-09',
+          instrument: 'Chords',
+          rating: 4.8,
+        );
+        await DatabaseService.saveSong(song);
+
+        await tester.pumpWidget(buildTestApp(const CollectionScreen()));
+        await Future.delayed(const Duration(milliseconds: 100));
+        await tester.pumpAndSettle();
+
+        // Simulate manual long press
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byType(ListTile).first),
+        );
+        await Future.delayed(const Duration(milliseconds: 600));
+        await tester.pump();
+        await gesture.up();
+
+        for (int i = 0; i < 15; i++) {
+          await Future.delayed(const Duration(milliseconds: 20));
+          await tester.pump();
+        }
+
+        expect(find.text('Delete Song'), findsOneWidget);
+        expect(
+          find.text(
+            'Are you sure you want to delete "Yesterday" from your Collection?',
+          ),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.text('Cancel'));
+        for (int i = 0; i < 15; i++) {
+          await Future.delayed(const Duration(milliseconds: 20));
+          await tester.pump();
+        }
+
+        expect(find.text('Delete Song'), findsNothing);
+      });
+    });
+
+    testWidgets('triggers delete dialog on secondary tap (right click)', (
+      WidgetTester tester,
+    ) async {
+      await tester.runAsync(() async {
+        final song = SavedSong(
+          sourceId: '123',
+          title: 'Yesterday',
+          artist: 'The Beatles',
+          lyrics: 'lyrics',
+          chords: 'chords',
+          source: 'ultimateguitar',
+          url: 'https://example.com/yesterday',
+          createdAt: '2026-06-09',
+          instrument: 'Chords',
+          rating: 4.8,
+        );
+        await DatabaseService.saveSong(song);
+
+        await tester.pumpWidget(buildTestApp(const CollectionScreen()));
+        await Future.delayed(const Duration(milliseconds: 100));
+        await tester.pumpAndSettle();
+
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byType(ListTile).first),
+          pointer: 7, // Custom pointer to avoid conflict
+          buttons: kSecondaryMouseButton,
+        );
+        await gesture.up();
+        for (int i = 0; i < 15; i++) {
+          await Future.delayed(const Duration(milliseconds: 20));
+          await tester.pump();
+        }
+
+        expect(find.text('Delete Song'), findsOneWidget);
+
+        await tester.tap(find.text('Delete'));
+        for (int i = 0; i < 15; i++) {
+          await Future.delayed(const Duration(milliseconds: 20));
+          await tester.pump();
+        }
+
+        await Future.delayed(const Duration(milliseconds: 100));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Yesterday'), findsNothing);
+      });
+    });
   });
 }

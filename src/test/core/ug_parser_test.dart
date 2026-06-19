@@ -130,14 +130,18 @@ void main() {
         expect(hasTab, isTrue);
       });
 
-      test('should parse multiple chords on the same line without splitting them into separate vertical lines', () {
-        const content = '    [ch]MIm[/ch] [ch]SIm[/ch]                [ch]LAm[/ch]      [ch]MIm[/ch] [ch]SI7[/ch]\n1.-)Uoh-yoh-yoh-yoh-oh-oh  eh-eh-eh-eh-yeh';
-        final parts = parseUGTabs(content);
+      test(
+        'should parse multiple chords on the same line without splitting them into separate vertical lines',
+        () {
+          const content =
+              '    [ch]MIm[/ch] [ch]SIm[/ch]                [ch]LAm[/ch]      [ch]MIm[/ch] [ch]SI7[/ch]\n1.-)Uoh-yoh-yoh-yoh-oh-oh  eh-eh-eh-eh-yeh';
+          final parts = parseUGTabs(content);
 
-        expect(parts.length, equals(1));
-        expect(parts[0].type, equals(UGPartType.tab));
-        expect(parts[0].content, contains('[ch]MIm[/ch] [ch]SIm[/ch]'));
-      });
+          expect(parts.length, equals(1));
+          expect(parts[0].type, equals(UGPartType.tab));
+          expect(parts[0].content, contains('[ch]MIm[/ch] [ch]SIm[/ch]'));
+        },
+      );
     });
 
     group('parseUGTabs tablature blocks', () {
