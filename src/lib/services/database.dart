@@ -17,6 +17,7 @@ class SavedSong {
   final String? instrument;
   final double? rating;
   final int? ratingCount;
+  final bool isFavorite;
 
   SavedSong({
     this.id,
@@ -31,6 +32,7 @@ class SavedSong {
     this.instrument,
     this.rating,
     this.ratingCount,
+    this.isFavorite = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -46,6 +48,7 @@ class SavedSong {
       'instrument': instrument,
       'rating': rating,
       'rating_count': ratingCount,
+      'favorite': isFavorite ? 1 : 0,
     };
   }
 
@@ -63,6 +66,7 @@ class SavedSong {
       instrument: map['instrument'] as String?,
       rating: (map['rating'] as num?)?.toDouble(),
       ratingCount: map['rating_count'] as int?,
+      isFavorite: map['favorite'] == 1,
     );
   }
 }
@@ -92,7 +96,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE songs (
@@ -107,6 +111,7 @@ class DatabaseService {
             instrument TEXT,
             rating REAL,
             rating_count INTEGER,
+            favorite INTEGER DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(source, source_id)
           )
@@ -132,6 +137,7 @@ class DatabaseService {
                 'instrument': songMap['instrument'],
                 'rating': songMap['rating'],
                 'rating_count': songMap['rating_count'],
+                'favorite': 0,
               }, conflictAlgorithm: ConflictAlgorithm.replace);
             }
           } catch (e) {
@@ -144,6 +150,11 @@ class DatabaseService {
         if (oldVersion < 2) {
           await db.execute(
             'ALTER TABLE songs ADD COLUMN rating_count INTEGER;',
+          );
+        }
+        if (oldVersion < 3) {
+          await db.execute(
+            'ALTER TABLE songs ADD COLUMN favorite INTEGER DEFAULT 0;',
           );
         }
       },
@@ -159,10 +170,11 @@ class DatabaseService {
     );
   }
 
-  static Future<List<SavedSong>> getSongs() async {
+  static Future<List<SavedSong>> getSongs({bool onlyFavorites = false}) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'songs',
+      where: onlyFavorites ? 'favorite = 1' : null,
       orderBy: 'created_at DESC',
     );
     return maps.map((map) => SavedSong.fromMap(map)).toList();
@@ -197,11 +209,15 @@ class DatabaseService {
     return null;
   }
 
-  static Future<List<SavedSong>> searchLocalSongs(String query) async {
+  static Future<List<SavedSong>> searchLocalSongs(
+    String query, {
+    bool onlyFavorites = false,
+  }) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
       'songs',
-      where: 'title LIKE ? OR artist LIKE ?',
+      where:
+          '(title LIKE ? OR artist LIKE ?)${onlyFavorites ? " AND favorite = 1" : ""}',
       whereArgs: ['%$query%', '%$query%'],
       orderBy: 'created_at DESC',
     );
@@ -211,5 +227,15 @@ class DatabaseService {
   static Future<void> deleteSong(int id) async {
     final db = await database;
     await db.delete('songs', where: 'id = ?', whereArgs: [id]);
+  }
+
+  static Future<void> setFavorite(int id, bool isFavorite) async {
+    final db = await database;
+    await db.update(
+      'songs',
+      {'favorite': isFavorite ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 }

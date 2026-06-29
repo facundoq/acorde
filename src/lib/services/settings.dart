@@ -43,6 +43,29 @@ class SettingsService {
     await prefs.setStringList(_sourcesConfigKey, list);
   }
 
+  static const String _googleApiKey = 'google_api_key';
+  static const String _googleCx = 'google_cx';
+
+  static Future<String?> getGoogleApiKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_googleApiKey);
+  }
+
+  static Future<void> saveGoogleApiKey(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_googleApiKey, key);
+  }
+
+  static Future<String?> getGoogleCx() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_googleCx);
+  }
+
+  static Future<void> saveGoogleCx(String cx) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_googleCx, cx);
+  }
+
   static Map<String, bool> _defaultSourcesConfig() {
     return {
       'ultimateguitar': true,

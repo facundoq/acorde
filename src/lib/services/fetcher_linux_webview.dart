@@ -16,9 +16,19 @@ bool _cefInitialized = false;
 void ensureCefInitialized() {
   if (_cefInitialized) return;
   _cefInitialized = true;
-  LinuxWebViewPlugin.initialize(options: {'no-sandbox': null});
+  LinuxWebViewPlugin.initialize(
+    options: {
+      'no-sandbox': null,
+      'disable-gpu': null,
+      'disable-software-rasterizer': null,
+      'renderer-process-limit': '1',
+      'disable-extensions': null,
+    },
+  );
   WebView.platform = LinuxWebView();
-  logger.log('CEF (flutter_linux_webview) initialized lazily on first fetch');
+  logger.log(
+    'CEF (flutter_linux_webview) initialized lazily on first fetch with memory optimization flags',
+  );
 }
 
 /// Terminates the CEF (flutter_linux_webview) plugin when the app exits.
@@ -55,6 +65,14 @@ class _LinuxWebViewWidgetState extends State<LinuxWebViewWidget> {
   void initState() {
     super.initState();
     ensureCefInitialized();
+  }
+
+  @override
+  void dispose() {
+    try {
+      _controller?.loadUrl('about:blank');
+    } catch (_) {}
+    super.dispose();
   }
 
   @override

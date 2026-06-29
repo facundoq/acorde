@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 import '../../core/models.dart';
 import '../../core/sources/source.dart';
 import '../../core/sources/ultimate_guitar_source.dart';
@@ -203,6 +206,33 @@ class SearchScreenState extends State<SearchScreen> {
         combinedResults.addAll(list);
       }
 
+      final googleKey =
+          const String.fromEnvironment('GOOGLE_API_KEY').isNotEmpty
+          ? const String.fromEnvironment('GOOGLE_API_KEY')
+          : await SettingsService.getGoogleApiKey();
+      final googleCx = const String.fromEnvironment('GOOGLE_CX').isNotEmpty
+          ? const String.fromEnvironment('GOOGLE_CX')
+          : await SettingsService.getGoogleCx();
+
+      if (combinedResults.isEmpty &&
+          googleKey != null &&
+          googleKey.isNotEmpty &&
+          googleCx != null &&
+          googleCx.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _status = 'Querying Google Custom Search fallback...';
+          });
+        }
+        logger.log('Triggering Google Custom Search API fallback...');
+        final googleResults = await _searchGoogleProgrammableSearch(
+          trimmedQuery,
+          googleKey,
+          googleCx,
+        );
+        combinedResults.addAll(googleResults);
+      }
+
       if (!mounted) return;
       setState(() {
         _onlineResults = combinedResults;
@@ -226,6 +256,149 @@ class SearchScreenState extends State<SearchScreen> {
         });
       }
     }
+  }
+
+  Future<List<SongSearchResult>> _searchGoogleProgrammableSearch(
+    String query,
+    String apiKey,
+    String cx,
+  ) async {
+    final url =
+        'https://customsearch.googleapis.com/customsearch/v1?key=$apiKey&cx=$cx&q=${Uri.encodeComponent(query)}';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final items = data['items'];
+        if (items is List) {
+          final List<SongSearchResult> results = [];
+          for (final item in items) {
+            final title = item['title'] as String? ?? '';
+            final link = item['link'] as String? ?? '';
+            final parsed = parseGoogleSearchResult(title, link);
+            if (parsed != null) {
+              results.add(parsed);
+            }
+          }
+          return results;
+        }
+      }
+    } catch (e) {
+      logger.log('Google Custom Search error: $e');
+    }
+    return [];
+  }
+
+  SongSearchResult? parseGoogleSearchResult(String title, String url) {
+    final cleanUrl = url.toLowerCase();
+    String source = '';
+
+    if (cleanUrl.contains('ultimate-guitar.com')) {
+      source = 'ultimateguitar';
+    } else if (cleanUrl.contains('cifraclub.com.br')) {
+      source = 'cifraclub';
+    } else if (cleanUrl.contains('lacuerda.net')) {
+      source = 'lacuerda';
+    } else if (cleanUrl.contains('cifras.com.br')) {
+      source = 'cifras';
+    } else {
+      return null;
+    }
+
+    String parsedTitle = title;
+    String parsedArtist = 'Unknown';
+
+    if (source == 'ultimateguitar') {
+      final parts = title.split(RegExp(r'\s+by\s+', caseSensitive: false));
+      if (parts.length == 2) {
+        parsedTitle = parts[0]
+            .replaceAll(
+              RegExp(r'\s+(chords|tab|bass|ukulele)\s*$', caseSensitive: false),
+              '',
+            )
+            .trim();
+        final artistParts = parts[1].split(' @ ');
+        parsedArtist = artistParts[0].trim();
+      }
+    } else if (source == 'cifraclub') {
+      final parts = title.split(' - ');
+      if (parts.length >= 2) {
+        parsedTitle = parts[0].trim();
+        parsedArtist = parts[1].trim();
+      }
+    } else if (source == 'lacuerda') {
+      final parts = title.split(':');
+      final mainPart = parts[0];
+      final subparts = mainPart.split(',');
+      if (subparts.length >= 2) {
+        parsedTitle = subparts[0].trim();
+        parsedArtist = subparts[1].trim();
+      }
+    } else if (source == 'cifras') {
+      final parts = title.split(' - ');
+      if (parts.length >= 2) {
+        parsedTitle = parts[0].trim();
+        parsedArtist = parts[1].trim();
+      }
+    }
+
+    if (parsedTitle.contains(' - ')) {
+      final split = parsedTitle.split(' - ');
+      parsedTitle = split[0].trim();
+      if (split.length > 1) {
+        parsedArtist = split[1].trim();
+      }
+    }
+
+    parsedTitle = parsedTitle
+        .replaceAll(
+          RegExp(
+            r'\s*(-\s*Cifra Club|-\s*Cifras|@\s*Ultimate-Guitar.Com|:\s*Acordes\s*-\s*LaCuerda)$',
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .trim();
+    parsedArtist = parsedArtist
+        .replaceAll(
+          RegExp(
+            r'\s*(-\s*Cifra Club|-\s*Cifras|@\s*Ultimate-Guitar.Com|:\s*Acordes\s*-\s*LaCuerda)$',
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .trim();
+
+    String id = url;
+    if (source == 'ultimateguitar') {
+      final prefix = 'https://tabs.ultimate-guitar.com/tab/';
+      if (url.startsWith(prefix)) {
+        id = url.substring(prefix.length);
+      }
+    } else if (source == 'lacuerda') {
+      final uri = Uri.parse(url);
+      id = uri.path.startsWith('/') ? uri.path.substring(1) : uri.path;
+    } else if (source == 'cifraclub') {
+      final prefix = 'https://www.cifraclub.com.br/';
+      if (url.startsWith(prefix)) {
+        id = url.substring(prefix.length);
+      }
+    } else if (source == 'cifras') {
+      final prefix = 'https://www.cifras.com.br/cifra/';
+      if (url.startsWith(prefix)) {
+        id = url.substring(prefix.length);
+      }
+    }
+
+    return SongSearchResult(
+      id: id,
+      title: parsedTitle,
+      artist: parsedArtist,
+      source: source,
+      url: url,
+      type: 'song',
+      instrument: detectInstrument(url, parsedTitle, ''),
+    );
   }
 
   IconData _getInstrumentIcon(String? instrument) {
@@ -270,6 +443,14 @@ class SearchScreenState extends State<SearchScreen> {
   }
 
   void _showConfigDialog() {
+    final apiKeyController = TextEditingController();
+    final cxController = TextEditingController();
+
+    SettingsService.getGoogleApiKey().then(
+      (val) => apiKeyController.text = val ?? '',
+    );
+    SettingsService.getGoogleCx().then((val) => cxController.text = val ?? '');
+
     showDialog(
       context: context,
       builder: (context) {
@@ -288,50 +469,92 @@ class SearchScreenState extends State<SearchScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ..._allSources.map((source) {
-                    final isChecked = _selectedSources[source.name] == true;
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ..._allSources.map((source) {
+                      final isChecked = _selectedSources[source.name] == true;
 
-                    return CheckboxListTile(
-                      title: Text(
-                        source.name[0].toUpperCase() + source.name.substring(1),
-                        style: TextStyle(color: colorScheme.onSurface),
-                      ),
-                      value: isChecked,
-                      activeColor: colorScheme.primary,
+                      return CheckboxListTile(
+                        title: Text(
+                          source.name[0].toUpperCase() +
+                              source.name.substring(1),
+                          style: TextStyle(color: colorScheme.onSurface),
+                        ),
+                        value: isChecked,
+                        activeColor: colorScheme.primary,
+                        onChanged: (val) {
+                          setModalState(() {
+                            _selectedSources[source.name] = val ?? false;
+                          });
+                          setState(() {
+                            _selectedSources[source.name] = val ?? false;
+                          });
+                          _saveSettings();
+                        },
+                      );
+                    }),
+                    const Divider(),
+                    SwitchListTile(
+                      title: const Text('Debug Mode'),
+                      subtitle: const Text('Show errors and logs in UI'),
+                      value: _debugMode,
+                      activeColor: Colors.red,
                       onChanged: (val) {
                         setModalState(() {
-                          _selectedSources[source.name] = val ?? false;
+                          _debugMode = val;
                         });
                         setState(() {
-                          _selectedSources[source.name] = val ?? false;
+                          _debugMode = val;
                         });
-                        _saveSettings();
                       },
-                    );
-                  }),
-                  const Divider(),
-                  SwitchListTile(
-                    title: const Text('Debug Mode'),
-                    subtitle: const Text('Show errors and logs in UI'),
-                    value: _debugMode,
-                    activeColor: Colors.red,
-                    onChanged: (val) {
-                      setModalState(() {
-                        _debugMode = val;
-                      });
-                      setState(() {
-                        _debugMode = val;
-                      });
-                    },
-                  ),
-                ],
+                    ),
+                    const Divider(),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Google Fallback Settings',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: apiKeyController,
+                      style: TextStyle(color: colorScheme.onSurface),
+                      decoration: const InputDecoration(
+                        labelText: 'Google API Key',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (val) {
+                        SettingsService.saveGoogleApiKey(val.trim());
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: cxController,
+                      style: TextStyle(color: colorScheme.onSurface),
+                      decoration: const InputDecoration(
+                        labelText: 'Search Engine ID (CX)',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (val) {
+                        SettingsService.saveGoogleCx(val.trim());
+                      },
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () {
+                    apiKeyController.dispose();
+                    cxController.dispose();
+                    Navigator.of(context).pop();
+                  },
                   child: const Text('Done'),
                 ),
               ],
@@ -832,25 +1055,61 @@ class SearchScreenState extends State<SearchScreen> {
                                         fontSize: 10,
                                       ),
                                     ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          setState(() => _debugLogs.clear()),
-                                      style: TextButton.styleFrom(
-                                        padding: EdgeInsets.zero,
-                                        minimumSize: Size.zero,
-                                        tapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                      ),
-                                      child: const Text(
-                                        'Clear',
-                                        style: TextStyle(fontSize: 10),
-                                      ),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () {
+                                            Clipboard.setData(
+                                              ClipboardData(
+                                                text: _debugLogs.join('\n'),
+                                              ),
+                                            );
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Copied logs to clipboard',
+                                                ),
+                                                duration: Duration(seconds: 2),
+                                              ),
+                                            );
+                                          },
+                                          style: TextButton.styleFrom(
+                                            padding: EdgeInsets.zero,
+                                            minimumSize: Size.zero,
+                                            tapTargetSize: MaterialTapTargetSize
+                                                .shrinkWrap,
+                                          ),
+                                          child: const Text(
+                                            'Copy',
+                                            style: TextStyle(fontSize: 10),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        TextButton(
+                                          onPressed: () => setState(
+                                            () => _debugLogs.clear(),
+                                          ),
+                                          style: TextButton.styleFrom(
+                                            padding: EdgeInsets.zero,
+                                            minimumSize: Size.zero,
+                                            tapTargetSize: MaterialTapTargetSize
+                                                .shrinkWrap,
+                                          ),
+                                          child: const Text(
+                                            'Clear',
+                                            style: TextStyle(fontSize: 10),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                                 const SizedBox(height: 5),
                                 ..._debugLogs.map(
-                                  (log) => Text(
+                                  (log) => SelectableText(
                                     log,
                                     style: TextStyle(
                                       color: colorScheme.onSurface,

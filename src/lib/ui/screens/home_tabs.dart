@@ -18,6 +18,8 @@ class _HomeTabsState extends State<HomeTabs> {
       GlobalKey<SearchScreenState>();
   final GlobalKey<CollectionScreenState> _collectionKey =
       GlobalKey<CollectionScreenState>();
+  final GlobalKey<CollectionScreenState> _favoritesKey =
+      GlobalKey<CollectionScreenState>();
 
   late final List<Widget> _screens;
 
@@ -26,6 +28,11 @@ class _HomeTabsState extends State<HomeTabs> {
     super.initState();
     _screens = [
       CollectionScreen(key: _collectionKey, onSearchOnline: _onSearchOnline),
+      CollectionScreen(
+        key: _favoritesKey,
+        onSearchOnline: _onSearchOnline,
+        showOnlyFavorites: true,
+      ),
       SearchScreen(key: _searchKey),
       const DiagramsScreen(),
       const TunerScreen(),
@@ -34,7 +41,7 @@ class _HomeTabsState extends State<HomeTabs> {
 
   void _onSearchOnline(String query) {
     setState(() {
-      _currentIndex = 1; // Search index is now 1
+      _currentIndex = 2; // Search index is now 2
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchKey.currentState?.triggerOnlineSearch(query);
@@ -46,8 +53,9 @@ class _HomeTabsState extends State<HomeTabs> {
       _currentIndex = index;
     });
     if (index == 0) {
-      // Collection is at index 0
       _collectionKey.currentState?.loadSongs();
+    } else if (index == 1) {
+      _favoritesKey.currentState?.loadSongs();
     }
   }
 
@@ -63,6 +71,11 @@ class _HomeTabsState extends State<HomeTabs> {
             icon: Icon(Icons.library_music_outlined),
             selectedIcon: Icon(Icons.library_music),
             label: 'Collection',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.favorite_outline),
+            selectedIcon: Icon(Icons.favorite),
+            label: 'Favourites',
           ),
           NavigationDestination(
             icon: Icon(Icons.search_outlined),

@@ -154,6 +154,8 @@ const _chromiumBinaries = [
   'chromium',
   'google-chrome-stable',
   'google-chrome',
+  'brave-browser-stable',
+  'brave-browser',
 ];
 
 Future<String> _fetchWithHeadlessChromium(String url) async {

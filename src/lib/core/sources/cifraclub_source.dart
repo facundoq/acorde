@@ -23,103 +23,64 @@ class CifraclubSource implements Source {
     final List<SongSearchResult> results = [];
 
     try {
-      // 1. Try suggestions API
-      final suggestUrl =
-          'https://www.cifraclub.com.br/api/search/suggestions/?q=${Uri.encodeComponent(query)}';
-      try {
-        print('[Cifraclub] Trying suggestions API...');
-        final suggestHtml = await _fetch(suggestUrl);
-        final data = jsonDecode(suggestHtml);
-        if (data != null && data['songs'] is List) {
-          final List songsList = data['songs'];
-          print('[Cifraclub] Found ${songsList.length} suggestions.');
-          for (final song in songsList) {
-            if (song == null) continue;
-            final songUrl = song['url'] as String? ?? '';
-            final songName = song['name'] as String? ?? 'Unknown';
-            final artistData = song['artist'];
-            final artistName = (artistData != null && artistData is Map)
-                ? (artistData['name'] as String? ?? 'Unknown Artist')
-                : 'Unknown Artist';
+      print('[Cifraclub] Scraping search page...');
+      final searchUrl =
+          'https://www.cifraclub.com.br/?q=${Uri.encodeComponent(query)}';
+      final html = await _fetch(searchUrl);
 
-            results.add(
-              SongSearchResult(
-                id: songUrl,
-                title: songName,
-                artist: artistName,
-                source: name,
-                url: 'https://www.cifraclub.com.br$songUrl',
-              ),
-            );
-          }
+      final songPattern = RegExp(
+        r'("name"|"url")\s*:\s*"([^"]+)"\s*,\s*("name"|"url")\s*:\s*"([^"]+)"',
+      );
+      for (final Match match in songPattern.allMatches(html)) {
+        final p1 = match.group(1) ?? '';
+        final v1 = match.group(2) ?? '';
+        final v2 = match.group(4) ?? '';
+        final titleName = p1.contains('name') ? v1 : v2;
+        final songUrl = p1.contains('url') ? v1 : v2;
+
+        final parts = songUrl.split('/').where((p) => p.isNotEmpty).toList();
+        if (parts.length >= 2) {
+          results.add(
+            SongSearchResult(
+              id: songUrl,
+              title: titleName,
+              artist: parts[0],
+              source: name,
+              url:
+                  'https://www.cifraclub.com.br${songUrl.startsWith('/') ? '' : '/'}$songUrl',
+            ),
+          );
         }
-      } catch (e) {
-        print('[Cifraclub] Suggestions API failed, falling back to scrape: $e');
       }
 
-      // 2. Fallback to scraping
       if (results.isEmpty) {
-        print('[Cifraclub] Scraping search page...');
-        final searchUrl =
-            'https://www.cifraclub.com.br/?q=${Uri.encodeComponent(query)}';
-        final html = await _fetch(searchUrl);
-
-        final songPattern = RegExp(
-          r'("name"|"url")\s*:\s*"([^"]+)"\s*,\s*("name"|"url")\s*:\s*"([^"]+)"',
-        );
-        for (final Match match in songPattern.allMatches(html)) {
-          final p1 = match.group(1) ?? '';
-          final v1 = match.group(2) ?? '';
-          final v2 = match.group(4) ?? '';
-          final titleName = p1.contains('name') ? v1 : v2;
-          final songUrl = p1.contains('url') ? v1 : v2;
-
-          final parts = songUrl.split('/').where((p) => p.isNotEmpty).toList();
-          if (parts.length >= 2) {
-            results.add(
-              SongSearchResult(
-                id: songUrl,
-                title: titleName,
-                artist: parts[0],
-                source: name,
-                url:
-                    'https://www.cifraclub.com.br${songUrl.startsWith('/') ? '' : '/'}$songUrl',
-              ),
-            );
-          }
-        }
-
-        if (results.isEmpty) {
-          final document = parser.parse(html);
-          final links = document.querySelectorAll('a');
-          for (final el in links) {
-            final href = el.attributes['href'];
-            final text = el.text.trim();
-            if (href != null &&
-                href.startsWith('/') &&
-                href.endsWith('/') &&
-                href.split('/').where((p) => p.isNotEmpty).length == 2) {
-              final parts = href.split('/').where((p) => p.isNotEmpty).toList();
-              if (![
-                'letra',
-                'musico',
-                'academy',
-                'mais',
-                'afinador',
-                'metronomo',
-              ].contains(parts[0])) {
-                results.add(
-                  SongSearchResult(
-                    id: href,
-                    title: text.isNotEmpty
-                        ? text
-                        : parts[1].replaceAll('-', ' '),
-                    artist: parts[0],
-                    source: name,
-                    url: 'https://www.cifraclub.com.br$href',
-                  ),
-                );
-              }
+        final document = parser.parse(html);
+        final links = document.querySelectorAll('a');
+        for (final el in links) {
+          final href = el.attributes['href'];
+          final text = el.text.trim();
+          if (href != null &&
+              href.startsWith('/') &&
+              href.endsWith('/') &&
+              href.split('/').where((p) => p.isNotEmpty).length == 2) {
+            final parts = href.split('/').where((p) => p.isNotEmpty).toList();
+            if (![
+              'letra',
+              'musico',
+              'academy',
+              'mais',
+              'afinador',
+              'metronomo',
+            ].contains(parts[0])) {
+              results.add(
+                SongSearchResult(
+                  id: href,
+                  title: text.isNotEmpty ? text : parts[1].replaceAll('-', ' '),
+                  artist: parts[0],
+                  source: name,
+                  url: 'https://www.cifraclub.com.br$href',
+                ),
+              );
             }
           }
         }

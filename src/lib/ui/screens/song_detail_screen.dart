@@ -663,6 +663,112 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                       ),
+                      IconButton(
+                        icon: Icon(
+                          _song!.isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: _song!.isFavorite
+                              ? Colors.red
+                              : colorScheme.onSurfaceVariant,
+                        ),
+                        onPressed: () async {
+                          final nextFav = !_song!.isFavorite;
+                          final messenger = ScaffoldMessenger.of(context);
+                          if (_song!.id == null) {
+                            setState(() {
+                              _loading = true;
+                            });
+                            try {
+                              final savedSong = SavedSong(
+                                sourceId: _song!.sourceId,
+                                title: _song!.title,
+                                artist: _song!.artist,
+                                lyrics: _song!.lyrics,
+                                chords: _song!.chords,
+                                source: _song!.source,
+                                url: _song!.url,
+                                createdAt: DateTime.now().toIso8601String(),
+                                instrument: _song!.instrument,
+                                rating: _song!.rating,
+                                ratingCount: _song!.ratingCount,
+                                isFavorite: true,
+                              );
+                              final newId = await DatabaseService.saveSong(
+                                savedSong,
+                              );
+                              final updatedSong = SavedSong(
+                                id: newId,
+                                sourceId: savedSong.sourceId,
+                                title: savedSong.title,
+                                artist: savedSong.artist,
+                                lyrics: savedSong.lyrics,
+                                chords: savedSong.chords,
+                                source: savedSong.source,
+                                url: savedSong.url,
+                                createdAt: savedSong.createdAt,
+                                instrument: savedSong.instrument,
+                                rating: savedSong.rating,
+                                ratingCount: savedSong.ratingCount,
+                                isFavorite: true,
+                              );
+                              if (!mounted) return;
+                              setState(() {
+                                _song = updatedSong;
+                                _loading = false;
+                              });
+                              messenger.showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Saved to collection & added to favourites',
+                                  ),
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            } catch (e) {
+                              if (!mounted) return;
+                              setState(() {
+                                _loading = false;
+                              });
+                              logger.error('Failed to save as favorite: $e');
+                            }
+                          } else {
+                            await DatabaseService.setFavorite(
+                              _song!.id!,
+                              nextFav,
+                            );
+                            final updatedSong = SavedSong(
+                              id: _song!.id,
+                              sourceId: _song!.sourceId,
+                              title: _song!.title,
+                              artist: _song!.artist,
+                              lyrics: _song!.lyrics,
+                              chords: _song!.chords,
+                              source: _song!.source,
+                              url: _song!.url,
+                              createdAt: _song!.createdAt,
+                              instrument: _song!.instrument,
+                              rating: _song!.rating,
+                              ratingCount: _song!.ratingCount,
+                              isFavorite: nextFav,
+                            );
+                            if (!mounted) return;
+                            setState(() {
+                              _song = updatedSong;
+                            });
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  nextFav
+                                      ? 'Added to favourites'
+                                      : 'Removed from favourites',
+                                ),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          }
+                        },
+                      ),
                     ],
                   ),
                 ],

@@ -135,6 +135,81 @@ class LaCuerdaSource implements Source {
         if (results.isNotEmpty) return results;
       }
 
+      // Case 4: Versions page list (multiple versions of a song)
+      final rtHeadElements = document.querySelectorAll('.rtHead');
+      if (rtHeadElements.isNotEmpty) {
+        final h1 = document.querySelector('h1');
+        String artistName = 'LaCuerda';
+        String songTitle = 'Unknown Title';
+        if (h1 != null) {
+          artistName = h1.querySelector('a')?.text.trim() ?? 'LaCuerda';
+          final clone = h1.clone(true);
+          clone.querySelector('a')?.remove();
+          songTitle = clone.text.trim();
+        }
+
+        for (final rtHead in rtHeadElements) {
+          final aLink = rtHead.querySelector('.rtLabel a');
+          if (aLink != null) {
+            final href = aLink.attributes['href'];
+            final text = aLink.text.trim();
+            if (href != null && href.endsWith('.shtml')) {
+              final url = href.startsWith('http')
+                  ? href
+                  : 'https://acordes.lacuerda.net${href.startsWith('/') ? '' : '/'}$href';
+
+              final calEl = rtHead.querySelector('.mCalImg');
+              double? rating;
+              int? ratingCount;
+              if (calEl != null) {
+                final classAttr = calEl.attributes['class'] ?? '';
+                if (classAttr.contains('rtMejor')) {
+                  rating = 5.0;
+                  ratingCount = 50;
+                } else if (classAttr.contains('rtBueno')) {
+                  rating = 4.0;
+                  ratingCount = 20;
+                } else if (classAttr.contains('rtRegular')) {
+                  rating = 3.0;
+                  ratingCount = 10;
+                } else if (classAttr.contains('rtMalo')) {
+                  rating = 2.0;
+                  ratingCount = 5;
+                }
+              }
+
+              String instrument = 'Chords';
+              final tipoIcon = rtHead.querySelector('.tipoIcon');
+              if (tipoIcon != null) {
+                final classAttr = tipoIcon.attributes['class'] ?? '';
+                if (classAttr.contains('tiT')) {
+                  instrument = 'Tab';
+                } else if (classAttr.contains('tiK')) {
+                  instrument = 'Piano';
+                } else if (classAttr.contains('tiB')) {
+                  instrument = 'Bass';
+                }
+              }
+
+              results.add(
+                SongSearchResult(
+                  id: url,
+                  title: '$songTitle ($text)',
+                  artist: artistName,
+                  source: name,
+                  url: url,
+                  type: 'song',
+                  instrument: instrument,
+                  rating: rating,
+                  ratingCount: ratingCount,
+                ),
+              );
+            }
+          }
+        }
+        if (results.isNotEmpty) return results;
+      }
+
       // Case 3: Artist page or direct results list
       final linkElements = document.querySelectorAll('#b_main a');
       for (final el in linkElements) {
@@ -312,7 +387,33 @@ class LaCuerdaSource implements Source {
 
   @override
   Future<SongContent> getSong(String url) async {
-    final html = await _fetch(url);
+    var targetUrl = url;
+    if (!url.endsWith('.shtml')) {
+      try {
+        final html = await _fetch(url);
+        final document = parser.parse(html);
+        final links = document.querySelectorAll('a');
+        String? firstVersionUrl;
+        for (final a in links) {
+          final href = a.attributes['href'];
+          if (href != null && href.endsWith('.shtml')) {
+            firstVersionUrl = href.startsWith('http')
+                ? href
+                : 'https://acordes.lacuerda.net${href.startsWith('/') ? '' : '/'}$href';
+            break;
+          }
+        }
+        if (firstVersionUrl != null) {
+          targetUrl = firstVersionUrl;
+        } else {
+          targetUrl = _cleanSongUrl(url);
+        }
+      } catch (_) {
+        targetUrl = _cleanSongUrl(url);
+      }
+    }
+
+    final html = await _fetch(targetUrl);
     final document = parser.parse(html);
 
     final titleEl = document.querySelector('h1');
@@ -368,7 +469,7 @@ class LaCuerdaSource implements Source {
       artist: artist,
       lyrics: songLyrics,
       chords: content ?? 'Chords not found',
-      url: url,
+      url: targetUrl,
       source: name,
       instrument: detected,
       rating: rating,

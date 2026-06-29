@@ -4,13 +4,18 @@ import 'package:acorde/core/sources/la_cuerda_source.dart';
 void main() {
   group('LaCuerdaSource - Advanced Cases', () {
     late LaCuerdaSource source;
+    final Map<String, String> mockUrlResponses = {};
     String mockResponse = '';
 
     Future<String> mockFetchHtml(String url) async {
+      if (mockUrlResponses.containsKey(url)) {
+        return mockUrlResponses[url]!;
+      }
       return mockResponse;
     }
 
     setUp(() {
+      mockUrlResponses.clear();
       source = LaCuerdaSource(fetchHtmlFn: mockFetchHtml);
     });
 
@@ -125,6 +130,101 @@ void main() {
           results[1].url,
           equals('https://acordes.lacuerda.net/manal/avenida_rivadavia.shtml'),
         );
+      },
+    );
+
+    test(
+      'should resolve and load first version from a versions index page URL',
+      () async {
+        const indexUrl = 'https://acordes.lacuerda.net/fito_paez/11_y_6';
+        const versionUrl =
+            'https://acordes.lacuerda.net/fito_paez/11_y_6.shtml';
+
+        const indexHtml = '''
+        <html>
+          <body>
+            <h1>11 y 6</h1>
+            <div class="versions">
+              <a href="/fito_paez/11_y_6.shtml">Versión 1</a>
+              <a href="/fito_paez/11_y_6-2.shtml">Versión 2</a>
+            </div>
+          </body>
+        </html>
+      ''';
+
+        const songHtml = '''
+        <html>
+          <body>
+            <h1>11 y 6</h1>
+            <h2>Fito Paez</h2>
+            <div id="t_body">
+              <a href="#">DO</a> <a href="#">SOL</a> <a href="#">LAm</a>
+              Llegaste a mi vida...
+            </div>
+          </body>
+        </html>
+      ''';
+
+        mockUrlResponses[indexUrl] = indexHtml;
+        mockUrlResponses[versionUrl] = songHtml;
+
+        final songContent = await source.getSong(indexUrl);
+        expect(songContent.title, equals('11 y 6'));
+        expect(songContent.artist, equals('Fito Paez'));
+        expect(
+          songContent.chords,
+          contains('C G Am'),
+        ); // Verifying translation Solana
+        expect(songContent.url, equals(versionUrl));
+      },
+    );
+
+    test(
+      'should parse versions list page from search and extract rating/instrument info',
+      () async {
+        const versionsUrl = 'https://acordes.lacuerda.net/fito_paez/11_y_6';
+        const indexHtml = '''
+        <html>
+          <body>
+            <div id="r_head">
+              <h1>11 y 6 <br><a href="./">Fito Paez</a></h1>
+            </div>
+            <div class="versions">
+              <ul>
+                <li id="liElm1">
+                  <div class="rtHead">
+                    <div class="tipoIcon tiR"></div>
+                    <div class="rtLabel"><a href="11_y_6.shtml">Letra y Acordes</a></div>
+                    <div id="cal1" class="mCalImg rtMejor"></div>
+                  </div>
+                </li>
+                <li id="liElm2">
+                  <div class="rtHead">
+                    <div class="tipoIcon tiT"></div>
+                    <div class="rtLabel"><a href="11_y_6-2.shtml">Tablatura</a></div>
+                    <div id="cal2" class="mCalImg rtBueno"></div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </body>
+        </html>
+      ''';
+
+        mockResponse = indexHtml;
+
+        final results = await source.search(versionsUrl);
+        expect(results.length, equals(2));
+
+        expect(results[0].title, equals('11 y 6 (Letra y Acordes)'));
+        expect(results[0].artist, equals('Fito Paez'));
+        expect(results[0].instrument, equals('Chords'));
+        expect(results[0].rating, equals(5.0));
+
+        expect(results[1].title, equals('11 y 6 (Tablatura)'));
+        expect(results[1].artist, equals('Fito Paez'));
+        expect(results[1].instrument, equals('Tab'));
+        expect(results[1].rating, equals(4.0));
       },
     );
   });

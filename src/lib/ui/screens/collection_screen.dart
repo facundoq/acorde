@@ -6,11 +6,13 @@ import 'song_detail_screen.dart';
 class CollectionScreen extends StatefulWidget {
   final VoidCallback? onSettingsPressed;
   final void Function(String query)? onSearchOnline;
+  final bool showOnlyFavorites;
 
   const CollectionScreen({
     super.key,
     this.onSettingsPressed,
     this.onSearchOnline,
+    this.showOnlyFavorites = false,
   });
 
   @override
@@ -43,7 +45,9 @@ class CollectionScreenState extends State<CollectionScreen> {
     setState(() {
       _isLoading = true;
     });
-    final all = await DatabaseService.getSongs();
+    final all = await DatabaseService.getSongs(
+      onlyFavorites: widget.showOnlyFavorites,
+    );
     if (!mounted) return;
 
     // Sort by artist, then by title (case-insensitive)
@@ -84,7 +88,10 @@ class CollectionScreenState extends State<CollectionScreen> {
     setState(() {
       _isLoading = true;
     });
-    final results = await DatabaseService.searchLocalSongs(query);
+    final results = await DatabaseService.searchLocalSongs(
+      query,
+      onlyFavorites: widget.showOnlyFavorites,
+    );
     if (!mounted) return;
 
     // Sort by artist, then by title (case-insensitive)
@@ -163,9 +170,9 @@ class CollectionScreenState extends State<CollectionScreen> {
           children: [
             SvgPicture.asset('assets/images/icon.svg', width: 24, height: 24),
             const SizedBox(width: 8),
-            const Text(
-              'Acorde',
-              style: TextStyle(
+            Text(
+              widget.showOnlyFavorites ? 'Favourites' : 'Acorde',
+              style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'SpaceMono',
@@ -179,7 +186,9 @@ class CollectionScreenState extends State<CollectionScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
-                '$_totalCount Tabs',
+                widget.showOnlyFavorites
+                    ? '$_totalCount Favourites'
+                    : '$_totalCount Tabs',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 12,
@@ -190,7 +199,7 @@ class CollectionScreenState extends State<CollectionScreen> {
           ],
         ),
         actions: [
-          if (widget.onSettingsPressed != null)
+          if (widget.onSettingsPressed != null && !widget.showOnlyFavorites)
             IconButton(
               icon: const Icon(Icons.settings, color: Colors.white),
               onPressed: widget.onSettingsPressed,
@@ -208,7 +217,9 @@ class CollectionScreenState extends State<CollectionScreen> {
               controller: _searchController,
               style: TextStyle(color: colorScheme.onSurface),
               decoration: InputDecoration(
-                hintText: 'Search your Collection...',
+                hintText: widget.showOnlyFavorites
+                    ? 'Search your Favourites...'
+                    : 'Search your Collection...',
                 hintStyle: TextStyle(
                   color: colorScheme.onSurfaceVariant.withOpacity(0.7),
                 ),
@@ -339,6 +350,30 @@ class CollectionScreenState extends State<CollectionScreen> {
                                             trailing: Row(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
+                                                IconButton(
+                                                  icon: Icon(
+                                                    song.isFavorite
+                                                        ? Icons.favorite
+                                                        : Icons.favorite_border,
+                                                    color: song.isFavorite
+                                                        ? Colors.red
+                                                        : colorScheme
+                                                              .onSurfaceVariant,
+                                                  ),
+                                                  padding: EdgeInsets.zero,
+                                                  constraints:
+                                                      const BoxConstraints(),
+                                                  onPressed: () async {
+                                                    if (song.id != null) {
+                                                      await DatabaseService.setFavorite(
+                                                        song.id!,
+                                                        !song.isFavorite,
+                                                      );
+                                                      loadSongs();
+                                                    }
+                                                  },
+                                                ),
+                                                const SizedBox(width: 12),
                                                 Container(
                                                   padding:
                                                       const EdgeInsets.symmetric(
@@ -482,7 +517,9 @@ class CollectionScreenState extends State<CollectionScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Loading collection...',
+            widget.showOnlyFavorites
+                ? 'Loading favourites...'
+                : 'Loading collection...',
             style: TextStyle(
               fontSize: 14,
               color: colorScheme.onSurfaceVariant,
@@ -509,7 +546,9 @@ class CollectionScreenState extends State<CollectionScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'No matching local songs',
+                widget.showOnlyFavorites
+                    ? 'No matching favourites'
+                    : 'No matching local songs',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -517,29 +556,70 @@ class CollectionScreenState extends State<CollectionScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                'Would you like to search online for "$_query"?',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colorScheme.onSurfaceVariant),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: widget.onSearchOnline != null
-                    ? () => widget.onSearchOnline!(_query)
-                    : null,
-                icon: const Icon(Icons.public, color: Colors.white),
-                label: Text('Search online for "$_query"'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: colorScheme.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+              if (!widget.showOnlyFavorites) ...[
+                Text(
+                  'Would you like to search online for "$_query"?',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
+                ),
+                const SizedBox(height: 24),
+                ElevatedButton.icon(
+                  onPressed: widget.onSearchOnline != null
+                      ? () => widget.onSearchOnline!(_query)
+                      : null,
+                  icon: const Icon(Icons.public, color: Colors.white),
+                  label: Text('Search online for "$_query"'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
+              ] else ...[
+                Text(
+                  'Try searching for something else in your favourites.',
+                  style: TextStyle(color: colorScheme.onSurfaceVariant),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (widget.showOnlyFavorites) {
+      return Center(
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.favorite_border,
+                size: 80,
+                color: colorScheme.onSurfaceVariant.withOpacity(0.4),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Your Favourites list is empty',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurface,
+                  fontFamily: 'SpaceMono',
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Tap the heart icon on any song in your collection\nor song view to save it here!',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: colorScheme.onSurfaceVariant),
               ),
             ],
           ),

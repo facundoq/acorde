@@ -39,12 +39,19 @@ void main() {
       // Verify the tabs are rendered in the NavigationBar
       expect(find.text('Search'), findsOneWidget);
       expect(find.text('Collection'), findsOneWidget);
+      expect(find.text('Favourites'), findsOneWidget);
       expect(find.text('Diagrams'), findsOneWidget);
       expect(find.text('Tuner'), findsOneWidget);
 
       // Verify we start on the Collection Screen
-      expect(find.byType(CollectionScreen), findsOneWidget);
+      expect(find.byType(CollectionScreen), findsWidgets);
       expect(find.text('Acorde'), findsWidgets);
+
+      // Switch to Favourites tab
+      await tester.tap(find.text('Favourites'));
+      await Future.delayed(const Duration(milliseconds: 100));
+      await tester.pumpAndSettle();
+      expect(find.text('Favourites'), findsWidgets);
 
       // Switch to Search tab
       await tester.tap(find.text('Search'));
@@ -69,7 +76,7 @@ void main() {
       await tester.tap(find.text('Collection'));
       await Future.delayed(const Duration(milliseconds: 100));
       await tester.pumpAndSettle();
-      expect(find.byType(CollectionScreen), findsOneWidget);
+      expect(find.text('Acorde'), findsWidgets);
     });
   });
 }

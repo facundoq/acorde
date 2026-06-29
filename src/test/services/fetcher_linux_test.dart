@@ -31,6 +31,8 @@ Future<String> simulateChromiumFetch({
     'chromium',
     'google-chrome-stable',
     'google-chrome',
+    'brave-browser-stable',
+    'brave-browser',
   ];
 
   for (final binary in binaries) {

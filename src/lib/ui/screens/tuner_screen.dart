@@ -182,14 +182,21 @@ class _TunerScreenState extends State<TunerScreen> {
       onPitch: (pitch) {
         if (!mounted) return;
         setState(() {
-          _pitch = pitch;
+          if (_pitch == null) {
+            _pitch = pitch;
+          } else {
+            // Apply exponential moving average to smooth pitch fluctuations
+            const double smoothingFactor = 0.25;
+            _pitch =
+                (_pitch! * (1.0 - smoothingFactor)) + (pitch * smoothingFactor);
+          }
 
           // Find the closest string in the selected tuning
           double minDiff = double.infinity;
           TunedString closest = _currentTuning.strings[0];
 
           for (final s in _currentTuning.strings) {
-            final diff = (pitch - s.freq).abs();
+            final diff = (_pitch! - s.freq).abs();
             if (diff < minDiff) {
               minDiff = diff;
               closest = s;
@@ -199,7 +206,7 @@ class _TunerScreenState extends State<TunerScreen> {
           _closestString = closest;
 
           // Calculate cents off: 1200 * log2(pitch / freq)
-          _centsOff = 1200 * math.log(pitch / closest.freq) / math.ln2;
+          _centsOff = 1200 * math.log(_pitch! / closest.freq) / math.ln2;
         });
       },
       onError: (err) {
